@@ -1,9 +1,14 @@
 package api
 
-import (
-	"fmt"
-	"net/url"
-)
+import "net/url"
+
+/**
+convert func result to []byte
+*/
+type Convert interface {
+	convert(interface{}) []byte
+	getContentType() string
+}
 
 /**
  为了用户更加方便的路由设置，beego 参考了 sinatra 的路由实现，支持多种方式的路由：
@@ -27,14 +32,20 @@ import (
 	带有前缀的自定义正则 //匹配 :id 为正则类型。匹配 cms_123.html 这样的 url :id = 123
 */
 
-type Match struct {
-	pools map[string]Entry
+type Match interface {
+	match(url *url.URL, method string) interface{}
+	getMaps() map[string]Entry
 }
 
-/**
-if match return func
-*/
-func (m *Match) match(url *url.URL, method string) interface{} {
-	fmt.Println(url, method)
-	return nil
+type Api interface {
+	GET(interface{}, string)
+	POST(interface{}, string)
+	PUT(interface{}, string)
+	DELETE(interface{}, string)
+	getMaps() map[string]Entry
+}
+
+type Caller interface {
+	//function --> return
+	call(interface{}) interface{}
 }
