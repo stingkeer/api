@@ -20,16 +20,9 @@ type ApiService struct {
 }
 
 func (a *ApiService) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	fun := a.match.match(req.URL, req.Method)
+	fun, params := a.match.match(req.URL, req.Method)
 	if fun != nil {
-		inf := a.caller.call(fun)
+		inf := a.caller.call(fun, params)
 		rw.Write(a.convert.convert(inf))
 	}
-}
-
-type Entry struct {
-	url    string
-	group  string
-	method string
-	f      interface{}
 }

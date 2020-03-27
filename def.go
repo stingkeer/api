@@ -1,6 +1,10 @@
 package api
 
-import "net/url"
+import (
+	"encoding/base64"
+	"github.com/sirupsen/logrus"
+	"net/url"
+)
 
 /**
 convert func result to []byte
@@ -33,7 +37,10 @@ type Convert interface {
 */
 
 type Match interface {
-	match(url *url.URL, method string) interface{}
+	/**
+	 * return (result,param)
+	 */
+	match(url *url.URL, method string) (interface{}, url.Values)
 	getMaps() map[string]Entry
 }
 
@@ -47,5 +54,28 @@ type Api interface {
 
 type Caller interface {
 	//function --> return
-	call(interface{}) interface{}
+	call(f interface{}, params url.Values) interface{}
+}
+
+var M string
+
+var methods map[interface{}]methodInfo
+
+type param struct {
+	order int
+	name  string
+	typ   string
+}
+
+type methodInfo struct {
+	pkg    string
+	method interface{}
+	//map[order]Param
+	param map[int]param
+}
+
+func init() {
+	bytes, _ := base64.RawStdEncoding.DecodeString(M)
+	logrus.Debugf("has decode string %s", string(bytes))
+
 }

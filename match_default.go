@@ -1,7 +1,7 @@
 package api
 
 import (
-	"fmt"
+	"github.com/sirupsen/logrus"
 	"net/url"
 )
 
@@ -12,9 +12,9 @@ type MatchImpl struct {
 /**
 if match return func
 */
-func (m *MatchImpl) match(url *url.URL, method string) interface{} {
-	fmt.Println(url)
-	return m.getFuncWithURL(url.Path, method)
+func (m *MatchImpl) match(url *url.URL, method string) (interface{}, url.Values) {
+	logrus.Debug(url.Query())
+	return m.getFuncWithURL(url.Path, method), url.Query()
 }
 
 func (m *MatchImpl) getFuncWithURL(url string, method string) interface{} {

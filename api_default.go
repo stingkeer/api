@@ -1,5 +1,12 @@
 package api
 
+type Entry struct {
+	url    string
+	group  string
+	method string
+	f      interface{}
+}
+
 var _api Api
 
 func SetApi(api Api) {
