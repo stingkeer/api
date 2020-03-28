@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/base64"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"net/url"
 )
@@ -76,5 +77,6 @@ type methodInfo struct {
 
 func initDef() {
 	bytes, _ := base64.RawStdEncoding.DecodeString(M)
+	fmt.Println(string(bytes))
 	logrus.Debugf("has decode string %s", string(bytes))
 }
