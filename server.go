@@ -5,6 +5,7 @@ import (
 )
 
 func Start(addr string) {
+	initDef()
 	apiServer := ApiService{
 		&MatchImpl{GetApi().getMaps()},
 		&JSONConvertImpl{},

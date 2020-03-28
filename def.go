@@ -74,8 +74,7 @@ type methodInfo struct {
 	param map[int]param
 }
 
-func init() {
+func initDef() {
 	bytes, _ := base64.RawStdEncoding.DecodeString(M)
 	logrus.Debugf("has decode string %s", string(bytes))
-
 }
