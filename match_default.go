@@ -13,16 +13,17 @@ type MatchImpl struct {
 if match return func
 */
 func (m *MatchImpl) match(url *url.URL, method string) (interface{}, url.Values) {
-	logrus.Debug(url.Query())
+	logrus.Debugf("url query = %s", url.Query())
 	return m.getFuncWithURL(url.Path, method), url.Query()
 }
 
 func (m *MatchImpl) getFuncWithURL(url string, method string) interface{} {
 	for _url, entry := range m.getMaps() {
-		if _url == url {
+		if "/"+_url == url {
 			return entry.f
 		}
 	}
+	logrus.Tracef("not match url %s", url)
 	return nil
 }
 

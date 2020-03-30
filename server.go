@@ -1,10 +1,16 @@
 package api
 
 import (
+	"github.com/sirupsen/logrus"
 	"net/http"
+	"os"
 )
 
 func Start(addr string) {
+	logrus.SetOutput(os.Stdout)
+	// Only log the warning severity or above.
+	logrus.SetLevel(logrus.TraceLevel)
+	logrus.SetReportCaller(true)
 	initDef()
 	apiServer := ApiService{
 		&MatchImpl{GetApi().getMaps()},
@@ -25,5 +31,7 @@ func (a *ApiService) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if fun != nil {
 		inf := a.caller.call(fun, params)
 		rw.Write(a.convert.convert(inf))
+	} else {
+
 	}
 }

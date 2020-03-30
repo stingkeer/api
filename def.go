@@ -2,9 +2,10 @@ package api
 
 import (
 	"encoding/base64"
-	"fmt"
+	"encoding/json"
 	"github.com/sirupsen/logrus"
 	"net/url"
+	"os"
 )
 
 /**
@@ -60,23 +61,33 @@ type Caller interface {
 
 var M string
 
-var methods map[interface{}]methodInfo
+//method name-->
+var methods []MethodInfo
 
-type param struct {
-	order int
-	name  string
-	typ   string
+type Param struct {
+	Order int    `json:"order"`
+	Name  string `json:"name"`
 }
 
-type methodInfo struct {
-	pkg    string
-	method interface{}
+type MethodInfo struct {
+	Pkg        string      `json:"pkg"`
+	Receive    string      `json:"receive"`
+	Method     interface{} `json:"-"`
+	MethodName string      `json:"method_name"`
 	//map[order]Param
-	param map[int]param
+	Param map[string]Param `json:"param"`
 }
 
 func initDef() {
-	bytes, _ := base64.RawStdEncoding.DecodeString(M)
-	fmt.Println(string(bytes))
+	if M == "" {
+		logrus.Error("init error lost method header")
+		os.Exit(2)
+	}
+	bytes, e := base64.RawStdEncoding.DecodeString(M)
 	logrus.Debugf("has decode string %s", string(bytes))
+	if e == nil {
+		if err := json.Unmarshal(bytes, &methods); err == nil {
+			logrus.Infof("init ok with methods [%d]", len(methods))
+		}
+	}
 }
