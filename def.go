@@ -12,7 +12,7 @@ import (
 convert func result to []byte
 */
 type Convert interface {
-	convert(interface{}) []byte
+	convert(interface{}) *Header
 	getContentType() string
 }
 
@@ -67,6 +67,11 @@ var methods []MethodInfo
 type Param struct {
 	Order int    `json:"order"`
 	Name  string `json:"name"`
+}
+
+type Header struct {
+	ContentType string
+	bytes       []byte
 }
 
 type MethodInfo struct {

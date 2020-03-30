@@ -9,15 +9,18 @@ type JSONConvertImpl struct {
 	contentType string
 }
 
-func (c *JSONConvertImpl) convert(f interface{}) []byte {
+func (c *JSONConvertImpl) convert(f interface{}) *Header {
+	var head Header
 	kind := reflect.Indirect(reflect.ValueOf(f)).Kind()
 	if kind == reflect.String {
-		c.contentType = "text/plain"
-		return []byte(f.(string))
+		head.bytes = []byte(f.(string))
+		head.ContentType = "text/plain"
+		return &head
 	}
 	bytes, _ := json.Marshal(f)
-	c.contentType = "application/json"
-	return bytes
+	head.bytes = bytes
+	head.ContentType = "application/json"
+	return &head
 }
 
 func (c *JSONConvertImpl) getContentType() string {

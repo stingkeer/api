@@ -30,7 +30,9 @@ func (a *ApiService) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	fun, params := a.match.match(req.URL, req.Method)
 	if fun != nil {
 		inf := a.caller.call(fun, params)
-		rw.Write(a.convert.convert(inf))
+		h := a.convert.convert(inf)
+		rw.Header().Add("Content-Type", h.ContentType)
+		rw.Write(h.bytes)
 	} else {
 
 	}
