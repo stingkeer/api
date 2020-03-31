@@ -2,7 +2,8 @@ package api
 
 import (
 	"github.com/sirupsen/logrus"
-	"net/url"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"reflect"
 	"runtime"
@@ -10,9 +11,29 @@ import (
 )
 
 type CallerDefault struct {
+	convert Convert
 }
 
-func (c *CallerDefault) call(f interface{}, params url.Values) interface{} {
+func (c *CallerDefault) call(f interface{}, req *http.Request) interface{} {
+	switch req.Method {
+	case "GET":
+		return c.callGet(f, req)
+	case "POST":
+		return c.callPost(f, req)
+	}
+	return nil
+}
+
+func (c *CallerDefault) callPost(f interface{}, req *http.Request) interface{} {
+	v := reflect.ValueOf(f)
+	newT := reflect.New(v.Type().In(0))
+	bytes, _ := ioutil.ReadAll(req.Body)
+	c.convert.convertFrom(bytes, newT.Interface())
+	vs := v.Call([]reflect.Value{newT.Elem()})
+	return vs[0].Interface()
+}
+
+func (c *CallerDefault) callGet(f interface{}, req *http.Request) interface{} {
 	name := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
 	logrus.Tracef("call function name [%s]", name)
 	m := c.getFuncInfo(name)
@@ -23,9 +44,10 @@ func (c *CallerDefault) call(f interface{}, params url.Values) interface{} {
 	t := reflect.TypeOf(f)
 	var pvs = make([]reflect.Value, t.NumIn())
 	logrus.Tracef("method has param [%d]", t.NumIn())
+	params := req.URL.Query()
 	for name, p := range m.Param {
 		if v, b := params[name]; b {
-			pvs[p.Order] = c.convert(v[0], t.In(p.Order))
+			pvs[p.Order] = c.typeConvert(v[0], t.In(p.Order))
 		} else {
 			pvs[p.Order] = c.defaultCallValue(t.In(p.Order).Kind())
 		}
@@ -34,7 +56,7 @@ func (c *CallerDefault) call(f interface{}, params url.Values) interface{} {
 	return vs[0].Interface()
 }
 
-func (c *CallerDefault) convert(value string, dest reflect.Type) reflect.Value {
+func (c *CallerDefault) typeConvert(value string, dest reflect.Type) reflect.Value {
 	switch dest.Kind() {
 	case reflect.String:
 		return reflect.ValueOf(value)
@@ -56,6 +78,8 @@ func (c *CallerDefault) convert(value string, dest reflect.Type) reflect.Value {
 			panic(e)
 		}
 		return reflect.ValueOf(s).Convert(dest)
+	default:
+
 	}
 	return reflect.ValueOf(nil)
 }

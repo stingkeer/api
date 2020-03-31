@@ -12,10 +12,11 @@ func Start(addr string) {
 	logrus.SetLevel(logrus.TraceLevel)
 	logrus.SetReportCaller(true)
 	initDef()
+	j := &JSONConvertImpl{}
 	apiServer := ApiService{
 		&MatchImpl{GetApi().getMaps()},
-		&JSONConvertImpl{},
-		&CallerDefault{},
+		j,
+		&CallerDefault{j},
 	}
 	http.ListenAndServe(":8080", &apiServer)
 }
@@ -27,10 +28,11 @@ type ApiService struct {
 }
 
 func (a *ApiService) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	fun, params := a.match.match(req.URL, req.Method)
+	logrus.Tracef("incoming req method [%s] , url [%s]", req.Method, req.URL.String())
+	fun := a.match.match(req.URL)
 	if fun != nil {
-		inf := a.caller.call(fun, params)
-		h := a.convert.convert(inf)
+		inf := a.caller.call(fun, req)
+		h := a.convert.convertTo(inf)
 		rw.Header().Add("Content-Type", h.ContentType)
 		rw.Write(h.bytes)
 	} else {

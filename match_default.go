@@ -12,12 +12,12 @@ type MatchImpl struct {
 /**
 if match return func
 */
-func (m *MatchImpl) match(url *url.URL, method string) (interface{}, url.Values) {
+func (m *MatchImpl) match(url *url.URL) interface{} {
 	logrus.Debugf("url query = %s", url.Query())
-	return m.getFuncWithURL(url.Path, method), url.Query()
+	return m.getFuncWithURL(url.Path)
 }
 
-func (m *MatchImpl) getFuncWithURL(url string, method string) interface{} {
+func (m *MatchImpl) getFuncWithURL(url string) interface{} {
 	for _url, entry := range m.getMaps() {
 		if "/"+_url == url {
 			return entry.f

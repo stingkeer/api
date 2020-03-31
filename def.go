@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"github.com/sirupsen/logrus"
+	"net/http"
 	"net/url"
 	"os"
 )
@@ -12,8 +13,8 @@ import (
 convert func result to []byte
 */
 type Convert interface {
-	convert(interface{}) *Header
-	getContentType() string
+	convertTo(interface{}) *Header
+	convertFrom([]byte, interface{}) error
 }
 
 /**
@@ -42,7 +43,7 @@ type Match interface {
 	/**
 	 * return (result,param)
 	 */
-	match(url *url.URL, method string) (interface{}, url.Values)
+	match(url *url.URL) interface{}
 	getMaps() map[string]Entry
 }
 
@@ -56,7 +57,7 @@ type Api interface {
 
 type Caller interface {
 	//function --> return
-	call(f interface{}, params url.Values) interface{}
+	call(f interface{}, req *http.Request) interface{}
 }
 
 var M string
