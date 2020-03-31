@@ -11,7 +11,6 @@ type Person struct {
 }
 
 func TestCaller(t *testing.T) {
-
 	c := CallerDefault{&JSONConvertImpl{}}
 	c.callPost(show, nil)
 

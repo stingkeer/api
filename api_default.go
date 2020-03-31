@@ -28,29 +28,29 @@ func (d *APiDefault) getMaps() map[string]Entry {
 	return d.pools
 }
 
-func (a *APiDefault) GET(f interface{}, url string) {
-	a.pools[url] = Entry{
+func (d *APiDefault) GET(f interface{}, url string) {
+	d.pools[url] = Entry{
 		url:    url,
 		method: "GET",
 		f:      f,
 	}
 }
-func (a *APiDefault) POST(f interface{}, url string) {
-	a.pools[url] = Entry{
+func (d *APiDefault) POST(f interface{}, url string) {
+	d.pools[url] = Entry{
 		url:    url,
 		method: "POST",
 		f:      f,
 	}
 }
-func (a *APiDefault) PUT(f interface{}, url string) {
-	a.pools[url] = Entry{
+func (d *APiDefault) PUT(f interface{}, url string) {
+	d.pools[url] = Entry{
 		url:    url,
 		method: "PUT",
 		f:      f,
 	}
 }
-func (a *APiDefault) DELETE(f interface{}, url string) {
-	a.pools[url] = Entry{
+func (d *APiDefault) DELETE(f interface{}, url string) {
+	d.pools[url] = Entry{
 		url:    url,
 		method: "DELETE",
 		f:      f,

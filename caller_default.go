@@ -28,8 +28,15 @@ func (c *CallerDefault) callPost(f interface{}, req *http.Request) interface{} {
 	v := reflect.ValueOf(f)
 	newT := reflect.New(v.Type().In(0))
 	bytes, _ := ioutil.ReadAll(req.Body)
-	c.convert.convertFrom(bytes, newT.Interface())
+	err := c.convert.convertFrom(bytes, newT.Interface())
+	if err != nil {
+		panic(err)
+	}
 	vs := v.Call([]reflect.Value{newT.Elem()})
+	if len(vs) == 0 {
+		logrus.Warn("call method no return")
+		return nil
+	}
 	return vs[0].Interface()
 }
 
@@ -53,6 +60,10 @@ func (c *CallerDefault) callGet(f interface{}, req *http.Request) interface{} {
 		}
 	}
 	vs := reflect.ValueOf(f).Call(pvs)
+	if len(vs) == 0 {
+		logrus.Warn("call method no return")
+		return nil
+	}
 	return vs[0].Interface()
 }
 
