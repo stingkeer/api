@@ -4,55 +4,55 @@ type Entry struct {
 	url    string
 	group  string
 	method string
-	f      interface{}
+	fn     interface{}
 }
 
-var _api Api
+var _api *apiDefault
 
-func SetApi(api Api) {
+func SetApi(api *apiDefault) {
 	_api = api
 }
 
-func GetApi() Api {
+func GetApi() *apiDefault {
 	if _api == nil {
-		SetApi(&APiDefault{map[string]Entry{}})
+		SetApi(&apiDefault{map[string]Entry{}})
 	}
 	return _api
 }
 
-type APiDefault struct {
+type apiDefault struct {
 	pools map[string]Entry
 }
 
-func (d *APiDefault) getMaps() map[string]Entry {
+func (d *apiDefault) getMaps() map[string]Entry {
 	return d.pools
 }
 
-func (d *APiDefault) GET(f interface{}, url string) {
+func (d *apiDefault) GET(f interface{}, url string) {
 	d.pools[url] = Entry{
 		url:    url,
 		method: "GET",
-		f:      f,
+		fn:     f,
 	}
 }
-func (d *APiDefault) POST(f interface{}, url string) {
+func (d *apiDefault) POST(f interface{}, url string) {
 	d.pools[url] = Entry{
 		url:    url,
 		method: "POST",
-		f:      f,
+		fn:     f,
 	}
 }
-func (d *APiDefault) PUT(f interface{}, url string) {
+func (d *apiDefault) PUT(f interface{}, url string) {
 	d.pools[url] = Entry{
 		url:    url,
 		method: "PUT",
-		f:      f,
+		fn:     f,
 	}
 }
-func (d *APiDefault) DELETE(f interface{}, url string) {
+func (d *apiDefault) DELETE(f interface{}, url string) {
 	d.pools[url] = Entry{
 		url:    url,
 		method: "DELETE",
-		f:      f,
+		fn:     f,
 	}
 }

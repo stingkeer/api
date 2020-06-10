@@ -1,12 +1,9 @@
 package api
 
 import (
-	"encoding/base64"
-	"encoding/json"
-	"github.com/sirupsen/logrus"
+	"gitee.com/aifuturewell/methods"
 	"net/http"
 	"net/url"
-	"os"
 )
 
 /**
@@ -60,10 +57,10 @@ type Caller interface {
 	call(f interface{}, req *http.Request) interface{}
 }
 
-var M string
+//fn [name]->
+type metaMethods map[string]MethodInfo
 
-//method name-->
-var methods []MethodInfo
+var _methods metaMethods
 
 type Param struct {
 	Order int    `json:"order"`
@@ -81,19 +78,25 @@ type MethodInfo struct {
 	Method     interface{} `json:"-"`
 	MethodName string      `json:"method_name"`
 	//map[order]Param
-	Param map[string]Param `json:"param"`
+	Param map[string]methods.ArgsMeta `json:"param"`
 }
 
 func initDef() {
-	if M == "" {
-		logrus.Error("init error lost method header")
-		os.Exit(2)
+	if _methods == nil {
+		_methods = make(metaMethods)
 	}
-	bytes, e := base64.RawStdEncoding.DecodeString(M)
-	logrus.Debugf("has decode string %s", string(bytes))
-	if e == nil {
-		if err := json.Unmarshal(bytes, &methods); err == nil {
-			logrus.Infof("init ok with methods [%d]", len(methods))
+	for _, entry := range GetApi().getMaps() {
+		med := methods.GetHelper().LookFun(entry.fn)
+		var args = make(map[string]methods.ArgsMeta)
+		for _, arg := range med.Args {
+			args[arg.Name] = arg
+		}
+		_methods[med.MethodName] = MethodInfo{
+			Pkg:        "",
+			Receive:    "",
+			Method:     entry.fn,
+			MethodName: med.MethodName,
+			Param:      args,
 		}
 	}
 }

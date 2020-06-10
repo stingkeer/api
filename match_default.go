@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/sirupsen/logrus"
 	"net/url"
+	"strings"
 )
 
 type MatchImpl struct {
@@ -19,8 +20,9 @@ func (m *MatchImpl) match(url *url.URL) interface{} {
 
 func (m *MatchImpl) getFuncWithURL(url string) interface{} {
 	for _url, entry := range m.getMaps() {
-		if "/"+_url == url {
-			return entry.f
+		str := strings.ReplaceAll("/"+_url, "//", "/")
+		if str == url {
+			return entry.fn
 		}
 	}
 	logrus.Tracef("not match url %s", url)

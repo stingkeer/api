@@ -11,11 +11,11 @@ func hello1(kk string) interface{} {
 }
 
 func TestBind(t *testing.T) {
-	GetApi().GET(hello, "/hello")
-	Start("")
+	GetApi().GET(hello, "hello")
+	Start(":8080")
 }
 
 func TestParam(t *testing.T) {
 	GetApi().GET(hello1, "/s")
-	Start("")
+	Start(":8080")
 }

@@ -96,14 +96,8 @@ func (c *CallerDefault) typeConvert(value string, dest reflect.Type) reflect.Val
 }
 
 func (c *CallerDefault) getFuncInfo(name string) *MethodInfo {
-	sStruct, sFunc := SplitFuncName(name)
-	for _, method := range methods {
-		if sStruct == "" && sFunc == method.MethodName {
-			return &method
-		}
-		if method.Receive == sStruct && sFunc == method.MethodName {
-			return &method
-		}
+	if m, ok := _methods[name]; ok {
+		return &m
 	}
 	logrus.Errorf("not find name [%s]", name)
 	os.Exit(2)

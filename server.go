@@ -8,8 +8,8 @@ import (
 
 func Start(addr string) {
 	logrus.SetOutput(os.Stdout)
-	logrus.SetLevel(logrus.TraceLevel)
-	logrus.SetReportCaller(true)
+	//logrus.SetLevel(logrus.TraceLevel)
+	//logrus.SetReportCaller(true)
 	initDef()
 	j := &JSONConvertImpl{}
 	apiServer := Service{
