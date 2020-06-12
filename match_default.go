@@ -13,18 +13,15 @@ type MatchImpl struct {
 if match return func
 */
 func (m *MatchImpl) match(url *url.URL) *Entry {
-	data, _ := m.store.Get(url.Path, queryToValues(url.Query()))
+	pv := make([]string, 10)
+	data, e := m.store.Get(url.Path, pv)
 	if data == nil {
 		return nil
 	}
+	ent := data.(*Entry)
+	for i := 0; i < len(e); i++ {
+		ent.ids[e[i]] = pv[i]
+	}
 	logrus.Debugf("url path = %s is matched", url.Path)
 	return data.(*Entry)
-}
-
-func queryToValues(v url.Values) []string {
-	var strs []string
-	for _, strings := range v {
-		strs = append(strs, strings[0])
-	}
-	return strs
 }

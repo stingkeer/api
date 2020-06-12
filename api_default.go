@@ -5,6 +5,7 @@ type Entry struct {
 	group  string
 	method string
 	fn     interface{}
+	ids    map[string]string
 }
 
 var _api *apiDefault
@@ -36,6 +37,7 @@ func (d *apiDefault) GET(f interface{}, url string) {
 		url:    url,
 		method: "GET",
 		fn:     f,
+		ids:    make(map[string]string),
 	}
 	d.fnCaches = append(d.fnCaches, e)
 	d.store.Add(url, e)
@@ -45,6 +47,7 @@ func (d *apiDefault) POST(f interface{}, url string) {
 		url:    url,
 		method: "POST",
 		fn:     f,
+		ids:    make(map[string]string),
 	}
 	d.fnCaches = append(d.fnCaches, e)
 	d.store.Add(url, e)
@@ -54,6 +57,7 @@ func (d *apiDefault) PUT(f interface{}, url string) {
 		url:    url,
 		method: "PUT",
 		fn:     f,
+		ids:    make(map[string]string),
 	}
 	d.fnCaches = append(d.fnCaches, e)
 	d.store.Add(url, e)
@@ -63,6 +67,7 @@ func (d *apiDefault) DELETE(f interface{}, url string) {
 		url:    url,
 		method: "DELETE",
 		fn:     f,
+		ids:    make(map[string]string),
 	}
 	d.fnCaches = append(d.fnCaches, e)
 	d.store.Add(url, e)

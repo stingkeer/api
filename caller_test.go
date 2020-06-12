@@ -12,7 +12,13 @@ type Person struct {
 
 func TestCaller(t *testing.T) {
 	c := CallerDefault{&JSONConvertImpl{}}
-	c.callPost(show, nil)
+	c.callPost(&Entry{
+		url:    "",
+		group:  "",
+		method: "",
+		fn:     show,
+		ids:    nil,
+	}, nil)
 
 }
 

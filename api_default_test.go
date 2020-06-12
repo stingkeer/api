@@ -17,5 +17,6 @@ func TestBind(t *testing.T) {
 
 func TestParam(t *testing.T) {
 	GetApi().GET(hello1, "/s")
+	GetApi().GET(hello1, "/s/<kk>")
 	Start(":8080")
 }

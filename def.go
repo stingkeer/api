@@ -53,7 +53,7 @@ type Api interface {
 
 type Caller interface {
 	//function --> return
-	call(f interface{}, req *http.Request) interface{}
+	call(f *Entry, req *http.Request) interface{}
 }
 
 //fn [name]->

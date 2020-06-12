@@ -45,7 +45,7 @@ func (a *Service) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if entry.fn != nil {
-		inf := a.caller.call(entry.fn, req)
+		inf := a.caller.call(entry, req)
 		h := a.convert.convertTo(inf)
 		rw.Header().Add("Content-Type", h.ContentType)
 		rw.Write(h.bytes)

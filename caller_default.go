@@ -14,7 +14,7 @@ type CallerDefault struct {
 	convert Convert
 }
 
-func (c *CallerDefault) call(f interface{}, req *http.Request) interface{} {
+func (c *CallerDefault) call(f *Entry, req *http.Request) interface{} {
 	switch req.Method {
 	case "GET":
 		return c.callGet(f, req)
@@ -24,7 +24,7 @@ func (c *CallerDefault) call(f interface{}, req *http.Request) interface{} {
 	return nil
 }
 
-func (c *CallerDefault) callPost(f interface{}, req *http.Request) interface{} {
+func (c *CallerDefault) callPost(f *Entry, req *http.Request) interface{} {
 	v := reflect.ValueOf(f)
 	newT := reflect.New(v.Type().In(0))
 	bytes, _ := ioutil.ReadAll(req.Body)
@@ -40,18 +40,21 @@ func (c *CallerDefault) callPost(f interface{}, req *http.Request) interface{} {
 	return vs[0].Interface()
 }
 
-func (c *CallerDefault) callGet(f interface{}, req *http.Request) interface{} {
-	name := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
+func (c *CallerDefault) callGet(f *Entry, req *http.Request) interface{} {
+	name := runtime.FuncForPC(reflect.ValueOf(f.fn).Pointer()).Name()
 	logrus.Tracef("call function name [%s]", name)
 	m := c.getFuncInfo(name)
 	if m == nil {
 		logrus.Error("not find method in header")
 		os.Exit(2)
 	}
-	t := reflect.TypeOf(f)
+	t := reflect.TypeOf(f.fn)
 	var pvs = make([]reflect.Value, t.NumIn())
 	logrus.Tracef("method has param [%d]", t.NumIn())
 	params := req.URL.Query()
+	for k, v := range f.ids {
+		params.Add(k, v)
+	}
 	for name, p := range m.Param {
 		if v, b := params[name]; b {
 			pvs[p.Order] = c.typeConvert(v[0], t.In(p.Order))
@@ -59,7 +62,7 @@ func (c *CallerDefault) callGet(f interface{}, req *http.Request) interface{} {
 			pvs[p.Order] = c.defaultCallValue(t.In(p.Order).Kind())
 		}
 	}
-	vs := reflect.ValueOf(f).Call(pvs)
+	vs := reflect.ValueOf(f.fn).Call(pvs)
 	if len(vs) == 0 {
 		logrus.Warn("call method no return")
 		return nil
