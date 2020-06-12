@@ -3,32 +3,28 @@ package api
 import (
 	"github.com/sirupsen/logrus"
 	"net/url"
-	"strings"
 )
 
 type MatchImpl struct {
-	pools map[string]Entry
+	store *store
 }
 
 /**
 if match return func
 */
-func (m *MatchImpl) match(url *url.URL) interface{} {
-	logrus.Debugf("url query = %s", url.Query())
-	return m.getFuncWithURL(url.Path)
-}
-
-func (m *MatchImpl) getFuncWithURL(url string) interface{} {
-	for _url, entry := range m.getMaps() {
-		str := strings.ReplaceAll("/"+_url, "//", "/")
-		if str == url {
-			return entry.fn
-		}
+func (m *MatchImpl) match(url *url.URL) *Entry {
+	data, _ := m.store.Get(url.Path, queryToValues(url.Query()))
+	if data == nil {
+		return nil
 	}
-	logrus.Tracef("not match url %s", url)
-	return nil
+	logrus.Debugf("url path = %s is matched", url.Path)
+	return data.(*Entry)
 }
 
-func (m *MatchImpl) getMaps() map[string]Entry {
-	return m.pools
+func queryToValues(v url.Values) []string {
+	var strs []string
+	for _, strings := range v {
+		strs = append(strs, strings[0])
+	}
+	return strs
 }

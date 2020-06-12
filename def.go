@@ -40,8 +40,7 @@ type Match interface {
 	/**
 	 * return (result,param)
 	 */
-	match(url *url.URL) interface{}
-	getMaps() map[string]Entry
+	match(url *url.URL) *Entry
 }
 
 type Api interface {
@@ -49,7 +48,7 @@ type Api interface {
 	POST(interface{}, string)
 	PUT(interface{}, string)
 	DELETE(interface{}, string)
-	getMaps() map[string]Entry
+	getMaps() map[string]*Entry
 }
 
 type Caller interface {
@@ -85,7 +84,7 @@ func initDef() {
 	if _methods == nil {
 		_methods = make(metaMethods)
 	}
-	for _, entry := range GetApi().getMaps() {
+	for _, entry := range GetApi().getFnCaches() {
 		med := methods.GetHelper().LookFun(entry.fn)
 		var args = make(map[string]methods.ArgsMeta)
 		for _, arg := range med.Args {
