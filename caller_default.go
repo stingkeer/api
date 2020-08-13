@@ -25,7 +25,7 @@ func (c *CallerDefault) call(f *Entry, req *http.Request) interface{} {
 }
 
 func (c *CallerDefault) callPost(f *Entry, req *http.Request) interface{} {
-	v := reflect.ValueOf(f)
+	v := reflect.ValueOf(f.fn)
 	newT := reflect.New(v.Type().In(0))
 	bytes, _ := ioutil.ReadAll(req.Body)
 	err := c.convert.convertFrom(bytes, newT.Interface())
