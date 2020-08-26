@@ -1,27 +1,28 @@
-package api
+package transverter
 
 import (
 	"encoding/json"
+	"gitee.com/fast_api/api/public"
 	"reflect"
 )
 
 type JSONConvertImpl struct {
 }
 
-func (c *JSONConvertImpl) convertFrom(bytes []byte, vpr interface{}) error {
+func (c *JSONConvertImpl) ConvertFrom(bytes []byte, vpr interface{}) error {
 	return json.Unmarshal(bytes, vpr)
 }
 
-func (c *JSONConvertImpl) convertTo(f interface{}) *Header {
-	var head Header
+func (c *JSONConvertImpl) ConvertTo(f interface{}) *public.Header {
+	var head public.Header
 	kind := reflect.Indirect(reflect.ValueOf(f)).Kind()
 	if kind == reflect.String {
-		head.bytes = []byte(f.(string))
+		head.Bytes = []byte(f.(string))
 		head.ContentType = "text/plain"
 		return &head
 	}
 	bytes, _ := json.Marshal(f)
-	head.bytes = bytes
+	head.Bytes = bytes
 	head.ContentType = "application/json"
 	return &head
 }

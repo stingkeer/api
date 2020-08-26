@@ -1,6 +1,9 @@
 package api
 
 import (
+	"gitee.com/fast_api/api/call"
+	"gitee.com/fast_api/api/public"
+	"gitee.com/fast_api/api/transverter"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
@@ -12,20 +15,21 @@ func Start(addr string) {
 	logrus.SetLevel(logrus.TraceLevel)
 	//logrus.SetReportCaller(true)
 	initDef()
-	j := &JSONConvertImpl{}
+	convert := &transverter.JSONConvertImpl{}
+	caller := call.NewCaller(convert, &transverter.DefaultTypeConvert{})
 	apiServer := Service{
 		&MatchImpl{GetApi().getStore()},
-		j,
-		&CallerDefault{j},
+		convert,
+		caller,
 	}
 	logrus.Infof("server listem %s", addr)
 	http.ListenAndServe(addr, &apiServer)
 }
 
 type Service struct {
-	match   Match
-	convert Convert
-	caller  Caller
+	match   public.Match
+	convert public.ResultConvert
+	caller  public.Caller
 }
 
 func (a *Service) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
@@ -35,19 +39,19 @@ func (a *Service) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			logrus.Error(err)
 		}
 	}()
-	logrus.Tracef("incoming req method [%s] , url [%s]", req.Method, req.URL.String())
-	entry := a.match.match(req.URL)
+	logrus.Tracef("incoming req Method [%s] , Url [%s]", req.Method, req.URL.String())
+	entry := a.match.Match(req.URL)
 	if nil == entry {
 		return
 	}
-	if req.Method != entry.method {
-		logrus.Warnf("not support method %s", req.Method)
+	if req.Method != entry.Method {
+		logrus.Warnf("not support Method %s", req.Method)
 		return
 	}
-	if entry.fn != nil {
-		inf := a.caller.call(entry, req)
-		h := a.convert.convertTo(inf)
+	if entry.Fn != nil {
+		inf := a.caller.Call(entry, req)
+		h := a.convert.ConvertTo(inf)
 		rw.Header().Add("Content-Type", h.ContentType)
-		rw.Write(h.bytes)
+		rw.Write(h.Bytes)
 	}
 }

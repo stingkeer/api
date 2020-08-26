@@ -1,6 +1,7 @@
 package api
 
 import (
+	"gitee.com/fast_api/api/public"
 	"github.com/sirupsen/logrus"
 	"net/url"
 )
@@ -12,16 +13,16 @@ type MatchImpl struct {
 /**
 if match return func
 */
-func (m *MatchImpl) match(url *url.URL) *Entry {
+func (m *MatchImpl) Match(url *url.URL) *public.Entry {
 	pv := make([]string, 10)
 	data, e := m.store.Get(url.Path, pv)
 	if data == nil {
 		return nil
 	}
-	ent := data.(*Entry)
+	ent := data.(*public.Entry)
 	for i := 0; i < len(e); i++ {
-		ent.ids[e[i]] = pv[i]
+		ent.Ids[e[i]] = pv[i]
 	}
-	logrus.Debugf("url path = %s is matched", url.Path)
-	return data.(*Entry)
+	logrus.Debugf("Url path = %s is matched", url.Path)
+	return data.(*public.Entry)
 }

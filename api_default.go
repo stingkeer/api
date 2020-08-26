@@ -1,12 +1,6 @@
 package api
 
-type Entry struct {
-	url    string
-	group  string
-	method string
-	fn     interface{}
-	ids    map[string]string
-}
+import "gitee.com/fast_api/api/public"
 
 var _api *apiDefault
 
@@ -24,7 +18,7 @@ func GetApi() *apiDefault {
 }
 
 type apiDefault struct {
-	fnCaches []*Entry
+	fnCaches []*public.Entry
 	store    *store
 }
 
@@ -33,46 +27,46 @@ func (d *apiDefault) getStore() *store {
 }
 
 func (d *apiDefault) GET(f interface{}, url string) {
-	e := &Entry{
-		url:    url,
-		method: "GET",
-		fn:     f,
-		ids:    make(map[string]string),
+	e := &public.Entry{
+		Url:    url,
+		Method: "GET",
+		Fn:     f,
+		Ids:    make(map[string]string),
 	}
 	d.fnCaches = append(d.fnCaches, e)
 	d.store.Add(url, e)
 }
 func (d *apiDefault) POST(f interface{}, url string) {
-	e := &Entry{
-		url:    url,
-		method: "POST",
-		fn:     f,
-		ids:    make(map[string]string),
+	e := &public.Entry{
+		Url:    url,
+		Method: "POST",
+		Fn:     f,
+		Ids:    make(map[string]string),
 	}
 	d.fnCaches = append(d.fnCaches, e)
 	d.store.Add(url, e)
 }
 func (d *apiDefault) PUT(f interface{}, url string) {
-	e := &Entry{
-		url:    url,
-		method: "PUT",
-		fn:     f,
-		ids:    make(map[string]string),
+	e := &public.Entry{
+		Url:    url,
+		Method: "PUT",
+		Fn:     f,
+		Ids:    make(map[string]string),
 	}
 	d.fnCaches = append(d.fnCaches, e)
 	d.store.Add(url, e)
 }
 func (d *apiDefault) DELETE(f interface{}, url string) {
-	e := &Entry{
-		url:    url,
-		method: "DELETE",
-		fn:     f,
-		ids:    make(map[string]string),
+	e := &public.Entry{
+		Url:    url,
+		Method: "DELETE",
+		Fn:     f,
+		Ids:    make(map[string]string),
 	}
 	d.fnCaches = append(d.fnCaches, e)
 	d.store.Add(url, e)
 }
 
-func (d *apiDefault) getFnCaches() []*Entry {
+func (d *apiDefault) getFnCaches() []*public.Entry {
 	return d.fnCaches
 }

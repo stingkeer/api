@@ -2,98 +2,23 @@ package api
 
 import (
 	"gitee.com/aifuturewell/methods"
-	"net/http"
-	"net/url"
+	"gitee.com/fast_api/api/public"
 )
 
-/**
-convert func result to []byte
-*/
-type Convert interface {
-	convertTo(interface{}) *Header
-	convertFrom([]byte, interface{}) error
-}
-
-/**
- 为了用户更加方便的路由设置，beego 参考了 sinatra 的路由实现，支持多种方式的路由：
-	beego.Router(“/api/?:id”, &controllers.RController{})
-	默认匹配 //例如对于URL”/api/123”可以匹配成功，此时变量”:id”值为”123”
-	beego.Router(“/api/:id”, &controllers.RController{})
-	默认匹配 //例如对于URL”/api/123”可以匹配成功，此时变量”:id”值为”123”，但URL”/api/“匹配失败
-	beego.Router(“/api/:id([0-9]+)“, &controllers.RController{})
-	自定义正则匹配 //例如对于URL”/api/123”可以匹配成功，此时变量”:id”值为”123”
-	beego.Router(“/user/:username([\\w]+)“, &controllers.RController{})
-	正则字符串匹配 //例如对于URL”/user/astaxie”可以匹配成功，此时变量”:username”值为”astaxie”
-	beego.Router(“/download/*.*”, &controllers.RController{})
-	*匹配方式 //例如对于URL”/download/file/api.xml”可以匹配成功，此时变量”:path”值为”file/api”， “:ext”值为”xml”
-	beego.Router(“/download/ceshi/*“, &controllers.RController{})
-	*全匹配方式 //例如对于URL”/download/ceshi/file/api.json”可以匹配成功，此时变量”:splat”值为”file/api.json”
-	beego.Router(“/:id:int”, &controllers.RController{})
-	int 类型设置方式，匹配 :id为int 类型，框架帮你实现了正则 ([0-9]+)
-	beego.Router(“/:hi:string”, &controllers.RController{})
-	string 类型设置方式，匹配 :hi 为 string 类型。框架帮你实现了正则 ([\w]+)
-	beego.Router(“/cms_:id([0-9]+).html”, &controllers.CmsController{})
-	带有前缀的自定义正则 //匹配 :id 为正则类型。匹配 cms_123.html 这样的 url :id = 123
-*/
-
-type Match interface {
-	/**
-	 * return (result,param)
-	 */
-	match(url *url.URL) *Entry
-}
-
-type Api interface {
-	GET(interface{}, string)
-	POST(interface{}, string)
-	PUT(interface{}, string)
-	DELETE(interface{}, string)
-	getMaps() map[string]*Entry
-}
-
-type Caller interface {
-	//function --> return
-	call(f *Entry, req *http.Request) interface{}
-}
-
-//fn [name]->
-type metaMethods map[string]MethodInfo
-
-var _methods metaMethods
-
-type Param struct {
-	Order int    `json:"order"`
-	Name  string `json:"name"`
-}
-
-type Header struct {
-	ContentType string
-	bytes       []byte
-}
-
-type MethodInfo struct {
-	Pkg        string      `json:"pkg"`
-	Receive    string      `json:"receive"`
-	Method     interface{} `json:"-"`
-	MethodName string      `json:"method_name"`
-	//map[order]Param
-	Param map[string]methods.ArgsMeta `json:"param"`
-}
-
 func initDef() {
-	if _methods == nil {
-		_methods = make(metaMethods)
+	if public.MethodsPools == nil {
+		public.MethodsPools = make(public.MetaMethods)
 	}
 	for _, entry := range GetApi().getFnCaches() {
-		med := methods.GetHelper().LookFun(entry.fn)
+		med := methods.GetHelper().LookFun(entry.Fn)
 		var args = make(map[string]methods.ArgsMeta)
 		for _, arg := range med.Args {
 			args[arg.Name] = arg
 		}
-		_methods[med.MethodName] = MethodInfo{
+		public.MethodsPools[med.MethodName] = public.MethodInfo{
 			Pkg:        "",
 			Receive:    "",
-			Method:     entry.fn,
+			Method:     entry.Fn,
 			MethodName: med.MethodName,
 			Param:      args,
 		}
