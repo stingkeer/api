@@ -6,14 +6,10 @@ import (
 	"gitee.com/fast_api/api/transverter"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"os"
 	"runtime/debug"
 )
 
 func Start(addr string) {
-	logrus.SetOutput(os.Stdout)
-	logrus.SetLevel(logrus.TraceLevel)
-	//logrus.SetReportCaller(true)
 	initDef()
 	convert := &transverter.JSONConvertImpl{}
 	caller := call.NewCaller(convert, &transverter.DefaultTypeConvert{})

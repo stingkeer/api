@@ -33,6 +33,8 @@ func TestTypeConvert(t *testing.T) {
 	fmt.Println(v)
 	dd := c.typeConvert("100", reflect.TypeOf(new(int)))
 	fmt.Println(dd.Elem())
+	cc := c.typeConvert("api", reflect.TypeOf(new(string)).Elem())
+	fmt.Println(cc)
 }
 
 func show(p *Person) string {
