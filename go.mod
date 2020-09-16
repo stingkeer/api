@@ -3,6 +3,6 @@ module gitee.com/fast_api/api
 go 1.14
 
 require (
-	gitee.com/aifuturewell/methods v0.0.0-20200813101327-e2d0bccea58a
+	gitee.com/aifuturewell/methods v0.0.0-20200916160715-885dc3655c30
 	github.com/sirupsen/logrus v1.5.0
 )
