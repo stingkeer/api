@@ -2,11 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c9d034f8-f5e0-4443-8f32-9b4465a4a7eb" name="Default Changelist" comment="support ptr func args">
-      <change afterPath="$PROJECT_DIR$/def_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/call/caller_default_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/call/caller_default_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/def.go" beforeDir="false" afterPath="$PROJECT_DIR$/def.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/server.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/def_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/def_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,7 +39,7 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../signer" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -50,7 +49,18 @@
       <recent name="C:\Users\Administrator\api\call" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Test.TestFunc in gitee.com/fast_api/api">
+  <component name="RunManager" selected="Go Test.TestAvg in gitee.com/fast_api/api">
+    <configuration name="TestAvg in gitee.com/fast_api/api" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="api" />
+      <working_directory value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="gitee.com/fast_api/api" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <pattern value="^TestAvg$" />
+      <method v="2" />
+    </configuration>
     <configuration name="TestDef in gitee.com/fast_api/api" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="api" />
       <working_directory value="$PROJECT_DIR$" />
@@ -71,17 +81,6 @@
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
       <pattern value="^TestFunc$" />
-      <method v="2" />
-    </configuration>
-    <configuration name="TestType in gitee.com/fast_api/api/transverter" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="api" />
-      <working_directory value="$PROJECT_DIR$/transverter" />
-      <framework value="gotest" />
-      <kind value="PACKAGE" />
-      <package value="gitee.com/fast_api/api/transverter" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <pattern value="^TestType$" />
       <method v="2" />
     </configuration>
     <configuration name="TestTypeConvert in gitee.com/fast_api/api/call (1)" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
@@ -108,11 +107,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Test.TestAvg in gitee.com/fast_api/api" />
         <item itemvalue="Go Test.TestFunc in gitee.com/fast_api/api" />
         <item itemvalue="Go Test.TestDef in gitee.com/fast_api/api" />
         <item itemvalue="Go Test.TestTypeConvert in gitee.com/fast_api/api/call (1)" />
         <item itemvalue="Go Test.TestTypeConvert in gitee.com/fast_api/api/call" />
-        <item itemvalue="Go Test.TestType in gitee.com/fast_api/api/transverter" />
       </list>
     </recent_temporary>
   </component>
@@ -140,22 +139,26 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="530" y="90" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1598429752462" />
-    <state width="1803" height="422" key="GridCell.Tab.0.bottom" timestamp="1598525487208">
+    <state x="723" y="287" key="FileChooserDialogImpl" timestamp="1600415716261">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1803" height="422" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1598525487208" />
-    <state width="1803" height="422" key="GridCell.Tab.0.center" timestamp="1598525487207">
+    <state x="723" y="287" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1600415716261" />
+    <state width="1803" height="338" key="GridCell.Tab.0.bottom" timestamp="1600422311877">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1803" height="422" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1598525487207" />
-    <state width="1803" height="422" key="GridCell.Tab.0.left" timestamp="1598525487207">
+    <state width="1803" height="338" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1600422311877" />
+    <state width="1803" height="338" key="GridCell.Tab.0.center" timestamp="1600422311877">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1803" height="422" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1598525487207" />
-    <state width="1803" height="422" key="GridCell.Tab.0.right" timestamp="1598525487207">
+    <state width="1803" height="338" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1600422311877" />
+    <state width="1803" height="338" key="GridCell.Tab.0.left" timestamp="1600422311877">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1803" height="422" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1598525487207" />
+    <state width="1803" height="338" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1600422311877" />
+    <state width="1803" height="338" key="GridCell.Tab.0.right" timestamp="1600422311877">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1803" height="338" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1600422311877" />
     <state width="1803" height="84" key="GridCell.Tab.1.bottom" timestamp="1598525234929">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

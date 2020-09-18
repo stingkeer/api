@@ -1,17 +1,55 @@
 package api
 
 import (
+	"gitee.com/aifuturewell/methods"
+	"gitee.com/fast_api/api/public"
+	"github.com/sirupsen/logrus"
 	"math"
-	"reflect"
 	"runtime"
 	"strings"
 	"sync"
 	"time"
-
-	"gitee.com/aifuturewell/methods"
-	"gitee.com/fast_api/api/public"
-	"github.com/sirupsen/logrus"
 )
+
+func doMethod(start, end int, fns []*public.Entry) {
+	for i := start; i < end; i++ {
+		fn := fns[i]
+		med := methods.GetHelper().LookFun(fn.Fn)
+		var args = make(map[string]methods.ArgsMeta)
+		for _, arg := range med.Args {
+			args[arg.Name] = arg
+		}
+		public.MethodsPools[med.MethodName] = public.MethodInfo{
+			Pkg:        "",
+			Receive:    "",
+			Method:     fns[i],
+			MethodName: med.MethodName,
+			Param:      args,
+		}
+		logrus.Infof("[%s] %s(%s) mapping url = %s", fn.Method, med.MethodName, printArgs(med.Args), fn.Url)
+	}
+}
+
+func averageDo(cpu, number int, do func(start, end int, g *sync.WaitGroup)) {
+	per := number / cpu
+	mod := 0
+	if per == 0 {
+		per = 1
+	} else {
+		mod = number % cpu
+	}
+	maybe := int(math.Min(float64(number), float64(cpu)))
+	var wg sync.WaitGroup
+	wg.Add(maybe)
+	for i := 1; i <= maybe; i++ {
+		seg := i * per
+		if i == maybe && mod != 0 {
+			seg += mod
+		}
+		go do((i-1)*per, seg, &wg)
+	}
+	wg.Wait()
+}
 
 func initDef() {
 	start := time.Now()
@@ -19,42 +57,11 @@ func initDef() {
 		public.MethodsPools = make(public.MetaMethods)
 	}
 	fns := GetApi().getFnCaches()
-	num := runtime.NumCPU()
-	per := len(fns) / num
-	mod := len(fns) % num
-	maybe := int(math.Min(float64(len(fns)), float64(num)))
-	var wait sync.WaitGroup
-	var l sync.Mutex
-	wait.Add(maybe)
-	for i := 1; i <= maybe; i++ {
-		go func(ii int) {
-			defer wait.Done()
-			rage := ii * per
-			if ii == maybe && mod != 0 {
-				rage += mod
-			}
-			for y := (ii - 1) * per; y < rage; y++ {
-				v := reflect.ValueOf(fns[y].Fn)
-				fName := runtime.FuncForPC(v.Pointer()).Name()
-				med := methods.GetHelper().LookFun(fns[y].Fn)
-				var args = make(map[string]methods.ArgsMeta)
-				for _, arg := range med.Args {
-					args[arg.Name] = arg
-				}
-				l.Lock()
-				public.MethodsPools[med.MethodName] = public.MethodInfo{
-					Pkg:        "",
-					Receive:    "",
-					Method:     fns[y],
-					MethodName: med.MethodName,
-					Param:      args,
-				}
-				l.Unlock()
-				logrus.Infof("[%s] %s(%s) mapping url = %s", fns[y].Method, fName, printArgs(med.Args), fns[y].Url)
-			}
-		}(i)
-	}
-	wait.Wait()
+	logrus.Debugf("api had caches %d", len(fns))
+	averageDo(runtime.NumCPU(), len(fns), func(start, end int, g *sync.WaitGroup) {
+		doMethod(start, end, fns)
+		g.Done()
+	})
 	logrus.Infof("init use %s", time.Since(start))
 }
 
