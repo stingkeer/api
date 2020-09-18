@@ -1,15 +1,16 @@
 package api
 
 import (
-	"gitee.com/aifuturewell/methods"
-	"gitee.com/fast_api/api/public"
-	"github.com/sirupsen/logrus"
 	"math"
 	"reflect"
 	"runtime"
 	"strings"
 	"sync"
 	"time"
+
+	"gitee.com/aifuturewell/methods"
+	"gitee.com/fast_api/api/public"
+	"github.com/sirupsen/logrus"
 )
 
 func initDef() {
@@ -23,7 +24,7 @@ func initDef() {
 	mod := len(fns) % num
 	maybe := int(math.Min(float64(len(fns)), float64(num)))
 	var wait sync.WaitGroup
-	//var l sync.Mutex
+	var l sync.Mutex
 	wait.Add(maybe)
 	for i := 1; i <= maybe; i++ {
 		go func(ii int) {
@@ -40,6 +41,7 @@ func initDef() {
 				for _, arg := range med.Args {
 					args[arg.Name] = arg
 				}
+				l.Lock()
 				public.MethodsPools[med.MethodName] = public.MethodInfo{
 					Pkg:        "",
 					Receive:    "",
@@ -47,6 +49,7 @@ func initDef() {
 					MethodName: med.MethodName,
 					Param:      args,
 				}
+				l.Unlock()
 				logrus.Infof("[%s] %s(%s) mapping url = %s", fns[y].Method, fName, printArgs(med.Args), fns[y].Url)
 			}
 		}(i)
