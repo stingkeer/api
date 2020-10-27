@@ -42,6 +42,10 @@ func IsMultipart(t reflect.Type) bool {
 
 func (c *callerDefault) callPost(f *public.Entry, req *http.Request) interface{} {
 	v := reflect.ValueOf(f.Fn)
+	if v.Type().NumIn() > 1 {
+		logrus.Error("not support param > 1")
+		return nil
+	}
 	p0 := v.Type().In(0)
 	newT := reflect.New(p0)
 	if IsMultipart(p0) { //file
