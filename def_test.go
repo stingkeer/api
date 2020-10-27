@@ -9,7 +9,7 @@ import (
 )
 
 func TestDef(t *testing.T) {
-	initDef()
+	PackApi()
 }
 
 func aa() {

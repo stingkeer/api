@@ -11,7 +11,7 @@ func hello1(kk string) interface{} {
 }
 
 func TestBind(t *testing.T) {
-	GetApi().GET(hello, "hello")
+	GetApi().GET(hello, "/hello")
 	Start(":8080")
 }
 

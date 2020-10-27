@@ -1,10 +1,12 @@
 package api
 
 import (
+	"fmt"
 	"gitee.com/aifuturewell/methods"
 	"gitee.com/fast_api/api/public"
 	"github.com/sirupsen/logrus"
 	"math"
+	"os"
 	"runtime"
 	"strings"
 	"sync"
@@ -15,6 +17,7 @@ func doMethod(start, end int, fns []*public.Entry) {
 	for i := start; i < end; i++ {
 		fn := fns[i]
 		med := methods.GetHelper().LookFun(fn.Fn)
+		fmt.Println(med)
 		var args = make(map[string]methods.ArgsMeta)
 		for _, arg := range med.Args {
 			args[arg.Name] = arg
@@ -51,8 +54,20 @@ func averageDo(cpu, number int, do func(start, end int, g *sync.WaitGroup)) {
 	wg.Wait()
 }
 
-func initDef() {
+func PackApi() {
+	PackApiWithPath(nil)
+}
+
+func PackApiWithPath(exePath func() string) {
 	start := time.Now()
+	//init methods
+	var path string
+	if exePath == nil {
+		path, _ = os.Executable()
+	} else {
+		path = exePath()
+	}
+	methods.Init(path)
 	if public.MethodsPools == nil {
 		public.MethodsPools = make(public.MetaMethods)
 	}

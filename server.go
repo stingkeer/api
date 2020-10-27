@@ -7,19 +7,13 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"runtime/debug"
+	"sync"
 )
 
 func Start(addr string) {
-	initDef()
-	convert := &transverter.JSONConvertImpl{}
-	caller := call.NewCaller(convert, &transverter.DefaultTypeConvert{})
-	apiServer := Service{
-		&MatchImpl{GetApi().getStore()},
-		convert,
-		caller,
-	}
 	logrus.Infof("server listem %s", addr)
-	http.ListenAndServe(addr, &apiServer)
+	PackApi()
+	http.ListenAndServe(addr, DefaultService())
 }
 
 type Service struct {
@@ -28,7 +22,37 @@ type Service struct {
 	caller  public.Caller
 }
 
+func DefaultService() *Service {
+	convert := &transverter.JSONConvertImpl{}
+	caller := call.NewCaller(convert, &transverter.DefaultTypeConvert{})
+	apiServer := &Service{
+		&MatchImpl{GetApi().getStore()},
+		convert,
+		caller,
+	}
+	return apiServer
+}
+
 func (a *Service) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	ApiHttp(rw, req, func() *Service {
+		return a
+	})
+}
+
+var one sync.Once
+var a *Service
+
+func ApiHttp(rw http.ResponseWriter, req *http.Request, service func() *Service) {
+	one.Do(func() {
+		if service == nil {
+			a = DefaultService()
+		} else {
+			a = service()
+		}
+	})
+	if a == nil {
+		logrus.Error("service is nil")
+	}
 	defer func() {
 		if err := recover(); err != nil {
 			debug.PrintStack()
