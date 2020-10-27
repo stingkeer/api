@@ -4,6 +4,7 @@ import (
 	"gitee.com/fast_api/api/public"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"reflect"
@@ -35,13 +36,27 @@ func (c *callerDefault) Call(f *public.Entry, req *http.Request) interface{} {
 	return nil
 }
 
+func IsMultipart(t reflect.Type) bool {
+	return t == reflect.TypeOf((*multipart.Reader)(nil)).Elem()
+}
+
 func (c *callerDefault) callPost(f *public.Entry, req *http.Request) interface{} {
 	v := reflect.ValueOf(f.Fn)
-	newT := reflect.New(v.Type().In(0))
-	bytes, _ := ioutil.ReadAll(req.Body)
-	err := c.resultConvert.ConvertFrom(bytes, newT.Interface())
-	if err != nil {
-		panic(err)
+	p0 := v.Type().In(0)
+	newT := reflect.New(p0)
+	if IsMultipart(p0) { //file
+		reader, err := req.MultipartReader()
+		if err != nil {
+			logrus.Error(err)
+		}
+		newT.Elem().Set(reflect.ValueOf(*reader))
+	} else { //small body
+		bytes, _ := ioutil.ReadAll(req.Body)
+		//instant json
+		err := c.resultConvert.ConvertFrom(bytes, newT.Interface())
+		if err != nil {
+			panic(err)
+		}
 	}
 	vs := v.Call([]reflect.Value{newT.Elem()})
 	if len(vs) == 0 {
@@ -108,7 +123,7 @@ func (c *callerDefault) typeConvert(value string, dest reflect.Type) reflect.Val
 		if typeConvert.Type().Kind() == reflect.Ptr {
 			logrus.Error("your convert return ptr")
 			os.Exit(0)
-		}else {
+		} else {
 			return toPtr(typeConvert.Interface())
 		}
 	case reflect.Struct:

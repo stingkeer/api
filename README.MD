@@ -18,3 +18,15 @@
 
    api.Start(":8080")
 ```
+upload file
+```go
+func MulFile(read multipart.Reader) string {
+	par, _ := read.NextPart()
+	fmt.Println(par.FileName(),par.FormName())
+	b, _ := ioutil.ReadAll(par)
+	fmt.Println(string(b))
+	return string(b)
+}
+GetApi().POST(MulFile, "/update")
+Start(":8080")
+```
