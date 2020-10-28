@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"gitee.com/aifuturewell/methods"
 	"gitee.com/fast_api/api/public"
 	"github.com/sirupsen/logrus"
@@ -17,7 +16,6 @@ func doMethod(start, end int, fns []*public.Entry) {
 	for i := start; i < end; i++ {
 		fn := fns[i]
 		med := methods.GetHelper().LookFun(fn.Fn)
-		fmt.Println(med)
 		var args = make(map[string]methods.ArgsMeta)
 		for _, arg := range med.Args {
 			args[arg.Name] = arg
