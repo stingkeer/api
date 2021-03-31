@@ -13,22 +13,22 @@ import (
 )
 
 type callerDefault struct {
-	resultConvert public.ResultConvert
-	typConvert    public.TypeConvert
+	serialize  public.Serialize
+	typConvert public.TypeConvert
 }
 
-func NewCaller(resultConvert public.ResultConvert, typConvert public.TypeConvert) *callerDefault {
+func NewCaller(serialize public.Serialize, typConvert public.TypeConvert) *callerDefault {
 	return &callerDefault{
-		resultConvert: resultConvert,
-		typConvert:    typConvert,
+		serialize:  serialize,
+		typConvert: typConvert,
 	}
 }
 
 func (c *callerDefault) Call(f *public.Entry, req *http.Request) interface{} {
 	switch req.Method {
-	case "GET":
+	case public.GET:
 		return c.callGet(f, req)
-	case "POST":
+	case public.POST:
 		return c.callPost(f, req)
 	default:
 		logrus.Warnf("method not support %s", req.Method)
@@ -57,7 +57,7 @@ func (c *callerDefault) callPost(f *public.Entry, req *http.Request) interface{}
 	} else { //small body
 		bytes, _ := ioutil.ReadAll(req.Body)
 		//instant json
-		err := c.resultConvert.ConvertFrom(bytes, newT.Interface())
+		err := c.serialize.Decode(bytes, newT.Interface())
 		if err != nil {
 			panic(err)
 		}
@@ -85,9 +85,11 @@ func (c *callerDefault) callGet(f *public.Entry, req *http.Request) interface{} 
 	for k, v := range f.Ids {
 		params.Add(k, v)
 	}
+
+	//convert param value to reflect.value
 	for name, p := range m.Param {
 		if v, b := params[name]; b {
-			pvs[p.Order] = c.typeConvert(v[0], t.In(p.Order))
+			pvs[p.Order] = c.paramTypeConvert(v[0], t.In(p.Order))
 		} else {
 			pvs[p.Order] = c.defaultCallValue(t.In(p.Order).Kind())
 		}
@@ -100,7 +102,7 @@ func (c *callerDefault) callGet(f *public.Entry, req *http.Request) interface{} 
 	return vs[0].Interface()
 }
 
-func (c *callerDefault) typeConvert(value string, dest reflect.Type) reflect.Value {
+func (c *callerDefault) paramTypeConvert(value string, dest reflect.Type) reflect.Value {
 	switch dest.Kind() {
 	case reflect.String:
 		return reflect.ValueOf(value)
@@ -123,10 +125,9 @@ func (c *callerDefault) typeConvert(value string, dest reflect.Type) reflect.Val
 		}
 		return reflect.ValueOf(s).Convert(dest)
 	case reflect.Ptr:
-		typeConvert := c.typeConvert(value, dest.Elem())
+		typeConvert := c.paramTypeConvert(value, dest.Elem())
 		if typeConvert.Type().Kind() == reflect.Ptr {
 			logrus.Error("your convert return ptr")
-			os.Exit(0)
 		} else {
 			return toPtr(typeConvert.Interface())
 		}
@@ -152,10 +153,10 @@ func (c *callerDefault) getFuncInfo(name string) *public.MethodInfo {
 		return &m
 	}
 	logrus.Errorf("not find name [%s]", name)
-	os.Exit(2)
 	return nil
 }
 
+//other param set default value
 func (c *callerDefault) defaultCallValue(kind reflect.Kind) reflect.Value {
 	switch kind {
 	case reflect.String:

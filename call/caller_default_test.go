@@ -2,8 +2,8 @@ package call
 
 import (
 	"fmt"
+	"gitee.com/fast_api/api/convert"
 	"gitee.com/fast_api/api/public"
-	"gitee.com/fast_api/api/transverter"
 	"math/big"
 	"reflect"
 	"testing"
@@ -15,8 +15,7 @@ type Person struct {
 }
 
 func TestCaller(t *testing.T) {
-
-	c := NewCaller(&transverter.JSONConvertImpl{}, &transverter.DefaultTypeConvert{})
+	c := NewCaller(&convert.JsonConvertImpl{}, &convert.DefaultTypeConvert{})
 	c.callPost(&public.Entry{
 		Url:    "",
 		Group:  "",
@@ -28,12 +27,12 @@ func TestCaller(t *testing.T) {
 }
 
 func TestTypeConvert(t *testing.T) {
-	c := NewCaller(&transverter.JSONConvertImpl{}, &transverter.DefaultTypeConvert{})
-	v := c.typeConvert("10000000000000", reflect.TypeOf(new(big.Int)))
+	c := NewCaller(&convert.JsonConvertImpl{}, &convert.DefaultTypeConvert{})
+	v := c.paramTypeConvert("10000000000000", reflect.TypeOf(new(big.Int)))
 	fmt.Println(v)
-	dd := c.typeConvert("100", reflect.TypeOf(new(int)))
+	dd := c.paramTypeConvert("100", reflect.TypeOf(new(int)))
 	fmt.Println(dd.Elem())
-	cc := c.typeConvert("api", reflect.TypeOf(new(string)).Elem())
+	cc := c.paramTypeConvert("api", reflect.TypeOf(new(string)).Elem())
 	fmt.Println(cc)
 }
 

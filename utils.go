@@ -1,6 +1,9 @@
 package api
 
 import (
+	"crypto/md5"
+	"encoding/hex"
+	"io"
 	"regexp"
 	"strings"
 )
@@ -27,4 +30,10 @@ func SplitFuncName(name string) (string, string) {
 		return "", name[lastF+1:]
 	}
 
+}
+
+func Md5String(s string) string {
+	h := md5.New()
+	io.WriteString(h, s)
+	return hex.EncodeToString(h.Sum(nil))
 }

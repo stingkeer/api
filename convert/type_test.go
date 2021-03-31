@@ -1,4 +1,4 @@
-package transverter
+package convert
 
 import (
 	"fmt"

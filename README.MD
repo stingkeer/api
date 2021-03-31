@@ -1,5 +1,5 @@
 ```GET
-	api.GetApi().GET(func(mainNetPrivateKey string, tokenAmount *big.Int) Result {
+	api.GET(func(mainNetPrivateKey string, tokenAmount *big.Int) Result {
     		return toResult(swap.Deposit(mainNetPrivateKey, tokenAmount))
     	}, "/deposit")
 
@@ -7,7 +7,7 @@
 }
 ```
 ```POST
-   api.GetApi().POST(func (param struct {
+   api.POST(func (param struct {
                          	MainNetPrivateKey string `json:"mainNetPrivateKey"`
                          	Base64PrivateKey  string `json:"base64PrivateKey"`
                          }) Result {
@@ -28,5 +28,5 @@ func MulFile(read multipart.Reader) string {
 	return string(b)
 }
 GetApi().POST(MulFile, "/update")
-Start(":8080")
+StartServer(":8080")
 ```

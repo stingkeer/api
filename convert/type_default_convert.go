@@ -1,4 +1,4 @@
-package transverter
+package convert
 
 import (
 	"github.com/sirupsen/logrus"
@@ -6,8 +6,7 @@ import (
 	"reflect"
 )
 
-type DefaultTypeConvert struct {
-}
+type DefaultTypeConvert struct{}
 
 func (cvr *DefaultTypeConvert) ConvertTo(value string, typ reflect.Type) reflect.Value {
 	switch {

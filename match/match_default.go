@@ -1,4 +1,4 @@
-package api
+package match
 
 import (
 	"gitee.com/fast_api/api/public"
@@ -25,4 +25,12 @@ func (m *MatchImpl) Match(url *url.URL) *public.Entry {
 	}
 	logrus.Debugf("Url path = %s is matched", url.Path)
 	return data.(*public.Entry)
+}
+
+func (m *MatchImpl) Add(key string, data interface{}) {
+	m.store.Add(key, data)
+}
+
+func NewMatchImpl() *MatchImpl {
+	return &MatchImpl{store: newStore()}
 }

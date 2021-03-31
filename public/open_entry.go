@@ -1,6 +1,8 @@
 package public
 
-import "gitee.com/aifuturewell/methods"
+import (
+	"gitee.com/aifuturewell/methods"
+)
 
 //Fn [name]->
 type MetaMethods map[string]MethodInfo
@@ -20,9 +22,10 @@ type MethodInfo struct {
 	Param      map[string]methods.ArgsMeta `json:"param"`
 }
 
-type Header struct {
+type Content struct {
 	ContentType string
 	Bytes       []byte
+	Code        int
 }
 
 type Entry struct {

@@ -3,7 +3,9 @@ package api
 import (
 	"gitee.com/aifuturewell/methods"
 	"gitee.com/fast_api/api/public"
+
 	"github.com/sirupsen/logrus"
+
 	"math"
 	"os"
 	"runtime"
@@ -56,20 +58,25 @@ func PackApi() {
 	PackApiWithPath(nil)
 }
 
-func PackApiWithPath(exePath func() string) {
-	start := time.Now()
-	//init methods
-	var path string
-	if exePath == nil {
-		path, _ = os.Executable()
+func SetExecPath(path *string) {
+	if path == nil {
+		s, e := os.Executable()
+		if e == nil {
+			methods.Init(s)
+		}
 	} else {
-		path = exePath()
+		methods.Init(*path)
 	}
-	methods.Init(path)
-	if public.MethodsPools == nil {
-		public.MethodsPools = make(public.MetaMethods)
+}
+
+func PackApiWithPath(exePath func() *string) {
+	start := time.Now()
+	if exePath == nil {
+		SetExecPath(nil)
+	} else {
+		SetExecPath(exePath())
 	}
-	fns := GetApi().getFnCaches()
+	fns := getFnCaches()
 	logrus.Debugf("api had caches %d", len(fns))
 	averageDo(runtime.NumCPU(), len(fns), func(start, end int, g *sync.WaitGroup) {
 		doMethod(start, end, fns)
