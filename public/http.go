@@ -1,7 +1,7 @@
 package public
 
 const (
-	Json = "application/json"
+	Content_JSON = "application/json"
 )
 
 const (

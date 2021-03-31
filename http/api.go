@@ -5,6 +5,7 @@ import (
 	"gitee.com/fast_api/api/server"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"reflect"
 )
 
 type ApiInter struct {
@@ -37,7 +38,7 @@ func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
 			return false
 		}
 		rw.Header().Add("Content-Type", h.ContentType)
-		rw.WriteHeader(h.Code)
+		rw.WriteHeader(http.StatusOK)
 		rw.Write(h.Bytes)
 		return false
 	}
@@ -56,4 +57,6 @@ func init() {
 			resultConvert,
 		})
 	})
+
+	errorsMap = make(map[reflect.Type]ErrorHandler)
 }

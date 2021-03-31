@@ -3,7 +3,6 @@ package convert
 import (
 	"encoding/json"
 	"gitee.com/fast_api/api/public"
-	"net/http"
 	"reflect"
 )
 
@@ -15,25 +14,18 @@ func (c *JsonConvertImpl) Decode(bytes []byte, vpr interface{}) error {
 
 func (c *JsonConvertImpl) Encode(f interface{}) *public.Content {
 	var ctxt public.Content
-	ctxt.Code = http.StatusOK
+	ctxt.ContentType = public.Content_JSON
 	if e, b := f.(error); b {
-		bytes, _ := json.Marshal(public.NewError(e.Error()))
-		ctxt.Bytes = bytes
-		ctxt.ContentType = public.Json
-		ctxt.Code = http.StatusInternalServerError
-		return &ctxt
+		panic(e)
 	}
-
 	kind := reflect.Indirect(reflect.ValueOf(f)).Kind()
 	switch kind {
 	case reflect.String:
 		ctxt.Bytes = []byte(f.(string))
-		ctxt.ContentType = public.Json
 		return &ctxt
 	default:
 		bytes, _ := json.Marshal(f)
 		ctxt.Bytes = bytes
-		ctxt.ContentType = public.Json
 		return &ctxt
 	}
 }

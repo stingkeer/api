@@ -1,6 +1,7 @@
 package api
 
 import (
+	"gitee.com/fast_api/api/http"
 	"gitee.com/fast_api/api/public"
 	"gitee.com/fast_api/api/server"
 )
@@ -11,6 +12,11 @@ var (
 	GET  = httpM(public.GET)
 	POST = httpM(public.POST)
 	PUT  = httpM(public.PUT)
+
+	//error handler
+	RegisterErrorHandler = http.RegisterErrorHandler
+	//http handler
+	AddHttpHandle = http.AddHttpHandle
 )
 
 var fnCaches []*public.Entry

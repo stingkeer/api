@@ -25,7 +25,6 @@ type MethodInfo struct {
 type Content struct {
 	ContentType string
 	Bytes       []byte
-	Code        int
 }
 
 type Entry struct {
