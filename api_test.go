@@ -5,17 +5,12 @@ import (
 	"gitee.com/fast_api/api/public"
 	"gitee.com/fast_api/api/server"
 	"github.com/sirupsen/logrus"
-
 	"io/ioutil"
+	"math/big"
 	"mime/multipart"
-
+	"net/http"
 	"testing"
 )
-
-func hello() interface{} {
-	//panic("asdfsadf")
-	return "asdfsd"
-}
 
 func hello1(kk string) interface{} {
 	return map[string]string{"name": kk}
@@ -31,7 +26,22 @@ func MulFile(read multipart.Reader) string {
 
 func TestBind(t *testing.T) {
 	logrus.SetLevel(logrus.TraceLevel)
-	GET(hello, "/hello")
+	GET(func(a http.Request) interface{} {
+		return a.Host
+	}, "/hello")
+
+	GET(func(a big.Int) interface{} {
+		return a.String()
+	}, "/int")
+
+	GET(func(a public.Header) interface{} {
+		return a.Values("Accept-Encoding")
+	}, "/h")
+
+	GET(func(a public.Header) {
+		a.Add("szb", "nnnnn")
+	}, "/no")
+
 	StartService(":8011")
 }
 

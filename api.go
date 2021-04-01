@@ -1,22 +1,28 @@
 package api
 
 import (
+	"gitee.com/fast_api/api/call"
 	"gitee.com/fast_api/api/http"
 	"gitee.com/fast_api/api/public"
 	"gitee.com/fast_api/api/server"
+	stdhttp "net/http"
 )
 
 type httpMethod func(f interface{}, url string)
 
 var (
-	GET  = httpM(public.GET)
-	POST = httpM(public.POST)
-	PUT  = httpM(public.PUT)
+	GET  = httpM(stdhttp.MethodGet)
+	POST = httpM(stdhttp.MethodPost)
+	PUT  = httpM(stdhttp.MethodPut)
 
 	//error handler
 	RegisterErrorHandler = http.RegisterErrorHandler
+
 	//http handler
 	AddHttpHandle = http.AddHttpHandle
+
+	//type handler
+	RegisterTypeMapper = call.RegisterTypeMapper
 )
 
 var fnCaches []*public.Entry

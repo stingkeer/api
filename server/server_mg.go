@@ -2,9 +2,9 @@ package server
 
 import (
 	"gitee.com/fast_api/api/call"
-	"gitee.com/fast_api/api/convert"
 	"gitee.com/fast_api/api/match"
 	"gitee.com/fast_api/api/public"
+	"gitee.com/fast_api/api/serialize"
 	"go.uber.org/dig"
 )
 
@@ -16,15 +16,11 @@ func init() {
 	c = dig.New()
 	//default
 	Provide(func() public.Serialize {
-		return &convert.JsonConvertImpl{}
+		return &serialize.JsonConvertImpl{}
 	})
 
-	Provide(func() public.TypeConvert {
-		return &convert.DefaultTypeConvert{}
-	})
-
-	Provide(func(resultConvert public.Serialize, typConvert public.TypeConvert) public.Caller {
-		return call.NewCaller(resultConvert, typConvert)
+	Provide(func(resultConvert public.Serialize) public.Caller {
+		return call.NewCaller(resultConvert)
 	})
 
 	Provide(func() public.MetaMethods {

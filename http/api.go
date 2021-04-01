@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"reflect"
+	"strings"
 )
 
 type ApiInter struct {
@@ -15,7 +16,6 @@ type ApiInter struct {
 }
 
 func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
-
 	logrus.Tracef("incoming req Method [%s] , Url [%s]", req.Method, req.URL.String())
 	entry := api.match.Match(req.URL)
 	if nil == entry {
@@ -31,18 +31,40 @@ func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
 	if entry.Fn != nil {
 		inf := api.caller.Call(entry, req)
 		if inf == nil {
+			WriteResponse(rw, req, nil)
 			return false
 		}
 		h := api.serialize.Encode(inf)
 		if h == nil {
+			WriteResponse(rw, req, nil)
 			return false
 		}
-		rw.Header().Add("Content-Type", h.ContentType)
-		rw.WriteHeader(http.StatusOK)
-		rw.Write(h.Bytes)
+		WriteResponse(rw, req, h)
 		return false
 	}
 	return false
+}
+
+func WriteResponse(rw http.ResponseWriter, req *http.Request, content *public.Content) {
+	header := rw.Header()
+	apHeader := req.Header.Get(public.HEAD_CONST)
+	if apHeader == "" {
+		return
+	}
+	kvs := strings.Split(apHeader, ",")
+	for _, v := range kvs {
+		l := strings.Split(v, "=")
+		if len(l) != 2 {
+			panic("you set head error")
+		}
+		header.Add(l[0], l[1])
+	}
+	if content != nil {
+		header.Add("Content-Type", content.ContentType)
+		rw.Write(content.Bytes)
+	}
+	rw.WriteHeader(http.StatusOK)
+
 }
 
 func (api *ApiInter) Order() int {

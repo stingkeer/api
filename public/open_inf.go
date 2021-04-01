@@ -3,13 +3,7 @@ package public
 import (
 	"net/http"
 	"net/url"
-	"reflect"
 )
-
-type TypeConvert interface {
-	//convert string param to value
-	ConvertTo(value string, typ reflect.Type) reflect.Value
-}
 
 type Serialize interface {
 	Encode(interface{}) *Content

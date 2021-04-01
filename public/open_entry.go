@@ -2,6 +2,8 @@ package public
 
 import (
 	"gitee.com/aifuturewell/methods"
+	"net/http"
+	"reflect"
 )
 
 //Fn [name]->
@@ -33,4 +35,12 @@ type Entry struct {
 	Method string
 	Fn     interface{}
 	Ids    map[string]string
+}
+
+type ParamWarp struct {
+	http.Request
+	PTyp   reflect.Type
+	PValue string
+	Path   string
+	PName  string
 }

@@ -25,7 +25,11 @@ func (ad *Service) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 }
 
 func init() {
-	a = &Service{}
+	server.Provide(func() *Service {
+		a = &Service{}
+		return a
+	})
+
 }
 
 var (

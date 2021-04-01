@@ -1,4 +1,4 @@
-package convert
+package serialize
 
 import (
 	"fmt"
