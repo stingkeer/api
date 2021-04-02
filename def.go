@@ -2,7 +2,7 @@ package api
 
 import (
 	"gitee.com/aifuturewell/methods"
-	"gitee.com/fast_api/api/public"
+	"gitee.com/fast_api/api/def"
 
 	"github.com/sirupsen/logrus"
 
@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func doMethod(start, end int, fns []*public.Entry) {
+func doMethod(start, end int, fns []*def.Entry) {
 	for i := start; i < end; i++ {
 		fn := fns[i]
 		med := methods.GetHelper().LookFun(fn.Fn)
@@ -22,7 +22,7 @@ func doMethod(start, end int, fns []*public.Entry) {
 		for _, arg := range med.Args {
 			args[arg.Name] = arg
 		}
-		public.MethodsPools[med.MethodName] = public.MethodInfo{
+		def.MethodsPools[med.MethodName] = def.MethodInfo{
 			Pkg:        "",
 			Receive:    "",
 			Method:     fns[i],

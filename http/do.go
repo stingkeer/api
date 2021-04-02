@@ -2,9 +2,11 @@ package http
 
 import (
 	"encoding/json"
+	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/intercept"
-	"gitee.com/fast_api/api/public"
+	"github.com/sirupsen/logrus"
 	"net/http"
+	"runtime/debug"
 	"sort"
 	"sync"
 )
@@ -25,6 +27,8 @@ func DoHttp(rw http.ResponseWriter, req *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			WriteError(handleError(err), rw)
+			logrus.Error(err)
+			debug.PrintStack()
 		}
 	}()
 	for _, handle := range httpHandles {
@@ -42,7 +46,7 @@ func AddHttpHandle(f intercept.HttpIntercept) {
 
 func WriteError(err interface{}, rw http.ResponseWriter) {
 	bytes, _ := json.Marshal(err)
-	rw.Header().Add("Content-Type", public.Content_JSON)
+	rw.Header().Add("Content-Type", def.Content_JSON)
 	rw.WriteHeader(http.StatusInternalServerError)
 	rw.Write(bytes)
 }

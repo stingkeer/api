@@ -1,23 +1,33 @@
 package http
 
 import (
-	"gitee.com/fast_api/api/public"
-	"gitee.com/fast_api/api/server"
+	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/intercept"
 	"github.com/sirupsen/logrus"
+	"io"
 	"net/http"
 	"reflect"
 	"strings"
 )
 
 type ApiInter struct {
-	match     public.Match
-	caller    public.Caller
-	serialize public.Serialize
+	match     def.Match
+	caller    def.Caller
+	serialize def.Serialize
+}
+
+func NewApiIntercept(match def.Match, caller def.Caller, serialize def.Serialize) intercept.HttpIntercept {
+	return &ApiInter{
+		match:     match,
+		caller:    caller,
+		serialize: serialize,
+	}
 }
 
 func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
 	logrus.Tracef("incoming req Method [%s] , Url [%s]", req.Method, req.URL.String())
 	entry := api.match.Match(req.URL)
+	req.Header.Del(def.HEAD_CONST)
 	if nil == entry {
 		logrus.Tracef("not match %s", req.URL)
 		return false
@@ -27,58 +37,99 @@ func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
 		logrus.Warnf("not support Method %s", req.Method)
 		return false
 	}
-
 	if entry.Fn != nil {
-		inf := api.caller.Call(entry, req)
-		if inf == nil {
-			WriteResponse(rw, req, nil)
+
+		iRet := api.caller.Call(entry, req)
+
+		if !doWithRet(iRet, rw, req) {
+			if iRet == nil {
+				WriteResponse(rw, req, nil)
+				return false
+			}
+
+			//default return json
+			h := api.serialize.Encode(iRet)
+			if h == nil {
+				WriteResponse(rw, req, nil)
+				return false
+			}
+			WriteResponse(rw, req, h)
 			return false
 		}
-		h := api.serialize.Encode(inf)
-		if h == nil {
-			WriteResponse(rw, req, nil)
-			return false
-		}
-		WriteResponse(rw, req, h)
-		return false
+
 	}
 	return false
 }
 
-func WriteResponse(rw http.ResponseWriter, req *http.Request, content *public.Content) {
-	header := rw.Header()
-	apHeader := req.Header.Get(public.HEAD_CONST)
-	if apHeader == "" {
-		return
-	}
-	kvs := strings.Split(apHeader, ",")
-	for _, v := range kvs {
-		l := strings.Split(v, "=")
-		if len(l) != 2 {
-			panic("you set head error")
+var retAdapters = make(map[reflect.Type]def.RetAdapter)
+
+func RegisterReturnHandler(ret def.RetAdapter) {
+	if retAdapters != nil {
+		for _, m := range ret.Register() {
+			retAdapters[m] = ret
 		}
-		header.Add(l[0], l[1])
 	}
+}
+
+func doWithRet(value interface{}, rw http.ResponseWriter, req *http.Request) bool {
+	typ := reflect.TypeOf(value)
+	if _, b := retAdapters[typ]; b {
+		WriteRetResponse(rw, req, value.(def.RetAdapter))
+		return true
+	} else {
+		return false
+	}
+}
+
+func WriteRetResponse(rw http.ResponseWriter, req *http.Request, adapter def.RetAdapter) {
+	appendSysHeader(rw, req)
+	header := rw.Header()
+	header.Add("Content-Type", adapter.Content())
+
+	if v, b := adapter.(def.AppendHeader); b {
+		mHeader := v.Append()
+		for k, v := range mHeader {
+			header.Add(k, v)
+		}
+	}
+
+	_, err := io.Copy(rw, adapter.Return())
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	if v, b := adapter.(def.Closer); b {
+		v.Close()
+	}
+
+}
+
+func appendSysHeader(rw http.ResponseWriter, req *http.Request) {
+	header := rw.Header()
+	apHeader := req.Header.Get(def.HEAD_CONST)
+	if apHeader != "" {
+		kvs := strings.Split(apHeader, ",")
+		for _, v := range kvs {
+			l := strings.Split(v, "=")
+			if len(l) != 2 {
+				panic("you set head error")
+			}
+			header.Add(l[0], l[1])
+		}
+	}
+}
+
+func WriteResponse(rw http.ResponseWriter, req *http.Request, content *def.Content) {
+	appendSysHeader(rw, req)
+	header := rw.Header()
 	if content != nil {
 		header.Add("Content-Type", content.ContentType)
+		rw.WriteHeader(http.StatusOK)
 		rw.Write(content.Bytes)
 	}
-	rw.WriteHeader(http.StatusOK)
 
 }
 
 func (api *ApiInter) Order() int {
 	return 100
-}
-
-func init() {
-	server.Invoke(func(match public.Match, resultConvert public.Serialize, caller public.Caller) {
-		AddHttpHandle(&ApiInter{
-			match,
-			caller,
-			resultConvert,
-		})
-	})
-
-	errorsMap = make(map[reflect.Type]ErrorHandler)
 }

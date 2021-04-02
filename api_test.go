@@ -2,13 +2,15 @@ package api
 
 import (
 	"fmt"
-	"gitee.com/fast_api/api/public"
+	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/server"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"math/big"
 	"mime/multipart"
 	"net/http"
+	"os"
+	"reflect"
 	"testing"
 )
 
@@ -24,7 +26,7 @@ func MulFile(read multipart.Reader) string {
 	return string(b)
 }
 
-func TestBind(t *testing.T) {
+func TestApiHttp(t *testing.T) {
 	logrus.SetLevel(logrus.TraceLevel)
 	GET(func(a http.Request) interface{} {
 		return a.Host
@@ -34,13 +36,22 @@ func TestBind(t *testing.T) {
 		return a.String()
 	}, "/int")
 
-	GET(func(a public.Header) interface{} {
+	GET(func(a def.Header) interface{} {
 		return a.Values("Accept-Encoding")
 	}, "/h")
 
-	GET(func(a public.Header) {
+	GET(func(a def.Header) {
 		a.Add("szb", "nnnnn")
 	}, "/no")
+
+	GET(func(a int, b def.StringReq) {
+		fmt.Println(a, b)
+	}, "/m")
+
+	GET(func() interface{} {
+		f, _ := os.Open("C:/Users/Administrator/api/README.MD")
+		return NewFileStream(f)
+	}, "/download")
 
 	StartService(":8011")
 }
@@ -56,7 +67,7 @@ func TestParam(t *testing.T) {
 type A struct {
 }
 
-func (A) Encode(interface{}) *public.Content {
+func (A) Encode(interface{}) *def.Content {
 	return nil
 }
 func (A) Decode([]byte, interface{}) error {
@@ -64,13 +75,14 @@ func (A) Decode([]byte, interface{}) error {
 }
 
 func TestFile(t *testing.T) {
-	server.Provide(func() public.Serialize {
+	server.Provide(func() def.Serialize {
 		return &A{}
 	})
 	POST(MulFile, "/update")
 	StartService(":8080")
 }
 
-func TestFx(t *testing.T) {
-
+func TestType(t *testing.T) {
+	type kk int
+	fmt.Println(reflect.TypeOf((*kk)(nil)).Elem().Kind())
 }

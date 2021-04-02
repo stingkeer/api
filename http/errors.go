@@ -1,23 +1,23 @@
 package http
 
 import (
-	"gitee.com/fast_api/api/public"
+	"gitee.com/fast_api/api/def"
 	"reflect"
 )
 
 type ErrorHandler func(err interface{}) interface{}
 
-var errorsMap map[reflect.Type]ErrorHandler
+var errorsMap = make(map[reflect.Type]ErrorHandler)
 
 func handleError(err interface{}) interface{} {
 	if v, b := errorsMap[reflect.TypeOf(err)]; b {
 		return v(err)
 	}
 	if v, b := err.(string); b {
-		return public.NewError(v)
+		return def.NewError(v)
 	}
 	if v, b := err.(error); b {
-		return public.NewError(v.Error())
+		return def.NewError(v.Error())
 	}
 	return ""
 }

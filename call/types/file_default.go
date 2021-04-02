@@ -1,7 +1,7 @@
-package call
+package types
 
 import (
-	"gitee.com/fast_api/api/public"
+	"gitee.com/fast_api/api/def"
 	"github.com/sirupsen/logrus"
 	"mime/multipart"
 	"reflect"
@@ -9,7 +9,7 @@ import (
 
 type FileType struct{}
 
-func (f FileType) Mapper(param public.ParamWarp) reflect.Value {
+func (f FileType) Mapper(param def.ParamWarp) reflect.Value {
 	newT := reflect.New(param.PTyp)
 	reader, err := param.MultipartReader()
 	if err != nil {

@@ -1,4 +1,4 @@
-package public
+package def
 
 import (
 	"gitee.com/aifuturewell/methods"

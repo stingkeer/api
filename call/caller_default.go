@@ -1,7 +1,7 @@
 package call
 
 import (
-	"gitee.com/fast_api/api/public"
+	"gitee.com/fast_api/api/def"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
@@ -11,18 +11,20 @@ import (
 )
 
 type callerDefault struct {
-	serialize public.Serialize
+	serialize def.Serialize
 }
 
-var adapters = make(map[reflect.Type]Adapter)
+var (
+	adapters = make(map[reflect.Type]def.Adapter)
+)
 
-func NewCaller(serialize public.Serialize) *callerDefault {
+func NewCaller(serialize def.Serialize) *callerDefault {
 	return &callerDefault{
 		serialize: serialize,
 	}
 }
 
-func RegisterTypeMapper(adapter Adapter) {
+func RegisterTypeMapper(adapter def.Adapter) {
 	if adapter != nil {
 		for _, m := range adapter.Register() {
 			adapters[m] = adapter
@@ -31,12 +33,8 @@ func RegisterTypeMapper(adapter Adapter) {
 }
 
 //request == call(def) => value
-func (c *callerDefault) Call(f *public.Entry, req *http.Request) interface{} {
+func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 	v := reflect.ValueOf(f.Fn)
-	if v.Type().NumIn() > 1 {
-		logrus.Error("not support param > 1")
-		return nil
-	}
 	name := runtime.FuncForPC(reflect.ValueOf(f.Fn).Pointer()).Name()
 	m := c.getFuncInfo(name)
 	if m == nil {
@@ -49,7 +47,7 @@ func (c *callerDefault) Call(f *public.Entry, req *http.Request) interface{} {
 	}
 	var paramsV []reflect.Value
 	for name, p := range m.Param {
-		pw := public.ParamWarp{Request: *req}
+		pw := def.ParamWarp{Request: *req}
 		pw.PTyp = v.Type().In(p.Order)
 		pw.PName = name
 		if t, b := adapters[p.Typ]; b {
@@ -66,14 +64,14 @@ func (c *callerDefault) Call(f *public.Entry, req *http.Request) interface{} {
 			}
 			paramsV = append(paramsV, newT.Elem())
 		} else { //default value
-			logrus.Tracef("not support %s set default value", pw.PTyp.Kind())
+			logrus.Tracef("not support %s set default value", pw.PTyp)
 			paramsV = append(paramsV, c.defaultCallValue(pw.PTyp.Kind()))
 		}
 	}
 	vs := v.Call(paramsV)
 	if len(vs) == 0 {
 		logrus.Warn("call method no return")
-		return nil
+		return reflect.ValueOf(nil)
 	}
 	return vs[0].Interface()
 }
@@ -84,8 +82,8 @@ func toPtr(obj interface{}) reflect.Value {
 	return vp
 }
 
-func (c *callerDefault) getFuncInfo(name string) *public.MethodInfo {
-	if m, ok := public.MethodsPools[name]; ok {
+func (c *callerDefault) getFuncInfo(name string) *def.MethodInfo {
+	if m, ok := def.MethodsPools[name]; ok {
 		return &m
 	}
 	logrus.Errorf("not find name [%s]", name)
@@ -101,12 +99,4 @@ func (c *callerDefault) defaultCallValue(kind reflect.Kind) reflect.Value {
 		return reflect.ValueOf(0)
 	}
 	return reflect.ValueOf(nil)
-}
-
-func init() {
-	RegisterTypeMapper(&BaseType{})
-	RegisterTypeMapper(&bigType{})
-	RegisterTypeMapper(&FileType{})
-	RegisterTypeMapper(&HttpType{})
-	RegisterTypeMapper(&headType{})
 }
