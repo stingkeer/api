@@ -32,9 +32,7 @@ var (
 	//register handler
 	RegisterReturnHandler = http.RegisterReturnHandler
 
-	NewBytesStream = rettypes.NewBytesStream
-
-	NewFileStream = rettypes.NewFileStream
+	NewStream = rettypes.NewStream
 )
 
 var fnCaches []*def.Entry

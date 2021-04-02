@@ -50,7 +50,7 @@ func TestApiHttp(t *testing.T) {
 
 	GET(func() interface{} {
 		f, _ := os.Open("C:/Users/Administrator/api/README.MD")
-		return NewFileStream(f)
+		return NewStream(f)
 	}, "/download")
 
 	StartService(":8011")
