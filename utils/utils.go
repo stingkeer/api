@@ -1,9 +1,10 @@
-package api
+package utils
 
 import (
 	"crypto/md5"
 	"encoding/hex"
 	"io"
+	"reflect"
 	"regexp"
 	"strings"
 )
@@ -36,4 +37,15 @@ func Md5String(s string) string {
 	h := md5.New()
 	io.WriteString(h, s)
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+//other param set default value
+func DefaultCallValue(kind reflect.Kind) reflect.Value {
+	switch kind {
+	case reflect.String:
+		return reflect.ValueOf("")
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return reflect.ValueOf(0)
+	}
+	return reflect.ValueOf(nil)
 }

@@ -8,11 +8,13 @@ import (
 
 func init() {
 
-	RegisterTypeMapper(&types.BaseType{})
+	base := types.BaseType{}
+	RegisterTypeMapper(&base)
 	RegisterTypeMapper(&types.BigType{})
 	RegisterTypeMapper(&types.FileType{})
 	RegisterTypeMapper(&types.HttpType{})
 	RegisterTypeMapper(&types.HeadType{})
+	RegisterTypeMapper(&types.TypeRequire{BaseType: base})
 
 	http.RegisterReturnHandler(&rettypes.Stream{})
 }

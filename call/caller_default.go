@@ -2,6 +2,7 @@ package call
 
 import (
 	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/utils"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
@@ -38,14 +39,16 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 	name := runtime.FuncForPC(reflect.ValueOf(f.Fn).Pointer()).Name()
 	m := c.getFuncInfo(name)
 	if m == nil {
-		logrus.Error("not find method in header")
+		logrus.Error("not find method in exe")
 		os.Exit(2)
 	}
 	params := req.URL.Query()
 	for k, v := range f.Ids {
 		params.Add(k, v)
 	}
-	var paramsV = make([]reflect.Value, len(m.Param))
+
+	paramsV := make([]reflect.Value, len(m.Param))
+
 	for name, p := range m.Param {
 		pw := def.ParamWarp{Request: *req}
 		pw.PTyp = v.Type().In(p.Order)
@@ -65,10 +68,12 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 			paramsV[p.Order] = newT.Elem()
 		} else { //default value
 			logrus.Tracef("not support %s set default value", pw.PTyp)
-			paramsV[p.Order] = c.defaultCallValue(pw.PTyp.Kind())
+			paramsV[p.Order] = utils.DefaultCallValue(pw.PTyp.Kind())
 		}
 	}
+
 	vs := v.Call(paramsV)
+
 	if len(vs) == 0 {
 		logrus.Warn("call method no return")
 		return reflect.ValueOf(nil)
@@ -88,15 +93,4 @@ func (c *callerDefault) getFuncInfo(name string) *def.MethodInfo {
 	}
 	logrus.Errorf("not find name [%s]", name)
 	return nil
-}
-
-//other param set default value
-func (c *callerDefault) defaultCallValue(kind reflect.Kind) reflect.Value {
-	switch kind {
-	case reflect.String:
-		return reflect.ValueOf("")
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return reflect.ValueOf(0)
-	}
-	return reflect.ValueOf(nil)
 }

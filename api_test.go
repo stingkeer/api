@@ -44,8 +44,8 @@ func TestApiHttp(t *testing.T) {
 		a.Add("szb", "nnnnn")
 	}, "/no")
 
-	GET(func(a int, b def.StringReq) {
-		fmt.Println(a, b)
+	GET(func(a int, hello def.StringReq) {
+		fmt.Println(a, hello)
 	}, "/m")
 
 	GET(func() interface{} {
@@ -60,7 +60,7 @@ func TestApiHttp(t *testing.T) {
 	StartService(":8011")
 }
 
-func TestParam(t *testing.T) {
+func TestURL(t *testing.T) {
 	GET(hello1, "/s")
 	GET(hello1, "/s/<kk>")
 	POST(MulFile, "/update")

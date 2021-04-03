@@ -11,4 +11,6 @@ type HttpIntercept interface {
 }
 
 type MethodIntercept interface {
+	BeforeInvoke()
+	AfterInvoke()
 }

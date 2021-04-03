@@ -61,16 +61,6 @@ func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
 	return false
 }
 
-var retAdapters = make(map[reflect.Type]def.RetAdapter)
-
-func RegisterReturnHandler(ret def.RetAdapter) {
-	if retAdapters != nil {
-		for _, m := range ret.Register() {
-			retAdapters[m] = ret
-		}
-	}
-}
-
 func doWithRet(value interface{}, rw http.ResponseWriter, req *http.Request) bool {
 	typ := reflect.TypeOf(value)
 	if _, b := retAdapters[typ]; b {
@@ -86,6 +76,7 @@ func WriteRetResponse(rw http.ResponseWriter, req *http.Request, adapter def.Ret
 	header := rw.Header()
 	header.Add("Content-Type", adapter.Content())
 
+	//if struct impl def.AppendHeader ,can def header
 	if v, b := adapter.(def.AppendHeader); b {
 		mHeader := v.Append()
 		for k, v := range mHeader {
@@ -98,7 +89,7 @@ func WriteRetResponse(rw http.ResponseWriter, req *http.Request, adapter def.Ret
 		logrus.Error(err)
 	}
 
-	if v, b := adapter.(def.Closer); b {
+	if v, b := adapter.(io.Closer); b {
 		v.Close()
 	}
 

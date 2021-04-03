@@ -2,6 +2,7 @@ package types
 
 import (
 	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/utils"
 	"github.com/sirupsen/logrus"
 	"reflect"
 	"strconv"
@@ -20,6 +21,9 @@ func getFuncInfo(name string) *def.MethodInfo {
 func (b *BaseType) Mapper(p def.ParamWarp) reflect.Value {
 	dest := p.PTyp
 	value := p.PValue
+	if value == "" {
+		return utils.DefaultCallValue(dest.Kind())
+	}
 	switch dest.Kind() {
 	case reflect.String:
 		return reflect.ValueOf(value)
