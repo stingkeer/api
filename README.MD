@@ -1,32 +1,42 @@
-```GET
-	api.GET(func(mainNetPrivateKey string, tokenAmount *big.Int) Result {
-    		return toResult(swap.Deposit(mainNetPrivateKey, tokenAmount))
-    	}, "/deposit")
-
-	api.Start(":8080")
-}
+### quick start
+1.eg.helloword
 ```
-```POST
-   api.POST(func (param struct {
-                         	MainNetPrivateKey string `json:"mainNetPrivateKey"`
-                         	Base64PrivateKey  string `json:"base64PrivateKey"`
-                         }) Result {
-                         	err := gw.MapAccounts(param.MainNetPrivateKey, param.Base64PrivateKey)
-                         	return toResult(err)
-                          }
-   )
-
-   api.Start(":8080")
+api.GET(func() interface{} {
+      return "hello word"
+}, "/hello")
+api.StartService(":8011")
 ```
-upload file
-```go
-func MulFile(read multipart.Reader) string {
-	par, _ := read.NextPart()
-	fmt.Println(par.FileName(),par.FormName())
-	b, _ := ioutil.ReadAll(par)
-	fmt.Println(string(b))
-	return string(b)
-}
-GetApi().POST(MulFile, "/update")
-StartServer(":8080")
+2.eg.login
+```
+api.GET(func(username,password string) interface{} {
+      return "hello word"
+}, "/login")
+api.StartService(":8011")
+```
+```shell script
+curl --location --request GET 'http://127.0.0.1:8011/login?username=alloce&password=123456'
+```
+##### upload file
+```
+api.POST(func(reader multipart.Reader) interface{} {
+	form, _ := reader.ReadForm(0)
+	fHeader := form.File["file"][0]
+	f, _ := fHeader.Open()
+	bytes,_:=ioutil.ReadAll(f)
+	return bytes
+}, "/fileUpload")
+api.StartService(":8011")
+```
+```shell script
+curl --location --request GET 'http://127.0.0.1:8011/fileUpload' \
+--form 'file=@"/C:/Users/Administrator/Downloads/README.MD"'
+```
+#### download file
+
+```
+api.GET(func() interface{} {
+	f, _ := os.Open("C:/Users/Administrator/api/README.MD")
+	return api.NewStream(f)
+}, "/download")
+api.StartService(":8011")
 ```
