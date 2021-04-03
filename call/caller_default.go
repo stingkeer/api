@@ -45,7 +45,7 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 	for k, v := range f.Ids {
 		params.Add(k, v)
 	}
-	var paramsV []reflect.Value
+	var paramsV = make([]reflect.Value, len(m.Param))
 	for name, p := range m.Param {
 		pw := def.ParamWarp{Request: *req}
 		pw.PTyp = v.Type().In(p.Order)
@@ -54,7 +54,7 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 			if v, b := params[name]; b {
 				pw.PValue = v[0]
 			}
-			paramsV = append(paramsV, t.Mapper(pw))
+			paramsV[p.Order] = t.Mapper(pw)
 		} else if pw.PTyp.Kind() == reflect.Struct && req.Method == http.MethodPost {
 			newT := reflect.New(pw.PTyp)
 			bytes, _ := ioutil.ReadAll(req.Body)
@@ -62,10 +62,10 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 			if err != nil {
 				panic(err)
 			}
-			paramsV = append(paramsV, newT.Elem())
+			paramsV[p.Order] = newT.Elem()
 		} else { //default value
 			logrus.Tracef("not support %s set default value", pw.PTyp)
-			paramsV = append(paramsV, c.defaultCallValue(pw.PTyp.Kind()))
+			paramsV[p.Order] = c.defaultCallValue(pw.PTyp.Kind())
 		}
 	}
 	vs := v.Call(paramsV)

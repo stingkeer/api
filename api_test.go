@@ -53,6 +53,10 @@ func TestApiHttp(t *testing.T) {
 		return NewStream(f)
 	}, "/download")
 
+	GET(func(header def.Header, reader multipart.Reader) {
+		fmt.Println(header, reader)
+	}, "/file")
+
 	StartService(":8011")
 }
 
