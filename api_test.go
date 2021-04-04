@@ -49,8 +49,10 @@ func TestApiHttp(t *testing.T) {
 	}, "/m")
 
 	GET(func() interface{} {
-		f, _ := os.Open("C:/Users/Administrator/api/README.MD")
-		return NewStream(f)
+		f, _ := os.Open("/Users/szb/Downloads/Docker-AppleSilicon-Preview7.dmg")
+		stream := NewStream(f)
+		stream.SetRateLimit(10000000)
+		return stream
 	}, "/download")
 
 	GET(func(header def.Header, reader multipart.Reader) {

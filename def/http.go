@@ -17,9 +17,8 @@ const (
 
 */
 type Header interface {
-	Add(key, value string)
-	Get(key string) string
-	Values(key string) []string
+	ReadHeader
+	WriteHeader
 }
 
 //used in retType
@@ -27,7 +26,20 @@ type ContentType interface {
 	Content() string
 }
 
+type ReadHeader interface {
+	Get(key string) string
+	Values(key string) []string
+}
+
+type WriteHeader interface {
+	Add(key, value string)
+}
+
 //used in retType
 type AppendHeader interface {
-	Append() map[string]string
+	Append(header ReadHeader) map[string]string
+}
+
+type HttpStatus interface {
+	Code() int
 }

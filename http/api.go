@@ -78,10 +78,16 @@ func WriteRetResponse(rw http.ResponseWriter, req *http.Request, adapter def.Ret
 
 	//if struct impl def.AppendHeader ,can def header
 	if v, b := adapter.(def.AppendHeader); b {
-		mHeader := v.Append()
+		mHeader := v.Append(&readHead{
+			req: req,
+		})
 		for k, v := range mHeader {
 			header.Add(k, v)
 		}
+	}
+
+	if v, b := adapter.(def.HttpStatus); b {
+		rw.WriteHeader(v.Code())
 	}
 
 	_, err := io.Copy(rw, adapter.Return())
