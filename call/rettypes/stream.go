@@ -30,7 +30,7 @@ func (s *Stream) Read(p []byte) (n int, err error) {
 		s.total += int64(t)
 		return t, e
 	} else {
-		s.io.Read(p)
+		_, _ = s.io.Read(p)
 		return int((s.end - s.start) - s.total), io.EOF
 	}
 
