@@ -23,7 +23,7 @@ type Header interface {
 
 //used in retType
 type ContentType interface {
-	Content() string
+	ContentType() string
 }
 
 type ReadHeader interface {
