@@ -122,9 +122,7 @@ func WriteResponse(rw http.ResponseWriter, req *http.Request, content *def.Conte
 	if content != nil {
 		header.Add("Content-Type", content.ContentType)
 		rw.WriteHeader(http.StatusOK)
-		if content.Bytes != nil {
-			rw.Write(content.Bytes)
-		}
+		rw.Write(content.Bytes)
 	}
 
 }
