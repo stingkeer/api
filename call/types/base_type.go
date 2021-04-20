@@ -10,14 +10,6 @@ import (
 
 type BaseType struct{}
 
-func getFuncInfo(name string) *def.MethodInfo {
-	if m, ok := def.MethodsPools[name]; ok {
-		return &m
-	}
-	logrus.Errorf("not find name [%s]", name)
-	return nil
-}
-
 func (b *BaseType) Mapper(p def.ParamWarp) reflect.Value {
 	dest := p.PTyp
 	value := p.PValue

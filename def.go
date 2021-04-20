@@ -22,13 +22,13 @@ func doMethod(start, end int, fns []*def.Entry) {
 		for _, arg := range med.Args {
 			args[arg.Name] = arg
 		}
-		def.MethodsPools[med.MethodName] = def.MethodInfo{
+		def.GetMethodPools().Set(med.MethodName, &def.MethodInfo{
 			Pkg:        "",
 			Receive:    "",
 			Method:     fns[i],
 			MethodName: med.MethodName,
 			Param:      args,
-		}
+		})
 		logrus.Infof("[%s] %s(%s) mapping url = %s", fn.Method, med.MethodName, printArgs(med.Args), fn.Url)
 	}
 }

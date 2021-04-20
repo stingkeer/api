@@ -5,7 +5,6 @@ import (
 	"gitee.com/fast_api/api/def"
 	"github.com/sirupsen/logrus"
 	"io"
-	"io/fs"
 	"net/http"
 	"os"
 	"path"
@@ -24,6 +23,7 @@ type Stream struct {
 	isRange     bool
 	rLimit      *Reader
 	contextType *string
+	fileSize    int64
 }
 
 //Read(p []byte) (n int, err error)
@@ -34,9 +34,9 @@ func (s *Stream) Read(p []byte) (n int, err error) {
 		s.readTotal += int64(t)
 		return t, e
 	} else {
-		_, e := s.rLimit.Read(p)
+		lRead, e := s.rLimit.Read(p)
 		if e != nil {
-			return int(iTotal - s.readTotal), e
+			return lRead, e
 		}
 		return int(iTotal - s.readTotal), io.EOF
 	}
@@ -44,6 +44,9 @@ func (s *Stream) Read(p []byte) (n int, err error) {
 }
 
 func (s *Stream) Return() io.Reader {
+	if s.end == 0 {
+		return s.rLimit
+	}
 	return s
 }
 
@@ -108,25 +111,31 @@ func (s *Stream) parseRange(hRange string) {
 }
 
 func (s *Stream) Append(header def.ReadHeader) map[string]string {
+
+	if seeker, sb := s.io.(io.Seeker); sb && s.fileSize == 0 {
+		size, err := seeker.Seek(0, io.SeekEnd)
+		if err == nil {
+			s.fileSize = size
+			if s.end == 0 {
+				s.end = s.fileSize - 1
+			}
+			seeker.Seek(0, io.SeekStart)
+		}
+	}
+
 	rge := header.Get("Range")
 	if rge != "" {
-		seeker, sb := s.io.(io.Seeker)
-		if file, b := s.io.(fs.File); b && sb {
+		if seeker, sb := s.io.(io.Seeker); sb {
 			s.parseRange(rge)
 			//HTTP/1.1 206 Partial Content
 			//Content-Range: bytes 0-1023/146515
 			//Content-Length: 1024
-			fstat, _ := file.Stat()
-			if s.end == 0 {
-				s.end = fstat.Size() - 1
-			}
-			logrus.Debug(s.start, s.end)
-			//2-0
-			if s.end-s.start > fstat.Size() {
+
+			if s.end-s.start > s.fileSize {
 				panic("more than size")
 			}
 			s.AddHeader("Content-Length", fmt.Sprintf("%d", s.end-s.start+1))
-			s.AddHeader("Content-Range", fmt.Sprintf("bytes %d-%d/%d", s.start, s.end, fstat.Size()))
+			s.AddHeader("Content-Range", fmt.Sprintf("bytes %d-%d/%d", s.start, s.end, s.fileSize))
 			if s.start > 0 {
 				seeker.Seek(s.start, io.SeekCurrent)
 			}
@@ -134,13 +143,14 @@ func (s *Stream) Append(header def.ReadHeader) map[string]string {
 			s.isRange = true
 			return s.heads
 		}
-	}
-	if f, b := s.io.(fs.File); b {
+	} else {
 		//Accept-Ranges: bytes
-		stat, _ := f.Stat()
 		s.AddHeader("Accept-Ranges", "bytes")
-		s.AddHeader("Content-Length", fmt.Sprintf("%d", stat.Size()))
+		if s.fileSize != 0 {
+			s.AddHeader("Content-Length", fmt.Sprintf("%d", s.fileSize))
+		}
 	}
+
 	if _, b := s.heads[def.CONTENT_DISPOSITION]; b {
 		return s.heads
 	}

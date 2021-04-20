@@ -88,8 +88,9 @@ func toPtr(obj interface{}) reflect.Value {
 }
 
 func (c *callerDefault) getFuncInfo(name string) *def.MethodInfo {
-	if m, ok := def.MethodsPools[name]; ok {
-		return &m
+	mi := def.GetMethodPools().Get(name)
+	if mi != nil {
+		return mi
 	}
 	logrus.Errorf("not find name [%s]", name)
 	return nil

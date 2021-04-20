@@ -4,12 +4,36 @@ import (
 	"gitee.com/aifuturewell/methods"
 	"net/http"
 	"reflect"
+	"sync"
 )
 
 //Fn [name]->
-type MetaMethods map[string]MethodInfo
 
-var MethodsPools MetaMethods
+type methodsPools struct {
+	kv sync.Map
+}
+
+var mMethodPool *methodsPools
+
+//Fn [name]->
+func GetMethodPools() *methodsPools {
+	if mMethodPool == nil {
+		mMethodPool = &methodsPools{}
+	}
+	return mMethodPool
+}
+
+func (m *methodsPools) Get(name string) *MethodInfo {
+	if v, b := m.kv.Load(name); b {
+		return v.(*MethodInfo)
+	} else {
+		return nil
+	}
+}
+
+func (m *methodsPools) Set(name string, methodInfo *MethodInfo) {
+	m.kv.Store(name, methodInfo)
+}
 
 type Param struct {
 	Order int    `json:"order"`
