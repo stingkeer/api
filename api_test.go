@@ -51,7 +51,6 @@ func TestApiHttp(t *testing.T) {
 		f, e := os.Open("d:/download/QmfWv8FfpKiCWsueKfXDLrgyqXZsEuGFJFBL7TfjNmxkAw")
 		fmt.Println(e)
 		stream := NewStream(f)
-		stream.SetContentType("video/mp4")
 		stream.SetRateLimit(500000)
 		return stream
 	}, "/download")

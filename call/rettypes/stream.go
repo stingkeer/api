@@ -67,11 +67,22 @@ func (s *Stream) SetRateLimit(bytesPerSec float64) {
 }
 
 func (s *Stream) ContentType() string {
-	if s.contextType == nil {
-		st := def.CONTENT_STREAM
-		s.contextType = &st
+	if s.contextType != nil {
+		return *s.contextType
 	}
-	return *s.contextType
+	if seeker, sb := s.io.(io.Seeker); sb {
+		if s.contextType == nil {
+			temp := make([]byte, 512)
+			if _, err := s.io.Read(temp); err != nil && err != io.EOF {
+				panic(err)
+			}
+			cTyp := http.DetectContentType(temp)
+			s.contextType = &cTyp
+			seeker.Seek(0, io.SeekStart)
+		}
+		return *s.contextType
+	}
+	return def.CONTENT_STREAM
 }
 
 func (s *Stream) SetContentType(conTyp string) {
@@ -111,8 +122,8 @@ func (s *Stream) parseRange(hRange string) {
 }
 
 func (s *Stream) Append(header def.ReadHeader) map[string]string {
-
 	if seeker, sb := s.io.(io.Seeker); sb && s.fileSize == 0 {
+
 		size, err := seeker.Seek(0, io.SeekEnd)
 		if err == nil {
 			s.fileSize = size
@@ -120,6 +131,9 @@ func (s *Stream) Append(header def.ReadHeader) map[string]string {
 				s.end = s.fileSize - 1
 			}
 			seeker.Seek(0, io.SeekStart)
+
+			//Accept-Ranges: bytes
+			s.AddHeader("Accept-Ranges", "bytes")
 		}
 	}
 
@@ -144,19 +158,11 @@ func (s *Stream) Append(header def.ReadHeader) map[string]string {
 			return s.heads
 		}
 	} else {
-		//Accept-Ranges: bytes
-		s.AddHeader("Accept-Ranges", "bytes")
 		if s.fileSize != 0 {
 			s.AddHeader("Content-Length", fmt.Sprintf("%d", s.fileSize))
 		}
 	}
-
-	if _, b := s.heads[def.CONTENT_DISPOSITION]; b {
-		return s.heads
-	}
-	if v, b := s.io.(*os.File); b && *s.contextType == def.CONTENT_STREAM {
-		s.AddHeader(def.CONTENT_DISPOSITION, fmt.Sprintf("attachment; filename=%s", path.Base(v.Name())))
-	}
+	s.setFileName()
 	return s.heads
 }
 
@@ -169,4 +175,13 @@ func (s *Stream) Code() int {
 
 func (s *Stream) AddHeader(k, v string) {
 	s.heads[k] = v
+}
+
+func (s *Stream) setFileName() {
+	if _, b := s.heads[def.CONTENT_DISPOSITION]; b {
+		return
+	}
+	if v, b := s.io.(*os.File); b && *s.contextType == def.CONTENT_STREAM {
+		s.AddHeader(def.CONTENT_DISPOSITION, fmt.Sprintf("attachment; filename=%s", path.Base(v.Name())))
+	}
 }
