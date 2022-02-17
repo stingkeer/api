@@ -28,14 +28,17 @@ func doMethod(start, end int, fns []*def.Entry) {
 			MethodName: med.MethodName,
 			Param:      args,
 		})
-		log.Infof("[%s] %s(%s) mapping url = %s", trimPrefix(fn.Method), med.MethodName, printArgs(med.Args), fn.Url)
+		log.Infof("[%s] %s(%s) mapping url = %s", fn.Method, trimPrefix(med.MethodName), printArgs(med.Args), fn.Url)
 	}
 }
 
 var _prefix string
 
 func trimPrefix(s string) string {
-	return strings.ReplaceAll(s, _prefix, "")
+	if s != "" {
+		return strings.ReplaceAll(s, _prefix, "")
+	}
+	return s
 }
 
 func SetLogTrimPrefix(prefix string) {
