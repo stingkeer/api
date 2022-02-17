@@ -2,8 +2,8 @@ package types
 
 import (
 	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/log"
 	"gitee.com/fast_api/api/utils"
-	"github.com/sirupsen/logrus"
 	"reflect"
 	"strconv"
 )
@@ -14,7 +14,7 @@ func getFuncInfo(name string) *def.MethodInfo {
 	if m, ok := def.MethodsPools[name]; ok {
 		return &m
 	}
-	logrus.Errorf("not find name [%s]", name)
+	log.Errorf("not find name [%s]", name)
 	return nil
 }
 
@@ -46,7 +46,7 @@ func (b *BaseType) Mapper(p def.ParamWarp) reflect.Value {
 		}
 		return reflect.ValueOf(s).Convert(dest)
 	default:
-		logrus.Errorf("not find type %s", dest)
+		log.Errorf("not find type %s", dest)
 
 	}
 	return reflect.ValueOf(nil)

@@ -1,5 +1,7 @@
 gitee.com/aifuturewell/methods v0.0.0-20201027053559-36f90c866f56 h1:uVuidemO34VaYAI6qTuwLbl3NFH9AwJuj8ed35FvsoY=
 gitee.com/aifuturewell/methods v0.0.0-20201027053559-36f90c866f56/go.mod h1:NkKSo+mHuRWYDp8mbSN/xgcJ6Vrn3ECZl8RvSb9Y8Ng=
+gitee.com/aifuturewell/methods v0.0.1 h1:TqJWC0MFP0cZoUFRm8rAX6sR+K4KJPnqdHdbdzYMbyA=
+gitee.com/aifuturewell/methods v0.0.1/go.mod h1:NkKSo+mHuRWYDp8mbSN/xgcJ6Vrn3ECZl8RvSb9Y8Ng=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

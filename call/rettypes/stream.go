@@ -3,7 +3,7 @@ package rettypes
 import (
 	"fmt"
 	"gitee.com/fast_api/api/def"
-	"github.com/sirupsen/logrus"
+	"gitee.com/fast_api/api/log"
 	"io"
 	"net/http"
 	"os"
@@ -67,7 +67,7 @@ func (s *Stream) Strings() string {
 
 func (s *Stream) Close() error {
 	if v, b := s.io.(io.Closer); b {
-		logrus.Trace("close file ")
+		log.Trace("close file ")
 		return v.Close()
 	}
 	return nil

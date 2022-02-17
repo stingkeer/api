@@ -2,7 +2,7 @@ package types
 
 import (
 	"gitee.com/fast_api/api/def"
-	"github.com/sirupsen/logrus"
+	"gitee.com/fast_api/api/log"
 	"mime/multipart"
 	"reflect"
 )
@@ -13,7 +13,7 @@ func (f FileType) Mapper(param def.ParamWarp) reflect.Value {
 	newT := reflect.New(param.PTyp)
 	reader, err := param.MultipartReader()
 	if err != nil {
-		logrus.Error(err)
+		log.Error(err)
 	}
 	newT.Elem().Set(reflect.ValueOf(*reader))
 	return newT.Elem()

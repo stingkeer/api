@@ -3,7 +3,7 @@ package http
 import (
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/intercept"
-	"github.com/sirupsen/logrus"
+	"gitee.com/fast_api/api/log"
 	"io"
 	"net/http"
 	"reflect"
@@ -24,17 +24,29 @@ func NewApiIntercept(match def.Match, caller def.Caller, serialize def.Serialize
 	}
 }
 
+func (api *ApiInter) NotFindPath(rw http.ResponseWriter, req *http.Request) {
+	con := api.serialize.Encode(map[string]string{
+		"path": req.URL.String(),
+		"msg":  "Not find Path",
+	})
+	header := rw.Header()
+	header.Add("Content-Type", con.ContentType)
+	rw.WriteHeader(http.StatusNotFound)
+	rw.Write(con.Bytes)
+}
+
 func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
-	logrus.Tracef("incoming req Method [%s] , Url [%s]", req.Method, req.URL.String())
+	log.Tracef("incoming req Method [%s] , Url [%s]", req.Method, req.URL.String())
 	entry := api.match.Match(req.URL)
 	req.Header.Del(def.HEAD_CONST)
 	if nil == entry {
-		logrus.Tracef("not match %s", req.URL)
+		log.Tracef("not match %s", req.URL)
+		api.NotFindPath(rw, req)
 		return false
 	}
 
 	if req.Method != entry.Method {
-		logrus.Warnf("not support Method %s", req.Method)
+		log.Warnf("not support Method %s", req.Method)
 		return false
 	}
 	if entry.Fn != nil {
@@ -92,7 +104,7 @@ func WriteRetResponse(rw http.ResponseWriter, req *http.Request, adapter def.Ret
 
 	_, err := io.Copy(rw, adapter.Return())
 	if err != nil {
-		logrus.Error(err)
+		log.Error(err)
 	}
 
 	if v, b := adapter.(io.Closer); b {

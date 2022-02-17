@@ -3,8 +3,7 @@ package api
 import (
 	"gitee.com/aifuturewell/methods"
 	"gitee.com/fast_api/api/def"
-
-	"github.com/sirupsen/logrus"
+	"gitee.com/fast_api/api/log"
 
 	"math"
 	"os"
@@ -29,7 +28,7 @@ func doMethod(start, end int, fns []*def.Entry) {
 			MethodName: med.MethodName,
 			Param:      args,
 		}
-		logrus.Infof("[%s] %s(%s) mapping url = %s", fn.Method, med.MethodName, printArgs(med.Args), fn.Url)
+		log.Infof("[%s] %s(%s) mapping url = %s", fn.Method, med.MethodName, printArgs(med.Args), fn.Url)
 	}
 }
 
@@ -77,12 +76,12 @@ func PackApiWithPath(exePath func() *string) {
 		SetExecPath(exePath())
 	}
 	fns := getFnCaches()
-	logrus.Debugf("api had caches %d", len(fns))
+	log.Debugf("api had caches %d", len(fns))
 	averageDo(runtime.NumCPU(), len(fns), func(start, end int, g *sync.WaitGroup) {
 		doMethod(start, end, fns)
 		g.Done()
 	})
-	logrus.Infof("init use %s", time.Since(start))
+	log.Infof("init use %s", time.Since(start))
 }
 
 func printArgs(args []methods.ArgsMeta) string {

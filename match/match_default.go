@@ -2,7 +2,7 @@ package match
 
 import (
 	"gitee.com/fast_api/api/def"
-	"github.com/sirupsen/logrus"
+	"gitee.com/fast_api/api/log"
 	"net/url"
 )
 
@@ -10,9 +10,8 @@ type MatchImpl struct {
 	store *store
 }
 
-/**
-if match return func
-*/
+// Match
+//if match return func
 func (m *MatchImpl) Match(url *url.URL) *def.Entry {
 	pv := make([]string, 10)
 	data, e := m.store.Get(url.Path, pv)
@@ -23,7 +22,7 @@ func (m *MatchImpl) Match(url *url.URL) *def.Entry {
 	for i := 0; i < len(e); i++ {
 		ent.Ids[e[i]] = pv[i]
 	}
-	logrus.Debugf("Url path = %s is matched", url.Path)
+	log.Debugf("Url path = %s is matched", url.Path)
 	return data.(*def.Entry)
 }
 

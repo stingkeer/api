@@ -1,8 +1,6 @@
 package api
 
 import (
-	"crypto/tls"
-	"crypto/x509"
 	"fmt"
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/server"
@@ -16,8 +14,8 @@ import (
 	"testing"
 )
 
-func hello1(kk string) interface{} {
-	return map[string]string{"name": kk}
+func hello1(kk def.StringReq) interface{} {
+	return map[string]string{"name": kk.String()}
 }
 
 func MulFile(read multipart.Reader) string {
@@ -70,6 +68,11 @@ func TestURL(t *testing.T) {
 	POST(MulFile, "/update")
 	StartService(":8080")
 	//reflect.ValueOf(a.show)
+}
+
+func TestPath(t *testing.T) {
+	GET(hello1, "/s/<kk>")
+	StartService(":8080")
 }
 
 type A struct {

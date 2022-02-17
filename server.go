@@ -4,8 +4,8 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	ihttp "gitee.com/fast_api/api/http"
+	"gitee.com/fast_api/api/log"
 	"gitee.com/fast_api/api/server"
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"sync"
@@ -14,15 +14,15 @@ import (
 func StartService(addr string) {
 	PackApi()
 	server.Invoke(func(ser *Service) {
-		logrus.Infof("listen addr %s", addr)
-		logrus.Error(http.ListenAndServe(addr, ser))
+		log.Infof("listen addr %s", addr)
+		log.Error(http.ListenAndServe(addr, ser))
 	})
 }
 
 func StartTLSService(addr string, caFile, certFile, keyFile string) {
 	PackApi()
 	server.Invoke(func(ser *Service) {
-		logrus.Infof("listen addr %s", addr)
+		log.Infof("listen addr %s", addr)
 		caCertPool := x509.NewCertPool()
 		caCert, err := ioutil.ReadFile(caFile)
 		if err != nil {
@@ -35,7 +35,7 @@ func StartTLSService(addr string, caFile, certFile, keyFile string) {
 				ClientCAs:  caCertPool,
 			},
 		}
-		logrus.Error(server.ListenAndServeTLS(certFile, keyFile))
+		log.Error(server.ListenAndServeTLS(certFile, keyFile))
 	})
 
 }

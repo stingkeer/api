@@ -14,7 +14,7 @@ type (
 	Int8Req   int8
 	Int16Req  int16
 	Int32Req  int32
-	Int64Req  int32
+	Int64Req  int64
 	StringReq string
 )
 

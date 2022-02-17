@@ -2,8 +2,8 @@ package call
 
 import (
 	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/log"
 	"gitee.com/fast_api/api/utils"
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -33,13 +33,13 @@ func RegisterTypeMapper(adapter def.Adapter) {
 	}
 }
 
-//request == call(def) => value
+// Call request == call(def) => value
 func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 	v := reflect.ValueOf(f.Fn)
 	name := runtime.FuncForPC(reflect.ValueOf(f.Fn).Pointer()).Name()
 	m := c.getFuncInfo(name)
 	if m == nil {
-		logrus.Error("not find method in exe")
+		log.Error("not find method in exe")
 		os.Exit(2)
 	}
 	params := req.URL.Query()
@@ -67,7 +67,7 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 			}
 			paramsV[p.Order] = newT.Elem()
 		} else { //default value
-			logrus.Tracef("not support %s set default value", pw.PTyp)
+			log.Tracef("not support %s set default value", pw.PTyp)
 			paramsV[p.Order] = utils.DefaultCallValue(pw.PTyp.Kind())
 		}
 	}
@@ -75,7 +75,7 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 	vs := v.Call(paramsV)
 
 	if len(vs) == 0 {
-		logrus.Warn("call method no return")
+		log.Warn("call method no return")
 		return reflect.ValueOf(nil)
 	}
 	return vs[0].Interface()
@@ -91,6 +91,6 @@ func (c *callerDefault) getFuncInfo(name string) *def.MethodInfo {
 	if m, ok := def.MethodsPools[name]; ok {
 		return &m
 	}
-	logrus.Errorf("not find name [%s]", name)
+	log.Errorf("not find name [%s]", name)
 	return nil
 }
