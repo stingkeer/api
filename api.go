@@ -20,16 +20,16 @@ var (
 	POST = httpM(stdhttp.MethodPost)
 	PUT  = httpM(stdhttp.MethodPut)
 
-	//error handler
+	// RegisterErrorHandler error handler
 	RegisterErrorHandler = http.RegisterErrorHandler
 
-	//http handler
+	// AddHttpHandle http handler
 	AddHttpHandle = http.AddHttpHandle
 
-	//type handler
+	// RegisterTypeMapper type handler
 	RegisterTypeMapper = call.RegisterTypeMapper
 
-	//register handler
+	// RegisterReturnHandler register handler
 	RegisterReturnHandler = http.RegisterReturnHandler
 
 	NewStream = rettypes.NewStream

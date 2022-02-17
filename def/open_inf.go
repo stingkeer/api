@@ -7,7 +7,7 @@ import (
 
 type Serialize interface {
 	Encode(interface{}) *Content
-	//interface{} is out
+	// Decode interface{} is out
 	Decode([]byte, interface{}) error
 }
 
@@ -17,6 +17,6 @@ type Match interface {
 }
 
 type Caller interface {
-	//request ==> object
+	// Call request ==> object
 	Call(f *Entry, req *http.Request) interface{}
 }

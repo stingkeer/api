@@ -15,7 +15,7 @@ type methodsPools struct {
 
 var mMethodPool *methodsPools
 
-//Fn [name]->
+// GetMethodPools Fn [name]->
 func GetMethodPools() *methodsPools {
 	if mMethodPool == nil {
 		mMethodPool = &methodsPools{}

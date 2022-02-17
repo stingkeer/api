@@ -27,7 +27,7 @@ func doMethod(start, end int, fns []*def.Entry) {
 			Method:     fns[i],
 			MethodName: med.MethodName,
 			Param:      args,
-		}
+		})
 		log.Infof("[%s] %s(%s) mapping url = %s", fn.Method, med.MethodName, printArgs(med.Args), fn.Url)
 	}
 }
