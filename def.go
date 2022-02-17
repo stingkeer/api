@@ -28,8 +28,18 @@ func doMethod(start, end int, fns []*def.Entry) {
 			MethodName: med.MethodName,
 			Param:      args,
 		})
-		log.Infof("[%s] %s(%s) mapping url = %s", fn.Method, med.MethodName, printArgs(med.Args), fn.Url)
+		log.Infof("[%s] %s(%s) mapping url = %s", trimPrefix(fn.Method), med.MethodName, printArgs(med.Args), fn.Url)
 	}
+}
+
+var _prefix string
+
+func trimPrefix(s string) string {
+	return strings.ReplaceAll(s, _prefix, "")
+}
+
+func SetLogTrimPrefix(prefix string) {
+	_prefix = prefix
 }
 
 func averageDo(cpu, number int, do func(start, end int, g *sync.WaitGroup)) {
