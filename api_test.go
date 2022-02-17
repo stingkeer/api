@@ -10,7 +10,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"reflect"
 	"testing"
 )
 
@@ -49,9 +48,10 @@ func TestApiHttp(t *testing.T) {
 	}, "/m")
 
 	GET(func() interface{} {
-		f, _ := os.Open("/Users/szb/Downloads/Docker-AppleSilicon-Preview7.dmg")
+		f, e := os.Open("d:/download/QmfWv8FfpKiCWsueKfXDLrgyqXZsEuGFJFBL7TfjNmxkAw")
+		fmt.Println(e)
 		stream := NewStream(f)
-		stream.SetRateLimit(10000000)
+		stream.SetRateLimit(500000)
 		return stream
 	}, "/download")
 
@@ -94,6 +94,9 @@ func TestFile(t *testing.T) {
 }
 
 func TestType(t *testing.T) {
-	type kk int
-	fmt.Println(reflect.TypeOf((*kk)(nil)).Elem().Kind())
+	//bytes 64448694-86052627/86052628
+	//21603934
+	//13f63f85d5b618b2c03121c0a8d38758
+	//13f63f85d5b618b2c03121c0a8d38758
+	//2-9
 }

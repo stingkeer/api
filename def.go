@@ -21,7 +21,7 @@ func doMethod(start, end int, fns []*def.Entry) {
 		for _, arg := range med.Args {
 			args[arg.Name] = arg
 		}
-		def.MethodsPools[med.MethodName] = def.MethodInfo{
+		def.GetMethodPools().Set(med.MethodName, &def.MethodInfo{
 			Pkg:        "",
 			Receive:    "",
 			Method:     fns[i],

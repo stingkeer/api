@@ -67,15 +67,9 @@ func init() {
 		return call.NewCaller(resultConvert)
 	})
 
-	server.Provide(func() def.MetaMethods {
-		return def.MethodsPools
-	})
-
 	server.Provide(func() def.Match {
 		return match.NewMatchImpl()
 	})
-
-	def.MethodsPools = make(def.MetaMethods)
 
 	server.Invoke(func(match def.Match, caller def.Caller, serialize def.Serialize) {
 		AddHttpHandle(http.NewApiIntercept(match, caller, serialize))

@@ -86,7 +86,7 @@ func doWithRet(value interface{}, rw http.ResponseWriter, req *http.Request) boo
 func WriteRetResponse(rw http.ResponseWriter, req *http.Request, adapter def.RetAdapter) {
 	appendSysHeader(rw, req)
 	header := rw.Header()
-	header.Add("Content-Type", adapter.Content())
+	header.Add("Content-Type", adapter.ContentType())
 
 	//if struct impl def.AppendHeader ,can def header
 	if v, b := adapter.(def.AppendHeader); b {
