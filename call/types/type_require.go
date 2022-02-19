@@ -19,6 +19,7 @@ func (b *TypeRequire) Mapper(p def.ParamWarp) reflect.Value {
 
 func (b *TypeRequire) Register() []reflect.Type {
 	return []reflect.Type{
+		reflect.TypeOf((*def.IntReq)(nil)).Elem(),
 		reflect.TypeOf((*def.Int8Req)(nil)).Elem(),
 		reflect.TypeOf((*def.Int16Req)(nil)).Elem(),
 		reflect.TypeOf((*def.Int32Req)(nil)).Elem(),

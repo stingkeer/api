@@ -34,7 +34,7 @@ func (i Int8Req) Int32() int32 {
 	return int32(i)
 }
 
-func (i Int8Req) Int64() int64 {
+func (i Int64Req) Int64() int64 {
 	return int64(i)
 }
 
