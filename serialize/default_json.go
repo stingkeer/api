@@ -24,7 +24,10 @@ func (c *JsonConvertImpl) Encode(f interface{}) *def.Content {
 		ctxt.Bytes = []byte(f.(string))
 		return &ctxt
 	default:
-		bytes, _ := json.Marshal(f)
+		bytes, e := json.Marshal(f)
+		if e != nil {
+			panic(e)
+		}
 		ctxt.Bytes = bytes
 		return &ctxt
 	}

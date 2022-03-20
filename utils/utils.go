@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// SplitFuncName
 /**
  * return (struct,func)
  */
@@ -39,6 +40,7 @@ func Md5String(s string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
+// DefaultCallValue
 //other param set default value
 func DefaultCallValue(kind reflect.Kind) reflect.Value {
 	switch kind {
