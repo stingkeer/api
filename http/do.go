@@ -45,7 +45,10 @@ func AddHttpHandle(f intercept.HttpIntercept) {
 }
 
 func WriteError(err interface{}, rw http.ResponseWriter) {
-	bytes, _ := json.Marshal(err)
+	bytes, e := json.Marshal(err)
+	if e != nil {
+		panic(e)
+	}
 	rw.Header().Add("Content-Type", def.Content_JSON)
 	rw.WriteHeader(http.StatusInternalServerError)
 	rw.Write(bytes)

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"crypto/tls"
 	"fmt"
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/server"
@@ -99,4 +100,10 @@ func TestType(t *testing.T) {
 	//13f63f85d5b618b2c03121c0a8d38758
 	//13f63f85d5b618b2c03121c0a8d38758
 	//2-9
+}
+
+func TestDail(t *testing.T) {
+	c, err := tls.Dial("tcp", "www.baidu.com:https", nil)
+	fmt.Println(c, err, c.VerifyHostname("www.baidu.com"))
+
 }

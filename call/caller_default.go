@@ -60,10 +60,13 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 			paramsV[p.Order] = t.Mapper(pw)
 		} else if pw.PTyp.Kind() == reflect.Struct && req.Method == http.MethodPost {
 			newT := reflect.New(pw.PTyp)
-			bytes, _ := ioutil.ReadAll(req.Body)
-			err := c.serialize.Decode(bytes, newT.Interface())
+			bytes, err := ioutil.ReadAll(req.Body)
 			if err != nil {
 				panic(err)
+			}
+			err1 := c.serialize.Decode(bytes, newT.Interface())
+			if err1 != nil {
+				panic(err1)
 			}
 			paramsV[p.Order] = newT.Elem()
 		} else { //default value
