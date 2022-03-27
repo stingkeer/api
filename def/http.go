@@ -7,7 +7,7 @@ const (
 	CONTENT_DISPOSITION = "Content-Disposition"
 )
 
-//used in param
+// Header used in param
 //eg.
 /**
 

@@ -24,6 +24,7 @@ type Stream struct {
 	rLimit      *Reader
 	contextType *string
 	fileSize    int64
+	name        *string
 }
 
 //Read(p []byte) (n int, err error)
@@ -162,7 +163,7 @@ func (s *Stream) Append(header def.ReadHeader) map[string]string {
 			s.AddHeader("Content-Length", fmt.Sprintf("%d", s.fileSize))
 		}
 	}
-	s.setFileName()
+	s.reSetFileName()
 	return s.heads
 }
 
@@ -177,8 +178,16 @@ func (s *Stream) AddHeader(k, v string) {
 	s.heads[k] = v
 }
 
-func (s *Stream) setFileName() {
+func (s *Stream) SetName(name string) {
+	s.name = &name
+}
+
+func (s *Stream) reSetFileName() {
 	if _, b := s.heads[def.CONTENT_DISPOSITION]; b {
+		return
+	}
+	if s.name != nil {
+		s.AddHeader(def.CONTENT_DISPOSITION, fmt.Sprintf("attachment; filename=%s", *s.name))
 		return
 	}
 	if v, b := s.io.(*os.File); b && *s.contextType == def.CONTENT_STREAM {
