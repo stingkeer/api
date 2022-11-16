@@ -48,6 +48,10 @@ func TestApiHttp(t *testing.T) {
 		fmt.Println(a, hello)
 	}, "/m")
 
+	GET(func(req *http.Request, resp http.Response) {
+
+	}, "/http")
+
 	GET(func() interface{} {
 		f, e := os.Open("d:/download/QmfWv8FfpKiCWsueKfXDLrgyqXZsEuGFJFBL7TfjNmxkAw")
 		fmt.Println(e)

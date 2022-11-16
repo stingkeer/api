@@ -1,48 +1,32 @@
 package api
 
 import (
-	"gitee.com/aifuturewell/methods"
+	"fmt"
 	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/dwarf"
 	"gitee.com/fast_api/api/log"
 
 	"math"
 	"os"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
 )
 
-func doMethod(start, end int, fns []*def.Entry) {
-	for i := start; i < end; i++ {
-		fn := fns[i]
-		med := methods.GetHelper().LookFun(fn.Fn)
-		var args = make(map[string]methods.ArgsMeta)
-		for _, arg := range med.Args {
-			args[arg.Name] = arg
-		}
-		def.GetMethodPools().Set(med.MethodName, &def.MethodInfo{
-			Pkg:        "",
-			Receive:    "",
-			Method:     fns[i],
-			MethodName: med.MethodName,
-			Param:      args,
-		})
-		log.Infof("[%s] %s(%s) mapping url = %s", fn.Method, trimPrefix(med.MethodName), printArgs(med.Args), fn.Url)
-	}
-}
-
-var _prefix string
+var (
+	prefix string
+	maker  *dwarf.DwarfMaker
+)
 
 func trimPrefix(s string) string {
 	if s != "" {
-		return strings.ReplaceAll(s, _prefix, "")
+		return strings.ReplaceAll(s, prefix, "")
 	}
 	return s
 }
 
-func SetLogTrimPrefix(prefix string) {
-	_prefix = prefix
+func SetLogTrimPrefix(prefixM string) {
+	prefix = prefixM
 }
 
 func averageDo(cpu, number int, do func(start, end int, g *sync.WaitGroup)) {
@@ -71,13 +55,13 @@ func PackApi() {
 }
 
 func SetExecPath(path *string) {
-	if path == nil {
-		s, e := os.Executable()
-		if e == nil {
-			methods.Init(s)
-		}
+	if maker == nil {
+		maker = dwarf.NewDwarfMaker()
+	}
+	if dll, e := os.Executable(); e != nil && path == nil {
+		maker.Init(&dll)
 	} else {
-		methods.Init(*path)
+		maker.Init(path)
 	}
 }
 
@@ -90,14 +74,28 @@ func PackApiWithPath(exePath func() *string) {
 	}
 	fns := getFnCaches()
 	log.Debugf("api had caches %d", len(fns))
-	averageDo(runtime.NumCPU(), len(fns), func(start, end int, g *sync.WaitGroup) {
-		doMethod(start, end, fns)
-		g.Done()
-	})
+	for i, fn := range fns {
+		findM := maker.LookFun(fn.Fn)
+		if findM == nil {
+			panic(fmt.Sprintf("not find %s in drawf", fn.Fn))
+		}
+		var args = make(map[string]dwarf.ArgsMeta)
+		for _, arg := range findM.Args {
+			args[arg.Name] = arg
+		}
+		def.GetMethodPools().Set(findM.MethodName, &def.MethodInfo{
+			Pkg:        "",
+			Receive:    "",
+			Method:     fns[i],
+			MethodName: findM.MethodName,
+			Param:      args,
+		})
+		log.Infof("[%s] %s(%s) mapping url = %s", fn.Method, trimPrefix(findM.MethodName), printArgs(findM.Args), fn.Url)
+	}
 	log.Infof("init use %s", time.Since(start))
 }
 
-func printArgs(args []methods.ArgsMeta) string {
+func printArgs(args []dwarf.ArgsMeta) string {
 	var s strings.Builder
 	l := len(args) - 1
 	for i, arg := range args {

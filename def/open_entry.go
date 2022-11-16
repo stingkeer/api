@@ -1,7 +1,7 @@
 package def
 
 import (
-	"gitee.com/aifuturewell/methods"
+	"gitee.com/fast_api/api/dwarf"
 	"net/http"
 	"reflect"
 	"sync"
@@ -41,11 +41,11 @@ type Param struct {
 }
 
 type MethodInfo struct {
-	Pkg        string                      `json:"pkg"`
-	Receive    string                      `json:"receive"`
-	Method     interface{}                 `json:"-"`
-	MethodName string                      `json:"method_name"`
-	Param      map[string]methods.ArgsMeta `json:"param"`
+	Pkg        string                    `json:"pkg"`
+	Receive    string                    `json:"receive"`
+	Method     interface{}               `json:"-"`
+	MethodName string                    `json:"method_name"`
+	Param      map[string]dwarf.ArgsMeta `json:"param"`
 }
 
 type Content struct {
