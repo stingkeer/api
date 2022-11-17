@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	ihttp "gitee.com/fast_api/api/http"
 	"gitee.com/fast_api/api/log"
-	"gitee.com/fast_api/api/server"
+	"gitee.com/fast_api/api/mg"
 	"io/ioutil"
 	"net/http"
 	"sync"
@@ -13,7 +13,7 @@ import (
 
 func StartService(addr string) {
 	PackApi()
-	server.Invoke(func(ser *Service) {
+	mg.Invoke(func(ser *Service) {
 		log.Infof("listen addr %s", addr)
 		log.Error(http.ListenAndServe(addr, ser))
 	})
@@ -21,7 +21,7 @@ func StartService(addr string) {
 
 func StartTLSService(addr string, caFile, certFile, keyFile string) {
 	PackApi()
-	server.Invoke(func(ser *Service) {
+	mg.Invoke(func(ser *Service) {
 		log.Infof("listen addr %s", addr)
 		caCertPool := x509.NewCertPool()
 		caCert, err := ioutil.ReadFile(caFile)
@@ -49,7 +49,7 @@ func (ad *Service) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 }
 
 func init() {
-	server.Provide(func() *Service {
+	mg.Provide(func() *Service {
 		a = &Service{}
 		return a
 	})

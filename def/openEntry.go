@@ -2,6 +2,7 @@ package def
 
 import (
 	"gitee.com/fast_api/api/dwarf"
+	"gitee.com/fast_api/api/mg"
 	"net/http"
 	"reflect"
 	"sync"
@@ -9,21 +10,17 @@ import (
 
 //Fn [name]->
 
-type methodsPools struct {
+type MethodsPools struct {
 	kv sync.Map
 }
 
-var mMethodPool *methodsPools
-
-// GetMethodPools Fn [name]->
-func GetMethodPools() *methodsPools {
-	if mMethodPool == nil {
-		mMethodPool = &methodsPools{}
-	}
-	return mMethodPool
+func init() {
+	mg.Provide(func() *MethodsPools {
+		return &MethodsPools{}
+	})
 }
 
-func (m *methodsPools) Get(name string) *MethodInfo {
+func (m *MethodsPools) Get(name string) *MethodInfo {
 	if v, b := m.kv.Load(name); b {
 		return v.(*MethodInfo)
 	} else {
@@ -31,7 +28,7 @@ func (m *methodsPools) Get(name string) *MethodInfo {
 	}
 }
 
-func (m *methodsPools) Set(name string, methodInfo *MethodInfo) {
+func (m *MethodsPools) Set(name string, methodInfo *MethodInfo) {
 	m.kv.Store(name, methodInfo)
 }
 

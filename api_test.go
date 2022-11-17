@@ -4,14 +4,16 @@ import (
 	"crypto/tls"
 	"fmt"
 	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/server"
+	"gitee.com/fast_api/api/mg"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"math/big"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"sync"
 	"testing"
+	"time"
 )
 
 func hello1(kk def.StringReq) interface{} {
@@ -72,7 +74,6 @@ func TestURL(t *testing.T) {
 	GET(hello1, "/s/<kk>")
 	POST(MulFile, "/update")
 	StartService(":8080")
-	//reflect.ValueOf(a.show)
 }
 
 func TestPath(t *testing.T) {
@@ -91,7 +92,7 @@ func (A) Decode([]byte, interface{}) error {
 }
 
 func TestFile(t *testing.T) {
-	server.Provide(func() def.Serialize {
+	mg.Provide(func() def.Serialize {
 		return &A{}
 	})
 	POST(MulFile, "/update")
@@ -109,5 +110,14 @@ func TestType(t *testing.T) {
 func TestDail(t *testing.T) {
 	c, err := tls.Dial("tcp", "www.baidu.com:https", nil)
 	fmt.Println(c, err, c.VerifyHostname("www.baidu.com"))
+}
 
+func TestApiAfter(t *testing.T) {
+
+	var g sync.WaitGroup
+	g.Add(1)
+	go StartService(":8080")
+	time.Sleep(time.Second * 10)
+	GET(hello1, "/s")
+	g.Wait()
 }

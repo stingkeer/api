@@ -10,7 +10,6 @@ import (
 	"os"
 	"reflect"
 	"runtime"
-	"strings"
 	"time"
 )
 
@@ -85,15 +84,11 @@ func (h *DwarfMaker) Init(exe *string) {
 	tempName := ""
 	for r, _ := h.r.Next(); r != nil; r, _ = h.r.Next() {
 		if rName := r.Val(dwarf.AttrName); r.Tag == dwarf.TagSubprogram && rName != nil {
-			//sym := gosym.Sym{
-			//	Name: rName.(string),
-			//}
 			tempName = rName.(string)
-			h.debug[tempName] = Params{}
-			if strings.HasPrefix(tempName, "gitee.com/fast_api/api") {
-				fmt.Println(tempName)
+			if isRuntimePackage(tempName) {
+				continue
 			}
-
+			h.debug[tempName] = Params{}
 		}
 		if r.Tag != dwarf.TagFormalParameter {
 			continue
@@ -104,9 +99,6 @@ func (h *DwarfMaker) Init(exe *string) {
 		n := r.Val(dwarf.AttrName)
 		if n == nil {
 			continue
-		}
-		if strings.HasPrefix(tempName, "gitee.com/fast_api/api") {
-			fmt.Println(tempName, r.Val(dwarf.AttrVarParam), r.Val(dwarf.AttrDeclLine), n)
 		}
 		if _, b := h.debug[tempName]; b {
 			h.debug[tempName] = append(h.debug[tempName], n.(string))
