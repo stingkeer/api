@@ -3,10 +3,12 @@ package dwarf
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 )
 
 type D struct {
+	_ string
 }
 
 var exeHelper *DwarfMaker
@@ -29,6 +31,7 @@ func Add(int2 int, s string) {
 }
 
 func TestError(t *testing.T) {
+	Init()
 	dd := &D{}
 	kk := exeHelper.LookFun(dd.Show)
 	fmt.Println(kk)
@@ -38,4 +41,12 @@ func TestFunBase(t *testing.T) {
 	Init()
 	pp := exeHelper.LookFun(Add)
 	fmt.Println(pp)
+}
+
+func TestRegex(t *testing.T) {
+	regexp.MustCompile("$gitee.com/fast_api/.+$")
+}
+
+func TestGoSym(t *testing.T) {
+	//gosym.Sym{Name: "gitee.com/fast_api/api/dwarf.(*D).Show-fm"}.Type
 }

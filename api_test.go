@@ -11,9 +11,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"sync"
 	"testing"
-	"time"
 )
 
 func hello1(kk def.StringReq) interface{} {
@@ -113,11 +111,6 @@ func TestDail(t *testing.T) {
 }
 
 func TestApiAfter(t *testing.T) {
-
-	var g sync.WaitGroup
-	g.Add(1)
 	go StartService(":8080")
-	time.Sleep(time.Second * 10)
 	GET(hello1, "/s")
-	g.Wait()
 }

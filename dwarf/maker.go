@@ -19,16 +19,29 @@ func checkError(err error) {
 	}
 }
 
-type Params []string
+type (
+	Params     []string
+	FilterMode func(pkg string) bool
+)
+
+var (
+	RuntimeExclude = isRuntimePackage
+	SelfInclude    = isInclude
+)
 
 type DwarfMaker struct {
 	openData func() *dwarf.Reader
 	r        *dwarf.Reader
 	debug    map[string]Params
+	usedMode FilterMode
+}
+
+func NewDwarfMakerWithMode(mode FilterMode) *DwarfMaker {
+	return &DwarfMaker{debug: make(map[string]Params, 1000), usedMode: mode}
 }
 
 func NewDwarfMaker() *DwarfMaker {
-	return &DwarfMaker{debug: make(map[string]Params, 1000)}
+	return NewDwarfMakerWithMode(SelfInclude)
 }
 
 func (h *DwarfMaker) load(exe *string) {
@@ -85,7 +98,7 @@ func (h *DwarfMaker) Init(exe *string) {
 	for r, _ := h.r.Next(); r != nil; r, _ = h.r.Next() {
 		if rName := r.Val(dwarf.AttrName); r.Tag == dwarf.TagSubprogram && rName != nil {
 			tempName = rName.(string)
-			if isRuntimePackage(tempName) {
+			if !h.usedMode(tempName) {
 				continue
 			}
 			h.debug[tempName] = Params{}
@@ -103,7 +116,6 @@ func (h *DwarfMaker) Init(exe *string) {
 		if _, b := h.debug[tempName]; b {
 			h.debug[tempName] = append(h.debug[tempName], n.(string))
 		}
-
 	}
 	h.r = nil
 	log.Printf("DwarfMaker init use %s", time.Since(now))
@@ -129,9 +141,7 @@ func (h *DwarfMaker) LookFun(inf interface{}) *MethodMeta {
 		return &MethodMeta{
 			MethodName: fName,
 			Args:       args,
-			Ret:        nil,
 		}
 	}
 	return nil
-
 }

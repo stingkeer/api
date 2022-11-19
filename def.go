@@ -52,25 +52,26 @@ func PackApiWithPath(exePath func() *string) {
 	} else {
 		SetExecPath(exePath())
 	}
-	fns := getFnCaches()
-	log.Debugf("api had caches %d", len(fns))
+	log.Debugf("api had caches %d", initFnCache.Len())
 	mg.Invoke(func(pool *def.MethodsPools) {
-		for i, fn := range fns {
-			findM := maker.LookFun(fn.Fn)
+		initFnCache.Range(func(index int, en *def.Entry) {
+			findM := maker.LookFun(en.Fn)
 			if findM == nil {
-				panic(fmt.Sprintf("not find %s in drawf", fn.Fn))
+				panic(fmt.Sprintf("not find %s in drawf", en.Fn))
 			}
 			var args = make(map[string]dwarf.ArgsMeta)
 			for _, arg := range findM.Args {
 				args[arg.Name] = arg
 			}
 			pool.Set(findM.MethodName, &def.MethodInfo{
-				Method:     fns[i],
+				Method:     en,
 				MethodName: findM.MethodName,
 				Param:      args,
 			})
-			log.Infof("[%s] %s(%s) mapping url = %s", fn.Method, trimPrefix(findM.MethodName), printArgs(findM.Args), fn.Url)
-		}
+			initFnCache.SetDone()
+			log.Infof("[%s] %s(%s) mapping url = %s", en.Method, trimPrefix(findM.MethodName), printArgs(findM.Args), en.Url)
+		})
+
 	})
 
 	log.Infof("init use %s", time.Since(start))

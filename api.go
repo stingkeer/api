@@ -4,19 +4,26 @@ import (
 	"gitee.com/fast_api/api/call"
 	"gitee.com/fast_api/api/call/rettypes"
 	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/dwarf"
 	"gitee.com/fast_api/api/http"
 	"gitee.com/fast_api/api/match"
 	"gitee.com/fast_api/api/mg"
 	"gitee.com/fast_api/api/serialize"
 	stdhttp "net/http"
-	"reflect"
-	"runtime"
 )
 
 type (
 	httpMethod func(f interface{}, url string)
 )
+
+const eg = `
+please use api.GET or api.POST in init() method !
+eg.
+func init() {
+	api.GET(func(username string) {
+		fmt.Println(username)
+	},"send")
+}
+`
 
 var (
 	GET  = httpM(stdhttp.MethodGet)
@@ -38,43 +45,22 @@ var (
 	NewStream = rettypes.NewStream
 )
 
-var fnCaches []*def.Entry
-
 func httpM(method string) httpMethod {
+	if initFnCache.Init() {
+		panic(eg)
+	}
 	return func(f interface{}, url string) {
-		e := &def.Entry{
+		entry := &def.Entry{
 			Url:    url,
 			Method: method,
 			Fn:     f,
 			Ids:    make(map[string]string),
 		}
-		fnCaches = append(fnCaches, e)
+		initFnCache.Add(entry)
 		mg.Invoke(func(match def.Match) {
-			match.Add(url, e)
-		})
-		mg.Invoke(func(pool *def.MethodsPools) {
-			v := reflect.ValueOf(f)
-			fName := runtime.FuncForPC(v.Pointer()).Name()
-			if pool.Get(fName) == nil {
-				mg.Invoke(func(dwarfMaker *dwarf.DwarfMaker) {
-					findName := dwarfMaker.LookFun(f)
-					var args = make(map[string]dwarf.ArgsMeta)
-					for _, arg := range findName.Args {
-						args[arg.Name] = arg
-					}
-					pool.Set(findName.MethodName, &def.MethodInfo{
-						Method:     f,
-						MethodName: findName.MethodName,
-						Param:      args,
-					})
-				})
-			}
+			match.Add(url, entry)
 		})
 	}
-}
-
-func getFnCaches() []*def.Entry {
-	return fnCaches
 }
 
 func init() {
