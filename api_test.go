@@ -6,7 +6,7 @@ import (
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/mg"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
+	"io"
 	"math/big"
 	"mime/multipart"
 	"net/http"
@@ -21,7 +21,7 @@ func hello1(kk def.StringReq) interface{} {
 func MulFile(read multipart.Reader) string {
 	par, _ := read.NextPart()
 	fmt.Println(par.FileName(), par.FormName())
-	b, _ := ioutil.ReadAll(par)
+	b, _ := io.ReadAll(par)
 	fmt.Println(string(b))
 	return string(b)
 }
@@ -64,19 +64,21 @@ func TestApiHttp(t *testing.T) {
 		fmt.Println(header, reader)
 	}, "/file")
 
-	StartService(":8011")
+	StartService(nil)
 }
 
 func TestURL(t *testing.T) {
 	GET(hello1, "/s")
 	GET(hello1, "/s/<kk>")
 	POST(MulFile, "/update")
-	StartService(":8080")
+	StartService(nil)
 }
 
 func TestPath(t *testing.T) {
 	GET(hello1, "/s/<kk>")
-	StartService(":8080")
+	StartService(func(conf *Config) *Config {
+		return conf
+	})
 }
 
 type A struct {
@@ -94,7 +96,7 @@ func TestFile(t *testing.T) {
 		return &A{}
 	})
 	POST(MulFile, "/update")
-	StartService(":8080")
+	StartService(nil)
 }
 
 func TestType(t *testing.T) {
@@ -111,6 +113,6 @@ func TestDail(t *testing.T) {
 }
 
 func TestApiAfter(t *testing.T) {
-	go StartService(":8080")
+	go StartService(nil)
 	GET(hello1, "/s")
 }

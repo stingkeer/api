@@ -21,7 +21,7 @@ type Header interface {
 	WriteHeader
 }
 
-//used in retType
+// ContentType used in retType
 type ContentType interface {
 	ContentType() string
 }
@@ -35,7 +35,7 @@ type WriteHeader interface {
 	Add(key, value string)
 }
 
-//used in retType
+// AppendHeader used in retType
 type AppendHeader interface {
 	Append(header ReadHeader) map[string]string
 }

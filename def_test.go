@@ -7,10 +7,6 @@ import (
 	"testing"
 )
 
-func TestDef(t *testing.T) {
-	PackApi()
-}
-
 func aa() {
 
 }

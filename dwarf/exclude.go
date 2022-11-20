@@ -43,14 +43,6 @@ var exclude = map[string]interface{}{
 	"crypto":   nil,
 }
 
-func AddExclude(pkg string) bool {
-	if _, b := exclude[pkg]; b {
-		return false
-	}
-	exclude[pkg] = nil
-	return true
-}
-
 func isRuntimePackage(pkg string) bool {
 	if strings.HasPrefix(pkg, "type..") {
 		return true

@@ -5,6 +5,7 @@ import (
 	"debug/elf"
 	"debug/macho"
 	"debug/pe"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -20,13 +21,26 @@ func checkError(err error) {
 }
 
 type (
+	Mode       int
 	Params     []string
-	FilterMode func(pkg string) bool
+	FilterMode struct {
+		mode Mode
+		fn   func(pkg string) bool
+	}
+)
+
+func (f *FilterMode) Mode() Mode {
+	return f.mode
+}
+
+const (
+	RuntimePackageMode Mode = 1
+	IncludeMode        Mode = 2
 )
 
 var (
-	RuntimeExclude = isRuntimePackage
-	SelfInclude    = isInclude
+	RuntimeExclude = FilterMode{fn: isRuntimePackage, mode: RuntimePackageMode}
+	SelfInclude    = FilterMode{fn: isInclude, mode: IncludeMode}
 )
 
 type DwarfMaker struct {
@@ -36,12 +50,29 @@ type DwarfMaker struct {
 	usedMode FilterMode
 }
 
+func (h *DwarfMaker) UsedMode() FilterMode {
+	return h.usedMode
+}
+
 func NewDwarfMakerWithMode(mode FilterMode) *DwarfMaker {
 	return &DwarfMaker{debug: make(map[string]Params, 1000), usedMode: mode}
 }
 
 func NewDwarfMaker() *DwarfMaker {
 	return NewDwarfMakerWithMode(SelfInclude)
+}
+
+func (h *DwarfMaker) AddExclude(pkg string) bool {
+	if _, b := exclude[pkg]; b {
+		return false
+	}
+	exclude[pkg] = nil
+	return true
+}
+
+func (h *DwarfMaker) AddIncludeRegex(pkg string) bool {
+	includeRegex = append(includeRegex, pkg)
+	return true
 }
 
 func (h *DwarfMaker) load(exe *string) {
@@ -98,7 +129,7 @@ func (h *DwarfMaker) Init(exe *string) {
 	for r, _ := h.r.Next(); r != nil; r, _ = h.r.Next() {
 		if rName := r.Val(dwarf.AttrName); r.Tag == dwarf.TagSubprogram && rName != nil {
 			tempName = rName.(string)
-			if !h.usedMode(tempName) {
+			if !h.usedMode.fn(tempName) {
 				continue
 			}
 			h.debug[tempName] = Params{}
@@ -121,11 +152,11 @@ func (h *DwarfMaker) Init(exe *string) {
 	log.Printf("DwarfMaker init use %s", time.Since(now))
 }
 
-func (h *DwarfMaker) LookFun(inf interface{}) *MethodMeta {
+func (h *DwarfMaker) LookFun(inf interface{}) (*MethodMeta, error) {
 	v := reflect.ValueOf(inf)
 	fName := runtime.FuncForPC(v.Pointer()).Name()
 	if v.Kind() != reflect.Func {
-		return nil
+		return nil, errors.New("no func type")
 	}
 	tp := v.Type()
 	//argsNum := tp.NumIn()
@@ -141,7 +172,11 @@ func (h *DwarfMaker) LookFun(inf interface{}) *MethodMeta {
 		return &MethodMeta{
 			MethodName: fName,
 			Args:       args,
-		}
+		}, nil
 	}
-	return nil
+	return nil, fmt.Errorf("not find %s in drawf len %d", fName, len(h.debug))
+}
+
+func (h *DwarfMaker) SetFilterMode(mode FilterMode) {
+	h.usedMode = mode
 }
