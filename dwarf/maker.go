@@ -98,7 +98,7 @@ func (h *DwarfMaker) load(exe *string) {
 			checkError(e)
 			return data.Reader()
 		}
-	case "linux":
+	case "linux", "android":
 		h.openData = func() *dwarf.Reader {
 			f, e := elf.Open(path)
 			checkError(e)
@@ -117,7 +117,8 @@ func (h *DwarfMaker) load(exe *string) {
 			checkError(e)
 			return data.Reader()
 		}
-
+	default:
+		panic(fmt.Sprintf("not support %s", runtime.GOOS))
 	}
 }
 

@@ -1,6 +1,7 @@
 package dwarf
 
 import (
+	"debug/gosym"
 	"fmt"
 	"os"
 	"regexp"
@@ -33,13 +34,13 @@ func Add(int2 int, s string) {
 func TestError(t *testing.T) {
 	Init()
 	dd := &D{}
-	kk := exeHelper.LookFun(dd.Show)
+	kk, _ := exeHelper.LookFun(dd.Show)
 	fmt.Println(kk)
 }
 
 func TestFunBase(t *testing.T) {
 	Init()
-	pp := exeHelper.LookFun(Add)
+	pp, _ := exeHelper.LookFun(Add)
 	fmt.Println(pp)
 }
 
@@ -48,5 +49,6 @@ func TestRegex(t *testing.T) {
 }
 
 func TestGoSym(t *testing.T) {
-	//gosym.Sym{Name: "gitee.com/fast_api/api/dwarf.(*D).Show-fm"}.Type
+	b := gosym.Sym{Name: "main.init.0.func1"}
+	fmt.Println(b.PackageName())
 }

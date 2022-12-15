@@ -122,8 +122,8 @@ func (ad *Server) SetLogTrimPrefix(prefixM string) {
 }
 
 func (ad *Server) packInitApiWithPath(path *string) {
-	start := time.Now()
 	ad.init(path)
+	start := time.Now()
 	log.Debugf("api had caches %d", initFnCache.Len())
 	initFnCache.Range(func(index int, en *def.Entry) {
 		findM, err := ad.maker.LookFun(en.Fn)
