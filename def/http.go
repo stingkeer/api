@@ -3,6 +3,7 @@ package def
 const (
 	Content_JSON        = "application/json"
 	CONTENT_STREAM      = "application/octet-stream"
+	CONTENT_HTML        = "text/html"
 	HEAD_CONST          = "API_HEADER_TYPE"
 	CONTENT_DISPOSITION = "Content-Disposition"
 )

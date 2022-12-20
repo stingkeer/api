@@ -113,6 +113,40 @@ func TestDail(t *testing.T) {
 }
 
 func TestApiAfter(t *testing.T) {
+	http.FileServer(http.Dir(`.`))
 	go StartService(nil)
 	GET(hello1, "/s")
+}
+
+func TestHtml(t *testing.T) {
+	const tpl = `
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>{{.Title}}</title>
+	</head>
+	<body>
+		{{range .Items}}<div>{{ . }}</div>{{else}}<div><strong>no rows</strong></div>{{end}}
+	</body>
+</html>`
+	GET(func() any {
+		data := struct {
+			Title string
+			Items []string
+		}{
+			Title: "My page",
+			Items: []string{
+				"My photos",
+				"My blog",
+			},
+		}
+		return Html(tpl, data)
+	}, "/html")
+	StartService(nil)
+}
+
+func TestStatic(t *testing.T) {
+	AddStatic("/web/*", http.Dir("."))
+	StartService(nil)
 }

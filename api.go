@@ -43,6 +43,12 @@ var (
 	RegisterReturnHandler = http.RegisterReturnHandler
 
 	NewStream = rettypes.NewStream
+
+	Html     = rettypes.NewHtml
+	HtmlView = rettypes.HtmlView
+
+	// AddStatic static web
+	AddStatic = http.DefaultStatic.AddStatic
 )
 
 func httpM(method string) httpMethod {
@@ -82,4 +88,7 @@ func init() {
 		AddHttpHandle(http.NewApiIntercept(match, caller, serialize))
 	})
 
+	mg.Invoke(func(match def.Match, caller def.Caller, serialize def.Serialize) {
+		AddHttpHandle(http.DefaultStatic)
+	})
 }
