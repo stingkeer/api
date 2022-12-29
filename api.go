@@ -49,6 +49,8 @@ var (
 
 	// AddStatic static web
 	AddStatic = http.DefaultStatic.AddStatic
+
+	NewRedirect = rettypes.NewRedirect
 )
 
 func httpM(method string) httpMethod {
@@ -60,7 +62,6 @@ func httpM(method string) httpMethod {
 			Url:    url,
 			Method: method,
 			Fn:     f,
-			Ids:    make(map[string]string),
 		}
 		initFnCache.Add(entry)
 		mg.Invoke(func(match def.Match) {

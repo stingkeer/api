@@ -150,3 +150,10 @@ func TestStatic(t *testing.T) {
 	AddStatic("/web/*", http.Dir("."))
 	StartService(nil)
 }
+
+func TestNewRedirect(t *testing.T) {
+	GET(func() any {
+		return NewRedirect("https://www.google.com")
+	}, "/redirect")
+	StartService(nil)
+}

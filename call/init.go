@@ -18,4 +18,5 @@ func init() {
 
 	http.RegisterReturnHandler(&rettypes.Stream{})
 	http.RegisterReturnHandler(&rettypes.Html{})
+	http.RegisterReturnHandler(&rettypes.Redirect{})
 }

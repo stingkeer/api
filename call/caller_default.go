@@ -47,12 +47,12 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 		os.Exit(2)
 	}
 	params := req.URL.Query()
-	for k, id := range f.Ids {
-		params.Add(k, id)
-	}
+	f.Ids.Range(func(key, value any) bool {
+		params.Add(key.(string), value.(string))
+		return true
+	})
 
 	paramsV := make([]reflect.Value, len(m.Param))
-
 	for pName, p := range m.Param {
 		pw := def.ParamWarp{Request: *req}
 		pw.PTyp = v.Type().In(p.Order)

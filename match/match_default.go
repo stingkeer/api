@@ -11,7 +11,7 @@ type MatchImpl struct {
 }
 
 // Match
-//if match return func
+// if match return func
 func (m *MatchImpl) Match(url *url.URL) *def.Entry {
 	pv := make([]string, 10)
 	data, e := m.store.Get(url.Path, pv)
@@ -20,7 +20,7 @@ func (m *MatchImpl) Match(url *url.URL) *def.Entry {
 	}
 	ent := data.(*def.Entry)
 	for i := 0; i < len(e); i++ {
-		ent.Ids[e[i]] = pv[i]
+		ent.Ids.Store(e[i], pv[i])
 	}
 	log.Debugf("Url path = %s is matched", url.Path)
 	return data.(*def.Entry)
