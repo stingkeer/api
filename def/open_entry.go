@@ -58,7 +58,7 @@ type Entry struct {
 	Group  string
 	Method string
 	Fn     interface{}
-	Ids    map[string]string
+	Ids    sync.Map
 }
 
 type ParamWarp struct {

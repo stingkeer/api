@@ -43,9 +43,11 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 		os.Exit(2)
 	}
 	params := req.URL.Query()
-	for k, v := range f.Ids {
-		params.Add(k, v)
-	}
+
+	f.Ids.Range(func(key, value interface{}) bool {
+		params.Add(key.(string), value.(string))
+		return true
+	})
 
 	paramsV := make([]reflect.Value, len(m.Param))
 

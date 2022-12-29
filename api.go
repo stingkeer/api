@@ -43,7 +43,6 @@ func httpM(method string) httpMethod {
 			Url:    url,
 			Method: method,
 			Fn:     f,
-			Ids:    make(map[string]string),
 		}
 		fnCaches = append(fnCaches, e)
 		server.Invoke(func(f def.Match) {
