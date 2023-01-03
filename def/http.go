@@ -1,12 +1,19 @@
 package def
 
+import "net/http"
+
 const (
 	Content_JSON        = "application/json"
 	CONTENT_STREAM      = "application/octet-stream"
 	CONTENT_HTML        = "text/html"
-	HEAD_CONST          = "API_HEADER_TYPE"
+	HEAD_CONST          = "_API_HEADER_TYPE_"
 	CONTENT_DISPOSITION = "Content-Disposition"
 )
+
+type Cookie interface {
+	SetCookie(cookie *http.Cookie)
+	Cookie(name string) (*http.Cookie, error)
+}
 
 // Header used in param
 //eg.
@@ -18,6 +25,7 @@ const (
 
 */
 type Header interface {
+	Cookie
 	ReadHeader
 	WriteHeader
 }

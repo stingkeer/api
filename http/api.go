@@ -1,13 +1,13 @@
 package http
 
 import (
+	"encoding/json"
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/intercept"
 	"gitee.com/fast_api/api/log"
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 )
 
 type ApiInter struct {
@@ -113,13 +113,11 @@ func appendSysHeader(rw http.ResponseWriter, req *http.Request) {
 	header := rw.Header()
 	apHeader := req.Header.Get(def.HEAD_CONST)
 	if apHeader != "" {
-		kvs := strings.Split(apHeader, ",")
-		for _, v := range kvs {
-			l := strings.Split(v, "=")
-			if len(l) != 2 {
-				panic("you set head error")
+		m := make(map[string]string)
+		if err := json.Unmarshal([]byte(apHeader), &m); err == nil {
+			for k, v := range m {
+				header.Add(k, v)
 			}
-			header.Add(l[0], l[1])
 		}
 	}
 }

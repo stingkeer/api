@@ -5,7 +5,7 @@ import (
 	"gitee.com/fast_api/api/log"
 	"gitee.com/fast_api/api/mg"
 	"gitee.com/fast_api/api/utils"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"reflect"
@@ -64,7 +64,7 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 			paramsV[p.Order] = t.Mapper(pw)
 		} else if pw.PTyp.Kind() == reflect.Struct && req.Method == http.MethodPost {
 			newT := reflect.New(pw.PTyp)
-			bytes, err := ioutil.ReadAll(req.Body)
+			bytes, err := io.ReadAll(req.Body)
 			if err != nil {
 				panic(err)
 			}

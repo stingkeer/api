@@ -1,14 +1,13 @@
 package types
 
 import (
+	"encoding/json"
 	"gitee.com/fast_api/api/def"
 	"net/http"
 	"reflect"
-	"strings"
 )
 
-type HttpType struct {
-}
+type HttpType struct{}
 
 func (f HttpType) Mapper(param def.ParamWarp) reflect.Value {
 	return reflect.ValueOf(param.Request)
@@ -22,9 +21,19 @@ type HeadType struct {
 	req *http.Request
 }
 
+func (f *HeadType) SetCookie(cookie *http.Cookie) {
+	if v := cookie.String(); v != "" {
+		f.Add("Set-Cookie", v)
+	}
+}
+
+func (f *HeadType) Cookie(name string) (*http.Cookie, error) {
+	return f.req.Cookie(name)
+}
+
 func (f HeadType) Mapper(param def.ParamWarp) reflect.Value {
 	f.req = &param.Request
-	return reflect.ValueOf(f)
+	return reflect.ValueOf(&f)
 }
 
 func (f HeadType) Register() []reflect.Type {
@@ -32,14 +41,20 @@ func (f HeadType) Register() []reflect.Type {
 }
 
 func (f HeadType) Add(key, value string) {
-	var b strings.Builder
 	orig := f.Get(def.HEAD_CONST)
+	m := make(map[string]string)
 	if orig != "" {
-		b.WriteString(orig)
-		b.WriteByte(',')
+		err := json.Unmarshal([]byte(orig), &m)
+		if err != nil {
+			return
+		}
 	}
-	b.WriteString(key + "=" + value)
-	f.req.Header.Add(def.HEAD_CONST, b.String())
+	m[key] = value
+	bytes, err := json.Marshal(m)
+	if err != nil {
+		return
+	}
+	f.req.Header.Add(def.HEAD_CONST, string(bytes))
 }
 
 func (f HeadType) Get(key string) string {

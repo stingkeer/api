@@ -157,3 +157,16 @@ func TestNewRedirect(t *testing.T) {
 	}, "/redirect")
 	StartService(nil)
 }
+
+func TestCookie(t *testing.T) {
+	//cookie
+	GET(func(header def.Header) {
+		cookie, err := header.Cookie("username")
+		if err != nil {
+			return
+		}
+		cookie.Value = "hello"
+		header.SetCookie(cookie)
+	}, "/cookie")
+	StartService(nil)
+}
