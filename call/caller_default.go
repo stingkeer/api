@@ -3,12 +3,14 @@ package call
 import (
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/log"
+	"gitee.com/fast_api/api/mg"
 	"gitee.com/fast_api/api/utils"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"reflect"
 	"runtime"
+	"sync"
 )
 
 type callerDefault struct {
@@ -17,6 +19,8 @@ type callerDefault struct {
 
 var (
 	adapters = make(map[reflect.Type]def.Adapter)
+	pool     *def.MethodsPools
+	once     sync.Once
 )
 
 func NewCaller(serialize def.Serialize) *callerDefault {
@@ -43,21 +47,19 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 		os.Exit(2)
 	}
 	params := req.URL.Query()
-
-	f.Ids.Range(func(key, value interface{}) bool {
+	f.Ids.Range(func(key, value any) bool {
 		params.Add(key.(string), value.(string))
 		return true
 	})
 
 	paramsV := make([]reflect.Value, len(m.Param))
-
-	for name, p := range m.Param {
+	for pName, p := range m.Param {
 		pw := def.ParamWarp{Request: *req}
 		pw.PTyp = v.Type().In(p.Order)
-		pw.PName = name
+		pw.PName = pName
 		if t, b := adapters[p.Typ]; b {
-			if v, b := params[name]; b {
-				pw.PValue = v[0]
+			if param, exist := params[pName]; exist {
+				pw.PValue = param[0]
 			}
 			paramsV[p.Order] = t.Mapper(pw)
 		} else if pw.PTyp.Kind() == reflect.Struct && req.Method == http.MethodPost {
@@ -93,9 +95,17 @@ func toPtr(obj interface{}) reflect.Value {
 }
 
 func (c *callerDefault) getFuncInfo(name string) *def.MethodInfo {
-	mi := def.GetMethodPools().Get(name)
-	if mi != nil {
-		return mi
+	once.Do(func() {
+		err := mg.Invoke(func(poolMd *def.MethodsPools) {
+			pool = poolMd
+		})
+		if err != nil {
+			panic(err)
+		}
+	})
+	mInfo := pool.Get(name)
+	if mInfo != nil {
+		return mInfo
 	}
 	log.Errorf("not find name [%s]", name)
 	return nil

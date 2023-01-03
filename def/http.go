@@ -3,6 +3,7 @@ package def
 const (
 	Content_JSON        = "application/json"
 	CONTENT_STREAM      = "application/octet-stream"
+	CONTENT_HTML        = "text/html"
 	HEAD_CONST          = "API_HEADER_TYPE"
 	CONTENT_DISPOSITION = "Content-Disposition"
 )
@@ -21,7 +22,7 @@ type Header interface {
 	WriteHeader
 }
 
-//used in retType
+// ContentType used in retType
 type ContentType interface {
 	ContentType() string
 }
@@ -35,7 +36,7 @@ type WriteHeader interface {
 	Add(key, value string)
 }
 
-//used in retType
+// AppendHeader used in retType
 type AppendHeader interface {
 	Append(header ReadHeader) map[string]string
 }

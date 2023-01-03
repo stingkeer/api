@@ -4,9 +4,9 @@ import (
 	"crypto/tls"
 	"fmt"
 	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/server"
+	"gitee.com/fast_api/api/mg"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
+	"io"
 	"math/big"
 	"mime/multipart"
 	"net/http"
@@ -21,7 +21,7 @@ func hello1(kk def.StringReq) interface{} {
 func MulFile(read multipart.Reader) string {
 	par, _ := read.NextPart()
 	fmt.Println(par.FileName(), par.FormName())
-	b, _ := ioutil.ReadAll(par)
+	b, _ := io.ReadAll(par)
 	fmt.Println(string(b))
 	return string(b)
 }
@@ -48,6 +48,10 @@ func TestApiHttp(t *testing.T) {
 		fmt.Println(a, hello)
 	}, "/m")
 
+	GET(func(req *http.Request, resp http.Response) {
+
+	}, "/http")
+
 	GET(func() interface{} {
 		f, e := os.Open("d:/download/QmfWv8FfpKiCWsueKfXDLrgyqXZsEuGFJFBL7TfjNmxkAw")
 		fmt.Println(e)
@@ -60,20 +64,21 @@ func TestApiHttp(t *testing.T) {
 		fmt.Println(header, reader)
 	}, "/file")
 
-	StartService(":8011")
+	StartService(nil)
 }
 
 func TestURL(t *testing.T) {
 	GET(hello1, "/s")
 	GET(hello1, "/s/<kk>")
 	POST(MulFile, "/update")
-	StartService(":8080")
-	//reflect.ValueOf(a.show)
+	StartService(nil)
 }
 
 func TestPath(t *testing.T) {
 	GET(hello1, "/s/<kk>")
-	StartService(":8080")
+	StartService(func(conf *Config) *Config {
+		return conf
+	})
 }
 
 type A struct {
@@ -87,11 +92,11 @@ func (A) Decode([]byte, interface{}) error {
 }
 
 func TestFile(t *testing.T) {
-	server.Provide(func() def.Serialize {
+	mg.Provide(func() def.Serialize {
 		return &A{}
 	})
 	POST(MulFile, "/update")
-	StartService(":8080")
+	StartService(nil)
 }
 
 func TestType(t *testing.T) {
@@ -105,5 +110,50 @@ func TestType(t *testing.T) {
 func TestDail(t *testing.T) {
 	c, err := tls.Dial("tcp", "www.baidu.com:https", nil)
 	fmt.Println(c, err, c.VerifyHostname("www.baidu.com"))
+}
 
+func TestApiAfter(t *testing.T) {
+	http.FileServer(http.Dir(`.`))
+	go StartService(nil)
+	GET(hello1, "/s")
+}
+
+func TestHtml(t *testing.T) {
+	const tpl = `
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>{{.Title}}</title>
+	</head>
+	<body>
+		{{range .Items}}<div>{{ . }}</div>{{else}}<div><strong>no rows</strong></div>{{end}}
+	</body>
+</html>`
+	GET(func() any {
+		data := struct {
+			Title string
+			Items []string
+		}{
+			Title: "My page",
+			Items: []string{
+				"My photos",
+				"My blog",
+			},
+		}
+		return Html(tpl, data)
+	}, "/html")
+	StartService(nil)
+}
+
+func TestStatic(t *testing.T) {
+	AddStatic("/web/*", http.Dir("."))
+	StartService(nil)
+}
+
+func TestNewRedirect(t *testing.T) {
+	GET(func() any {
+		return NewRedirect("https://www.google.com")
+	}, "/redirect")
+	StartService(nil)
 }

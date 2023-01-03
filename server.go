@@ -1,71 +1,33 @@
 package api
 
 import (
-	"crypto/tls"
-	"crypto/x509"
-	ihttp "gitee.com/fast_api/api/http"
-	"gitee.com/fast_api/api/log"
-	"gitee.com/fast_api/api/server"
-	"io/ioutil"
+	"gitee.com/fast_api/api/mg"
 	"net/http"
-	"sync"
 )
 
-func StartService(addr string) {
-	PackApi()
-	server.Invoke(func(ser *Service) {
-		log.Infof("listen addr %s", addr)
-		log.Error(http.ListenAndServe(addr, ser))
-	})
-}
-
-func StartTLSService(addr string, caFile, certFile, keyFile string) {
-	PackApi()
-	server.Invoke(func(ser *Service) {
-		log.Infof("listen addr %s", addr)
-		caCertPool := x509.NewCertPool()
-		caCert, err := ioutil.ReadFile(caFile)
-		if err != nil {
-			panic(err)
-		}
-		caCertPool.AppendCertsFromPEM(caCert)
-		server := &http.Server{Addr: addr, Handler: ser,
-			TLSConfig: &tls.Config{
-				ClientAuth: tls.RequireAndVerifyClientCert,
-				ClientCAs:  caCertPool,
-			},
-		}
-		log.Error(server.ListenAndServeTLS(certFile, keyFile))
-	})
-
-}
-
-type Service struct{}
-
-func (ad *Service) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	ApiHttp(rw, req, func() *Service {
-		return a
-	})
-}
+var server *Server
 
 func init() {
-	server.Provide(func() *Service {
-		a = &Service{}
-		return a
+	mg.Invoke(func(s *Server) {
+		server = s
 	})
-
 }
 
-var (
-	one sync.Once
-	a   *Service
-)
+func StartService(f ConfigFun) {
+	if f != nil {
+		server.SetConfig(*f(server.Config()))
+	}
+	server.ListenAndServe()
+}
 
-func ApiHttp(rw http.ResponseWriter, req *http.Request, service func() *Service) {
-	one.Do(func() {
-		if service != nil {
-			a = service()
-		}
-	})
-	ihttp.DoHttp(rw, req)
+func StartTLSService(f ConfigFun) {
+	if f != nil {
+		server.SetConfig(*f(server.Config()))
+	}
+	server.StartTLSService()
+}
+
+// Http this combined with other http handler
+func Http(rw http.ResponseWriter, req *http.Request) {
+	server.ApiHttp(rw, req)
 }

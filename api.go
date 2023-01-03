@@ -6,14 +6,24 @@ import (
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/http"
 	"gitee.com/fast_api/api/match"
+	"gitee.com/fast_api/api/mg"
 	"gitee.com/fast_api/api/serialize"
-	"gitee.com/fast_api/api/server"
 	stdhttp "net/http"
 )
 
 type (
 	httpMethod func(f interface{}, url string)
 )
+
+const eg = `
+please use api.GET or api.POST in init() method !
+eg.
+func init() {
+	api.GET(func(username string) {
+		fmt.Println(username)
+	},"send")
+}
+`
 
 var (
 	GET  = httpM(stdhttp.MethodGet)
@@ -33,45 +43,53 @@ var (
 	RegisterReturnHandler = http.RegisterReturnHandler
 
 	NewStream = rettypes.NewStream
+
+	Html     = rettypes.NewHtml
+	HtmlView = rettypes.HtmlView
+
+	// AddStatic static web
+	AddStatic = http.DefaultStatic.AddStatic
+
+	NewRedirect = rettypes.NewRedirect
 )
 
-var fnCaches []*def.Entry
-
 func httpM(method string) httpMethod {
+	if initFnCache.Init() {
+		panic(eg)
+	}
 	return func(f interface{}, url string) {
-		e := &def.Entry{
+		entry := &def.Entry{
 			Url:    url,
 			Method: method,
 			Fn:     f,
 		}
-		fnCaches = append(fnCaches, e)
-		server.Invoke(func(f def.Match) {
-			f.Add(url, e)
+		initFnCache.Add(entry)
+		mg.Invoke(func(match def.Match) {
+			match.Add(url, entry)
 		})
 	}
-}
-
-func getFnCaches() []*def.Entry {
-	return fnCaches
 }
 
 func init() {
 
 	//default
-	server.Provide(func() def.Serialize {
+	mg.Provide(func() def.Serialize {
 		return &serialize.JsonConvertImpl{}
 	})
 
-	server.Provide(func(resultConvert def.Serialize) def.Caller {
+	mg.Provide(func(resultConvert def.Serialize) def.Caller {
 		return call.NewCaller(resultConvert)
 	})
 
-	server.Provide(func() def.Match {
+	mg.Provide(func() def.Match {
 		return match.NewMatchImpl()
 	})
 
-	server.Invoke(func(match def.Match, caller def.Caller, serialize def.Serialize) {
+	mg.Invoke(func(match def.Match, caller def.Caller, serialize def.Serialize) {
 		AddHttpHandle(http.NewApiIntercept(match, caller, serialize))
 	})
 
+	mg.Invoke(func(match def.Match, caller def.Caller, serialize def.Serialize) {
+		AddHttpHandle(http.DefaultStatic)
+	})
 }

@@ -44,21 +44,17 @@ func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
 		api.NotFindPath(rw, req)
 		return false
 	}
-
 	if req.Method != entry.Method {
 		log.Warnf("not support Method %s", req.Method)
 		return false
 	}
 	if entry.Fn != nil {
-
 		iRet := api.caller.Call(entry, req)
-
 		if !doWithRet(iRet, rw, req) {
 			if iRet == nil {
 				WriteResponse(rw, req, nil)
 				return false
 			}
-
 			//default return json
 			h := api.serialize.Encode(iRet)
 			if h == nil {

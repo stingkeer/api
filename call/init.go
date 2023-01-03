@@ -17,4 +17,6 @@ func init() {
 	RegisterTypeMapper(&types.TypeRequire{BaseType: base})
 
 	http.RegisterReturnHandler(&rettypes.Stream{})
+	http.RegisterReturnHandler(&rettypes.Html{})
+	http.RegisterReturnHandler(&rettypes.Redirect{})
 }
