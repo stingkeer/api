@@ -174,3 +174,11 @@ func TestCookie(t *testing.T) {
 	}, "/cookie")
 	StartService(nil)
 }
+
+func TestCache(t *testing.T) {
+	GET(func(s def.String[cache.Key]) (any, cache.Cache) {
+		fmt.Println("invoke")
+		return "hello", cache.NewCacheImpl(time.Second * 30)
+	}, "/cache")
+	StartService(nil)
+}

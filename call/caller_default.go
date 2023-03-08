@@ -139,7 +139,6 @@ func (c *callerDefault) getFuncInfo(name string) *def.MethodInfo {
 	return nil
 }
 
-// TypeInfo def.String[gitee.com/fast_api/api/cache.Key]
 func TypeInfo(name string) (typ string, generic string) {
 	i := strings.Index(name, "[")
 	if i > 0 {
