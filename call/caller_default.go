@@ -107,7 +107,7 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 	if c.mIntercept == nil {
 		vs = v.Call(paramsV)
 	} else {
-		vs = c.mIntercept.Invoke(v, m, paramsV)
+		vs = c.mIntercept.Invoke(m, paramsV)
 	}
 	if len(vs) == 0 {
 		log.Warn("call method no return")

@@ -12,5 +12,5 @@ type HttpIntercept interface {
 }
 
 type MethodIntercept interface {
-	Invoke(fn reflect.Value, m *def.MethodInfo, args []reflect.Value) []reflect.Value
+	Invoke(m *def.MethodInfo, args []reflect.Value) []reflect.Value
 }

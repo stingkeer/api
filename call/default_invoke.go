@@ -21,18 +21,18 @@ func SetMethodProxy(invoke MethodInvoke) {
 type defaultProxyInvoke struct {
 }
 
-func (d *defaultProxyInvoke) Invoke(fn reflect.Value, m *def.MethodInfo, args []reflect.Value) []reflect.Value {
-	return NewUserProxyInvokeImpl(methodInvokes, fn).Invoke(m, args)
+func (d *defaultProxyInvoke) Invoke(m *def.MethodInfo, args []reflect.Value) []reflect.Value {
+	return NewUserProxyInvokeImpl(methodInvokes).Invoke(m, args)
 }
 
 type UserProxyInvokeImpl struct {
 	list *list.List
 }
 
-func NewUserProxyInvokeImpl(list *list.List, origin reflect.Value) *UserProxyInvokeImpl {
+func NewUserProxyInvokeImpl(list *list.List) *UserProxyInvokeImpl {
 	u := &UserProxyInvokeImpl{list: list}
 	var fn MethodInvoke = func(fn MethodCaller, m *def.MethodInfo, args []reflect.Value) []reflect.Value {
-		return origin.Call(args)
+		return reflect.ValueOf(m.Method.(*def.Entry).Fn).Call(args)
 	}
 	list.PushBack(fn)
 	return u
