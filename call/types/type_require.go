@@ -14,7 +14,11 @@ func (b *TypeRequire) Mapper(p def.ParamWarp) reflect.Value {
 	if p.PValue == "" {
 		panic(fmt.Sprintf("param %s is require", p.PName))
 	}
-	return b.BaseType.Mapper(p).Convert(p.PTyp)
+	pv := reflect.New(p.PTyp)
+	field0 := pv.Elem().Field(0)
+	p.PTyp = field0.Type()
+	field0.Set(b.BaseType.Mapper(p).Convert(p.PTyp))
+	return pv.Elem()
 }
 
 func (b *TypeRequire) Register() []reflect.Type {

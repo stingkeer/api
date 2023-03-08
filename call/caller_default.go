@@ -1,7 +1,9 @@
 package call
 
 import (
+	"fmt"
 	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/intercept"
 	"gitee.com/fast_api/api/log"
 	"gitee.com/fast_api/api/mg"
 	"gitee.com/fast_api/api/utils"
@@ -10,22 +12,26 @@ import (
 	"os"
 	"reflect"
 	"runtime"
+	"strings"
 	"sync"
 )
 
 type callerDefault struct {
-	serialize def.Serialize
+	serialize  def.Serialize
+	mIntercept intercept.MethodIntercept
 }
 
 var (
-	adapters = make(map[reflect.Type]def.Adapter)
-	pool     *def.MethodsPools
-	once     sync.Once
+	adapters       = make(map[reflect.Type]def.Adapter)
+	adapterGeneric = make(map[string]def.Adapter)
+	pool           *def.MethodsPools
+	once           sync.Once
 )
 
 func NewCaller(serialize def.Serialize) *callerDefault {
 	return &callerDefault{
-		serialize: serialize,
+		serialize:  serialize,
+		mIntercept: &defaultProxyInvoke{},
 	}
 }
 
@@ -33,6 +39,15 @@ func RegisterTypeMapper(adapter def.Adapter) {
 	if adapter != nil {
 		for _, m := range adapter.Register() {
 			adapters[m] = adapter
+		}
+	}
+}
+
+func RegisterGenericTypeMapper(adapter def.Adapter) {
+	if adapter != nil {
+		for _, m := range adapter.Register() {
+			g, _ := TypeInfo(m.String())
+			adapterGeneric[g] = adapter
 		}
 	}
 }
@@ -53,6 +68,7 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 	})
 
 	paramsV := make([]reflect.Value, len(m.Param))
+	//TODO
 	for pName, p := range m.Param {
 		pw := def.ParamWarp{Request: *req}
 		pw.PTyp = v.Type().In(p.Order)
@@ -62,6 +78,14 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 				pw.PValue = param[0]
 			}
 			paramsV[p.Order] = t.Mapper(pw)
+		} else if pw.PTyp.Kind() == reflect.Struct {
+			tName, _ := TypeInfo(pw.PTyp.String())
+			if td, b1 := adapterGeneric[tName]; b1 {
+				if param, exist := params[pName]; exist {
+					pw.PValue = param[0]
+				}
+				paramsV[p.Order] = td.Mapper(pw)
+			}
 		} else if pw.PTyp.Kind() == reflect.Struct && req.Method == http.MethodPost {
 			newT := reflect.New(pw.PTyp)
 			bytes, err := io.ReadAll(req.Body)
@@ -75,12 +99,16 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 			paramsV[p.Order] = newT.Elem()
 		} else { //default value
 			log.Tracef("not support %s set default value", pw.PTyp)
+			fmt.Println(pw.PTyp.Kind(), reflect.TypeOf((*def.IntReq)(nil)).Elem())
 			paramsV[p.Order] = utils.DefaultCallValue(pw.PTyp.Kind())
 		}
 	}
-
-	vs := v.Call(paramsV)
-
+	var vs []reflect.Value
+	if c.mIntercept == nil {
+		vs = v.Call(paramsV)
+	} else {
+		vs = c.mIntercept.Invoke(v, m, paramsV)
+	}
 	if len(vs) == 0 {
 		log.Warn("call method no return")
 		return reflect.ValueOf(nil)
@@ -109,4 +137,14 @@ func (c *callerDefault) getFuncInfo(name string) *def.MethodInfo {
 	}
 	log.Errorf("not find name [%s]", name)
 	return nil
+}
+
+// TypeInfo def.String[gitee.com/fast_api/api/cache.Key]
+func TypeInfo(name string) (typ string, generic string) {
+	i := strings.Index(name, "[")
+	if i > 0 {
+		return name[0:i], name[i : len(name)-1]
+	} else {
+		return name, ""
+	}
 }

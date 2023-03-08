@@ -1,14 +1,16 @@
 package intercept
 
-import "net/http"
+import (
+	"gitee.com/fast_api/api/def"
+	"net/http"
+	"reflect"
+)
 
 type HttpIntercept interface {
-	// Http /**
 	Http(rw http.ResponseWriter, req *http.Request) bool
 	Order() int
 }
 
 type MethodIntercept interface {
-	BeforeInvoke()
-	AfterInvoke()
+	Invoke(fn reflect.Value, m *def.MethodInfo, args []reflect.Value) []reflect.Value
 }

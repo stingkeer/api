@@ -16,7 +16,10 @@ func init() {
 	RegisterTypeMapper(&types.HeadType{})
 	RegisterTypeMapper(&types.TypeRequire{BaseType: base})
 
+	RegisterGenericTypeMapper(&types.TypeRequireG{})
+
 	http.RegisterReturnHandler(&rettypes.Stream{})
 	http.RegisterReturnHandler(&rettypes.Html{})
 	http.RegisterReturnHandler(&rettypes.Redirect{})
+
 }

@@ -8,36 +8,36 @@ package def
    }, "/require")
 
 */
-
+//
 type (
-	IntReq    int
-	Int8Req   int8
-	Int16Req  int16
-	Int32Req  int32
-	Int64Req  int64
-	StringReq string
+	IntReq    Int[int]
+	Int8Req   Int8[int8]
+	Int16Req  Int16[int16]
+	Int32Req  Int32[int32]
+	Int64Req  Int64[int64]
+	StringReq String[string]
 )
 
 func (i IntReq) Int() int {
-	return int(i)
+	return i.V
 }
 
 func (i Int8Req) Int8() int8 {
-	return int8(i)
+	return i.V
 }
 
 func (i Int16Req) Int16() int16 {
-	return int16(i)
+	return i.V
 }
 
 func (i Int8Req) Int32() int32 {
-	return int32(i)
+	return int32(i.V)
 }
 
 func (i Int64Req) Int64() int64 {
-	return int64(i)
+	return i.V
 }
 
 func (i StringReq) String() string {
-	return string(i)
+	return i.V
 }

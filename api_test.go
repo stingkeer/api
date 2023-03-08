@@ -3,6 +3,7 @@ package api
 import (
 	"crypto/tls"
 	"fmt"
+	"gitee.com/fast_api/api/cache"
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/mg"
 	"github.com/sirupsen/logrus"
@@ -12,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"testing"
+	"time"
 )
 
 func hello1(kk def.StringReq) interface{} {
@@ -28,8 +30,8 @@ func MulFile(read multipart.Reader) string {
 
 func TestApiHttp(t *testing.T) {
 	logrus.SetLevel(logrus.TraceLevel)
-	GET(func(a http.Request) interface{} {
-		return a.Host
+	GET(func(a http.Request) (interface{}, any) {
+		return a.Host, cache.NewCacheImpl(time.Second)
 	}, "/hello")
 
 	GET(func(a big.Int) interface{} {
@@ -44,8 +46,9 @@ func TestApiHttp(t *testing.T) {
 		a.Add("szb", "nnnnn")
 	}, "/no")
 
-	GET(func(a int, hello def.StringReq) {
-		fmt.Println(a, hello)
+	GET(func(a int, hello def.String[cache.Key]) any {
+		fmt.Println(a, hello, hello.String())
+		return nil
 	}, "/m")
 
 	GET(func(req *http.Request, resp http.Response) {
@@ -82,6 +85,7 @@ func TestPath(t *testing.T) {
 }
 
 type A struct {
+	_ string
 }
 
 func (A) Encode(interface{}) *def.Content {
