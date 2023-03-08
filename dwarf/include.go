@@ -20,8 +20,8 @@ func isInclude(pkg string) bool {
 			panic(err)
 		}
 		if match {
-			return true
+			return false
 		}
 	}
-	return false
+	return true
 }

@@ -44,7 +44,7 @@ var exclude = map[string]interface{}{
 }
 
 func isRuntimePackage(pkg string) bool {
-	if strings.HasPrefix(pkg, "type..") {
+	if strings.HasPrefix(pkg, "type..") || strings.HasPrefix(pkg, "type:") {
 		return true
 	}
 	sym := gosym.Sym{

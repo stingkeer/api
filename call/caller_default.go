@@ -31,7 +31,7 @@ var (
 func NewCaller(serialize def.Serialize) *callerDefault {
 	return &callerDefault{
 		serialize:  serialize,
-		mIntercept: &defaultProxyInvoke{},
+		mIntercept: NewUserProxyInvokeImpl(methodInvokes),
 	}
 }
 

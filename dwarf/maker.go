@@ -59,7 +59,7 @@ func NewDwarfMakerWithMode(mode FilterMode) *DwarfMaker {
 }
 
 func NewDwarfMaker() *DwarfMaker {
-	return NewDwarfMakerWithMode(SelfInclude)
+	return NewDwarfMakerWithMode(RuntimeExclude)
 }
 
 func (h *DwarfMaker) AddExclude(pkg string) bool {
@@ -130,7 +130,7 @@ func (h *DwarfMaker) Init(exe *string) {
 	for r, _ := h.r.Next(); r != nil; r, _ = h.r.Next() {
 		if rName := r.Val(dwarf.AttrName); r.Tag == dwarf.TagSubprogram && rName != nil {
 			tempName = rName.(string)
-			if !h.usedMode.fn(tempName) {
+			if h.usedMode.fn(tempName) {
 				continue
 			}
 			h.debug[tempName] = Params{}

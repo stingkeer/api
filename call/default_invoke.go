@@ -18,13 +18,6 @@ func SetMethodProxy(invoke MethodInvoke) {
 	methodInvokes.PushFront(invoke)
 }
 
-type defaultProxyInvoke struct {
-}
-
-func (d *defaultProxyInvoke) Invoke(m *def.MethodInfo, args []reflect.Value) []reflect.Value {
-	return NewUserProxyInvokeImpl(methodInvokes).Invoke(m, args)
-}
-
 type UserProxyInvokeImpl struct {
 	list *list.List
 }
