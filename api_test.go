@@ -151,7 +151,7 @@ func TestHtml(t *testing.T) {
 }
 
 func TestStatic(t *testing.T) {
-	AddStatic("/web/*", http.Dir("."))
+	Static("/web/*", "web", http.Dir("."))
 	StartService(nil)
 }
 

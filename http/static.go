@@ -2,32 +2,60 @@ package http
 
 import (
 	"net/http"
+	"path"
 	"strings"
+	"time"
 )
 
 var DefaultStatic = NewStatic()
 
+type staticEntry struct {
+	fs      http.FileSystem
+	dirPath string
+}
+
+func (s *staticEntry) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	if req.URL.Path == "/" {
+		req.URL.Path = "/index.html"
+	}
+	f, err := s.fs.Open(path.Join(s.dirPath, req.URL.Path))
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	d, err := f.Stat()
+	if err != nil {
+		return
+	}
+	if d.IsDir() {
+		return
+	}
+	http.ServeContent(rw, req, d.Name(), time.Now(), f)
+}
+
 type Static struct {
-	m map[string]http.Handler
+	m map[string]staticEntry
 }
 
 func NewStatic() *Static {
-	return &Static{m: make(map[string]http.Handler)}
+	return &Static{m: make(map[string]staticEntry)}
 }
 
 func (s *Static) Http(rw http.ResponseWriter, req *http.Request) bool {
 	for reg, handler := range s.m {
-		if ok, path := s.match(req.URL.Path, reg); ok {
-			req.URL.Path = path
+		if ok, _ := s.match(req.URL.Path, reg); ok {
 			handler.ServeHTTP(rw, req)
-			return true
+			return false
 		}
 	}
 	return false
 }
 
-func (s *Static) AddStatic(path string, fileSystem http.FileSystem) {
-	s.m[path] = http.FileServer(fileSystem)
+func (s *Static) HandleStatic(path, dirPath string, fileSystem http.FileSystem) {
+	s.m[path] = staticEntry{
+		fs:      fileSystem,
+		dirPath: dirPath,
+	}
 }
 
 func (s *Static) Order() int {

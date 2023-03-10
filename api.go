@@ -47,8 +47,8 @@ var (
 	Html     = rettypes.NewHtml
 	HtmlView = rettypes.HtmlView
 
-	// AddStatic static web
-	AddStatic = http.DefaultStatic.AddStatic
+	// Static static web
+	Static = http.DefaultStatic.HandleStatic
 
 	NewRedirect = rettypes.NewRedirect
 )
