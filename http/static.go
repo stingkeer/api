@@ -14,23 +14,24 @@ type staticEntry struct {
 	dirPath string
 }
 
-func (s *staticEntry) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+func (s *staticEntry) ServeHTTP(rw http.ResponseWriter, req *http.Request) bool {
 	if req.URL.Path == "/" {
 		req.URL.Path = "/index.html"
 	}
 	f, err := s.fs.Open(path.Join(s.dirPath, req.URL.Path))
 	if err != nil {
-		return
+		return false
 	}
 	defer f.Close()
 	d, err := f.Stat()
 	if err != nil {
-		return
+		return false
 	}
 	if d.IsDir() {
-		return
+		return false
 	}
 	http.ServeContent(rw, req, d.Name(), time.Now(), f)
+	return true
 }
 
 type Static struct {
@@ -44,8 +45,7 @@ func NewStatic() *Static {
 func (s *Static) Http(rw http.ResponseWriter, req *http.Request) bool {
 	for reg, handler := range s.m {
 		if ok, _ := s.match(req.URL.Path, reg); ok {
-			handler.ServeHTTP(rw, req)
-			return false
+			return handler.ServeHTTP(rw, req)
 		}
 	}
 	return false
