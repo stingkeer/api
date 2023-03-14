@@ -41,6 +41,8 @@ var exclude = map[string]interface{}{
 	"debug":    nil,
 	"path":     nil,
 	"crypto":   nil,
+	"embed":    nil,
+	"database": nil,
 }
 
 func isRuntimePackage(pkg string) bool {
