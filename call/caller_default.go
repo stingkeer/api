@@ -78,15 +78,21 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 				pw.PValue = param[0]
 			}
 			paramsV[p.Order] = t.Mapper(pw)
-		} else if pw.PTyp.Kind() == reflect.Struct {
+			continue
+		}
+		// adapterGeneric
+		if pw.PTyp.Kind() == reflect.Struct {
+			fmt.Println(pw.PTyp.String())
 			tName, _ := TypeInfo(pw.PTyp.String())
 			if td, b1 := adapterGeneric[tName]; b1 {
 				if param, exist := params[pName]; exist {
 					pw.PValue = param[0]
 				}
 				paramsV[p.Order] = td.Mapper(pw)
+				continue
 			}
-		} else if pw.PTyp.Kind() == reflect.Struct && req.Method == http.MethodPost {
+		}
+		if (pw.PTyp.Kind() == reflect.Struct || pw.PTyp.Kind() == reflect.Slice) && req.Method == http.MethodPost {
 			newT := reflect.New(pw.PTyp)
 			bytes, err := io.ReadAll(req.Body)
 			if err != nil {
@@ -97,11 +103,12 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 				panic(err1)
 			}
 			paramsV[p.Order] = newT.Elem()
-		} else { //default value
-			log.Tracef("not support %s set default value", pw.PTyp)
-			fmt.Println(pw.PTyp.Kind(), reflect.TypeOf((*def.IntReq)(nil)).Elem())
-			paramsV[p.Order] = utils.DefaultCallValue(pw.PTyp.Kind())
+			continue
 		}
+		//default value
+		log.Warnf("[not support %s ] set default value", pw.PTyp)
+		fmt.Println(pw.PTyp.Kind(), reflect.TypeOf((*def.IntReq)(nil)).Elem())
+		paramsV[p.Order] = utils.DefaultCallValue(pw.PTyp.Kind())
 	}
 	var vs []reflect.Value
 	if c.mIntercept == nil {

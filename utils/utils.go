@@ -3,6 +3,7 @@ package utils
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"gitee.com/fast_api/api/log"
 	"io"
 	"reflect"
 	"regexp"
@@ -41,13 +42,15 @@ func Md5String(s string) string {
 }
 
 // DefaultCallValue
-//other param set default value
+// other param set default value
 func DefaultCallValue(kind reflect.Kind) reflect.Value {
 	switch kind {
 	case reflect.String:
 		return reflect.ValueOf("")
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return reflect.ValueOf(0)
+	default:
+		log.Errorf("DefaultCallValue error kind %s", kind)
 	}
 	return reflect.ValueOf(nil)
 }
