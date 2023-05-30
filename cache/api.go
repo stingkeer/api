@@ -1,14 +1,16 @@
 package cache
 
 import (
+	"fmt"
 	"gitee.com/fast_api/api/def"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 )
 
 type ProcessCache interface {
-	EncodeKey(v ...any) []byte
+	EncodeKey(m *def.MethodInfo, args []reflect.Value) []byte
 	EncodeValue(s def.Serialize, v reflect.Value) []byte
 }
 
@@ -27,12 +29,18 @@ func SetProcessCacheImpl(processCacheI ProcessCache) {
 
 type defaultProcessCacheImpl struct{}
 
-func (d *defaultProcessCacheImpl) EncodeKey(v ...any) []byte {
-	var s strings.Builder
-	for _, a := range v {
-		s.WriteString(a.(string))
+func (d *defaultProcessCacheImpl) EncodeKey(m *def.MethodInfo, args []reflect.Value) []byte {
+	var builder strings.Builder
+	for _, dm := range m.Param {
+		if !args[dm.Order].IsValid() {
+			continue
+		}
+		builder.WriteString(dm.Name)
+		builder.WriteString("=")
+		builder.WriteString(fmt.Sprintf("%s", args[dm.Order].Interface()))
+		builder.WriteString("@")
 	}
-	return []byte(s.String())
+	return []byte(builder.String())
 }
 
 func (d *defaultProcessCacheImpl) EncodeValue(s def.Serialize, v reflect.Value) []byte {
@@ -44,19 +52,23 @@ type cEntry struct {
 	t    time.Time
 }
 type defaultPersistenceCache struct {
-	cache map[string]cEntry
+	//cache map[string]cEntry
+	cache sync.Map
 }
 
 func (d defaultPersistenceCache) Set(key []byte, value []byte, ttl time.Duration) {
-	d.cache[string(key)] = cEntry{
+	d.cache.Store(string(key), cEntry{
 		data: value,
 		t:    time.Now().Add(ttl),
-	}
+	})
 }
 
 func (d defaultPersistenceCache) Get(key []byte) []byte {
-	if f, b := d.cache[string(key)]; b && f.t.After(time.Now()) {
-		return f.data
+	if f, b := d.cache.Load(string(key)); b && f != nil {
+		entry := f.(cEntry)
+		if entry.t.After(time.Now()) {
+			return entry.data
+		}
 	}
 	return nil
 }

@@ -2,34 +2,29 @@ package cache
 
 import (
 	"bytes"
-	"fmt"
 	"gitee.com/fast_api/api/call"
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/http"
 	"gitee.com/fast_api/api/mg"
 	"io"
 	"reflect"
-	"strings"
 	"time"
 )
 
 var (
 	cacheType                         = reflect.TypeOf((*Cache)(nil)).Elem()
-	persistenceCache PersistenceCache = &defaultPersistenceCache{cache: make(map[string]cEntry)}
+	persistenceCache PersistenceCache = &defaultPersistenceCache{}
 	processCache     ProcessCache     = &defaultProcessCacheImpl{}
 )
 
 func init() {
 	http.RegisterReturnHandler(&Bytes{})
 	call.SetMethodProxy(func(fn call.MethodCaller, m *def.MethodInfo, args []reflect.Value) []reflect.Value {
-		var builder strings.Builder
-		for _, dm := range m.Param {
-			builder.WriteString(dm.Name)
-			builder.WriteString("=")
-			builder.WriteString(fmt.Sprintf("%s", args[dm.Order].Interface()))
-			builder.WriteString("@")
+		key := []byte(m.MethodName + "@")
+		encodeKey := processCache.EncodeKey(m, args)
+		if encodeKey != nil && len(encodeKey) > 0 {
+			key = append(key, encodeKey...)
 		}
-		key := processCache.EncodeKey(m.MethodName, builder.String())
 		if cv := persistenceCache.Get(key); cv != nil {
 			return []reflect.Value{
 				reflect.ValueOf(Bytes(cv)),
@@ -55,6 +50,9 @@ func validArgs(m *def.MethodInfo, args []reflect.Value) {
 
 func validCache(vs []reflect.Value) Cache {
 	for _, v := range vs {
+		if !v.IsValid() || v.IsNil() {
+			continue
+		}
 		if v.Type().Implements(cacheType) {
 			return v.Interface().(Cache)
 		}
