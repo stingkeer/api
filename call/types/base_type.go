@@ -17,6 +17,12 @@ func (b *BaseType) Mapper(p def.ParamWarp) reflect.Value {
 		return utils.DefaultCallValue(dest.Kind())
 	}
 	switch dest.Kind() {
+	case reflect.Bool:
+		parseBool, err := strconv.ParseBool(value)
+		if err != nil {
+			panic(err)
+		}
+		return reflect.ValueOf(parseBool)
 	case reflect.String:
 		return reflect.ValueOf(value)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
@@ -46,6 +52,7 @@ func (b *BaseType) Mapper(p def.ParamWarp) reflect.Value {
 
 func (b *BaseType) Register() []reflect.Type {
 	return []reflect.Type{
+		reflect.TypeOf((*bool)(nil)).Elem(),
 		reflect.TypeOf((*string)(nil)).Elem(),
 		reflect.TypeOf((*int)(nil)).Elem(),
 		reflect.TypeOf((*int8)(nil)).Elem(),
