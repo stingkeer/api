@@ -12,11 +12,12 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"sync"
 	"testing"
 	"time"
 )
 
-func hello1(kk def.StringReq) interface{} {
+func hello1(kk def.StringReq) any {
 	return map[string]string{"name": kk.String()}
 }
 
@@ -30,15 +31,15 @@ func MulFile(read multipart.Reader) string {
 
 func TestApiHttp(t *testing.T) {
 	logrus.SetLevel(logrus.TraceLevel)
-	GET(func(a http.Request) (interface{}, any) {
+	GET(func(a http.Request) (any, any) {
 		return a.Host, cache.NewCacheImpl(time.Second)
 	}, "/hello")
 
-	GET(func(a big.Int) interface{} {
+	GET(func(a big.Int) any {
 		return a.String()
 	}, "/int")
 
-	GET(func(a def.Header) interface{} {
+	GET(func(a def.Header) any {
 		return a.Values("Accept-Encoding")
 	}, "/h")
 
@@ -55,7 +56,7 @@ func TestApiHttp(t *testing.T) {
 
 	}, "/http")
 
-	GET(func() interface{} {
+	GET(func() any {
 		f, e := os.Open("d:/download/QmfWv8FfpKiCWsueKfXDLrgyqXZsEuGFJFBL7TfjNmxkAw")
 		fmt.Println(e)
 		stream := NewStream(f)
@@ -88,10 +89,10 @@ type A struct {
 	_ string
 }
 
-func (A) Encode(interface{}) *def.Content {
+func (A) Encode(any) *def.Content {
 	return nil
 }
-func (A) Decode([]byte, interface{}) error {
+func (A) Decode([]byte, any) error {
 	return nil
 }
 
@@ -181,4 +182,16 @@ func TestCache(t *testing.T) {
 		return "hello", cache.NewCacheImpl(time.Second * 30)
 	}, "/cache")
 	StartService(nil)
+}
+
+func TestAfterRegister(t *testing.T) {
+
+	var s sync.WaitGroup
+	s.Add(1)
+	go StartService(nil)
+	GET(func(s def.StringReq) any {
+		return "after" + s.String()
+	}, "/after")
+	s.Wait()
+
 }

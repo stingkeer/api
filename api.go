@@ -4,11 +4,15 @@ import (
 	"gitee.com/fast_api/api/call"
 	"gitee.com/fast_api/api/call/rettypes"
 	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/dwarf"
 	"gitee.com/fast_api/api/http"
+	"gitee.com/fast_api/api/log"
 	"gitee.com/fast_api/api/match"
 	"gitee.com/fast_api/api/mg"
 	"gitee.com/fast_api/api/serialize"
 	stdhttp "net/http"
+	"os"
+	"sync"
 )
 
 type (
@@ -53,10 +57,20 @@ var (
 	NewRedirect = rettypes.NewRedirect
 )
 
+var (
+	maker = dwarf.NewDwarfMaker()
+	once  sync.Once
+)
+
 func httpM(method string) httpMethod {
-	if initFnCache.Init() {
-		panic(eg)
-	}
+	//init dwarf
+	once.Do(func() {
+		if dll := os.Getenv("API_DLL"); dll == "" {
+			maker.Init(nil)
+		} else {
+			maker.Init(&dll)
+		}
+	})
 	return func(f interface{}, url string) {
 		entry := &def.Entry{
 			Url:    url,
@@ -64,9 +78,31 @@ func httpM(method string) httpMethod {
 			Fn:     f,
 		}
 		initFnCache.Add(entry)
-		mg.Invoke(func(match def.Match) {
+		err := mg.Invoke(func(match def.Match) {
 			match.Add(url, entry)
 		})
+		if err != nil {
+			panic(err)
+		}
+		findM, err := maker.LookFun(entry.Fn)
+		if err != nil {
+			panic(err)
+		}
+		var args = make(map[string]dwarf.ArgsMeta)
+		for _, arg := range findM.Args {
+			args[arg.Name] = arg
+		}
+		err = mg.Invoke(func(pool *def.MethodsPools) {
+			pool.Set(findM.MethodName, &def.MethodInfo{
+				Method:     entry,
+				MethodName: findM.MethodName,
+				Param:      args,
+			})
+		})
+		if err != nil {
+			panic(err)
+		}
+		log.Infof("[%s] %s(%s) mapping url = %s", entry.Method, findM.MethodName, printArgs(findM.Args), entry.Url)
 	}
 }
 

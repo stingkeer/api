@@ -13,7 +13,6 @@ import (
 	"os"
 	"runtime/debug"
 	"strings"
-	"time"
 )
 
 type ConfigFun func(conf *Config) *Config
@@ -78,17 +77,11 @@ func (ad *Server) trimPrefix(s string) string {
 }
 
 func (ad *Server) ListenAndServe() {
-	if !ad.hasInitPacked {
-		ad.packInitApiWithPath(nil)
-	}
 	log.Infof("listen addr %s", ad.conf.Listen())
 	log.Error(http.ListenAndServe(ad.conf.Listen(), ad))
 }
 
 func (ad *Server) StartTLSService() {
-	if !ad.hasInitPacked {
-		ad.packInitApiWithPath(nil)
-	}
 	log.Infof("listen addr %s", ad.conf.Listen())
 	caCertPool := x509.NewCertPool()
 	caCert, err := os.ReadFile(ad.conf.CaFile())
@@ -107,9 +100,6 @@ func (ad *Server) StartTLSService() {
 }
 
 func (ad *Server) ApiHttp(rw http.ResponseWriter, req *http.Request) {
-	if !ad.hasInitPacked {
-		ad.packInitApiWithPath(nil)
-	}
 	ihttp.DoHttp(rw, req)
 }
 
@@ -119,32 +109,6 @@ func (ad *Server) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 func (ad *Server) SetLogTrimPrefix(prefixM string) {
 	ad.prefix = prefixM
-}
-
-func (ad *Server) packInitApiWithPath(path *string) {
-	ad.init(path)
-	start := time.Now()
-	log.Debugf("api had caches %d", initFnCache.Len())
-	initFnCache.Range(func(index int, en *def.Entry) {
-		findM, err := ad.maker.LookFun(en.Fn)
-		if err != nil {
-			panic(err)
-		}
-		var args = make(map[string]dwarf.ArgsMeta)
-		for _, arg := range findM.Args {
-			args[arg.Name] = arg
-		}
-		ad.pool.Set(findM.MethodName, &def.MethodInfo{
-			Method:     en,
-			MethodName: findM.MethodName,
-			Param:      args,
-		})
-		initFnCache.SetDone()
-		ad.hasInitPacked = true
-		log.Infof("[%s] %s(%s) mapping url = %s", en.Method, ad.trimPrefix(findM.MethodName), printArgs(findM.Args), en.Url)
-	})
-
-	log.Infof("init use %s", time.Since(start))
 }
 
 func printArgs(args []dwarf.ArgsMeta) string {
