@@ -19,16 +19,6 @@ type (
 	httpMethod func(f interface{}, url string)
 )
 
-const eg = `
-please use api.GET or api.POST in init() method !
-eg.
-func init() {
-	api.GET(func(username string) {
-		fmt.Println(username)
-	},"send")
-}
-`
-
 var (
 	GET  = httpM(stdhttp.MethodGet)
 	POST = httpM(stdhttp.MethodPost)
@@ -73,9 +63,9 @@ func httpM(method string) httpMethod {
 	})
 	return func(f interface{}, url string) {
 		entry := &def.Entry{
-			Url:    url,
-			Method: method,
-			Fn:     f,
+			Url:        url,
+			HttpMethod: method,
+			Fn:         f,
 		}
 		initFnCache.Add(entry)
 		err := mg.Invoke(func(match def.Match) {
@@ -102,7 +92,7 @@ func httpM(method string) httpMethod {
 		if err != nil {
 			panic(err)
 		}
-		log.Infof("[%s] %s(%s) mapping url = %s", entry.Method, findM.MethodName, printArgs(findM.Args), entry.Url)
+		log.Infof("[%s] %s(%s) mapping url = %s", entry.HttpMethod, findM.MethodName, printArgs(findM.Args), entry.Url)
 	}
 }
 

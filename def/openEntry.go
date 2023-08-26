@@ -3,33 +3,20 @@ package def
 import (
 	"gitee.com/fast_api/api/dwarf"
 	"gitee.com/fast_api/api/mg"
+	"gitee.com/fast_api/api/utils"
 	"net/http"
 	"reflect"
 	"sync"
 )
 
-//Fn [name]->
-
 type MethodsPools struct {
-	kv sync.Map
+	utils.Map[string, MethodInfo]
 }
 
 func init() {
 	mg.Provide(func() *MethodsPools {
 		return &MethodsPools{}
 	})
-}
-
-func (m *MethodsPools) Get(name string) *MethodInfo {
-	if v, b := m.kv.Load(name); b {
-		return v.(*MethodInfo)
-	} else {
-		return nil
-	}
-}
-
-func (m *MethodsPools) Set(name string, methodInfo *MethodInfo) {
-	m.kv.Store(name, methodInfo)
 }
 
 type Param struct {
@@ -40,7 +27,7 @@ type Param struct {
 type MethodInfo struct {
 	Pkg        string                    `json:"pkg"`
 	Receive    string                    `json:"receive"`
-	Method     interface{}               `json:"-"`
+	Method     *Entry                    `json:"-"`
 	MethodName string                    `json:"method_name"`
 	Param      map[string]dwarf.ArgsMeta `json:"param"`
 }
@@ -51,11 +38,11 @@ type Content struct {
 }
 
 type Entry struct {
-	Url    string
-	Group  string
-	Method string
-	Fn     interface{}
-	Ids    sync.Map
+	Url        string
+	Group      string
+	HttpMethod string
+	Fn         interface{}
+	Ids        sync.Map
 }
 
 type ParamWarp struct {

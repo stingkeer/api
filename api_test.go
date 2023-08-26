@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gitee.com/fast_api/api/cache"
 	"gitee.com/fast_api/api/def"
+	_ "gitee.com/fast_api/api/kit/swgger"
 	"gitee.com/fast_api/api/mg"
 	"github.com/sirupsen/logrus"
 	"io"

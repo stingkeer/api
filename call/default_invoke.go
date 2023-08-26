@@ -25,7 +25,7 @@ type UserProxyInvokeImpl struct {
 func NewUserProxyInvokeImpl(list *list.List) *UserProxyInvokeImpl {
 	u := &UserProxyInvokeImpl{list: list}
 	var fn MethodInvoke = func(fn MethodCaller, m *def.MethodInfo, args []reflect.Value) []reflect.Value {
-		return reflect.ValueOf(m.Method.(*def.Entry).Fn).Call(args)
+		return reflect.ValueOf(m.Method.Fn).Call(args)
 	}
 	list.PushBack(fn)
 	return u

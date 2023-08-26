@@ -36,7 +36,7 @@ func (api *ApiInter) NotFindPath(rw http.ResponseWriter, req *http.Request) {
 }
 
 func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
-	log.Tracef("incoming req Method [%s] , Url [%s]", req.Method, req.URL.String())
+	log.Tracef("incoming req HttpMethod [%s] , Url [%s]", req.Method, req.URL.String())
 	entry := api.match.Match(req.URL)
 	req.Header.Del(def.HEAD_CONST)
 	if nil == entry {
@@ -44,8 +44,8 @@ func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
 		api.NotFindPath(rw, req)
 		return false
 	}
-	if req.Method != entry.Method {
-		log.Warnf("not support Method %s", req.Method)
+	if req.Method != entry.HttpMethod {
+		log.Warnf("not support HttpMethod %s", req.Method)
 		return false
 	}
 	if entry.Fn != nil {
