@@ -1,6 +1,45 @@
 package def
 
-import "net/http"
+import (
+	"net/http"
+)
+
+type (
+	HttpMethod func(f any, url string) *Option
+	MiddleWare func(next func(rw http.ResponseWriter, req *http.Request)) func(rw http.ResponseWriter, req *http.Request)
+)
+
+var DefaultContext *Context
+
+type Context struct {
+	Match     Match
+	Pool      *MethodsPools
+	Caller    Caller
+	Serialize Serialize
+}
+
+type Option struct {
+	mi  *MethodInfo
+	ctx *Context
+}
+
+func (o *Option) SetContext(ctx *Context) *Option {
+	o.ctx = ctx
+	return o
+}
+
+func (o *Option) SetMethod(md *MethodInfo) *Option {
+	o.mi = md
+	return o
+}
+
+func (o *Option) Swagger(commit string) *Option {
+	return o
+}
+
+func (o *Option) SetMiddleware(m ...MiddleWare) *Option {
+	return o
+}
 
 const (
 	Content_JSON        = "application/json"

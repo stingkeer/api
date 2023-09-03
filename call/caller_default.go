@@ -5,33 +5,30 @@ import (
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/intercept"
 	"gitee.com/fast_api/api/log"
-	"gitee.com/fast_api/api/mg"
 	"gitee.com/fast_api/api/utils"
 	"io"
 	"net/http"
 	"os"
 	"reflect"
-	"runtime"
 	"strings"
-	"sync"
 )
 
 type callerDefault struct {
 	serialize  def.Serialize
+	pool       *def.MethodsPools
 	mIntercept intercept.MethodIntercept
 }
 
 var (
 	adapters       = make(map[reflect.Type]def.Adapter)
 	adapterGeneric = make(map[string]def.Adapter)
-	pool           *def.MethodsPools
-	once           sync.Once
 )
 
-func NewCaller(serialize def.Serialize) *callerDefault {
+func NewCaller(serialize def.Serialize, pool *def.MethodsPools) *callerDefault {
 	return &callerDefault{
 		serialize:  serialize,
 		mIntercept: NewUserProxyInvokeImpl(methodInvokes),
+		pool:       pool,
 	}
 }
 
@@ -55,16 +52,15 @@ func RegisterGenericTypeMapper(adapter def.Adapter) {
 // Call request == call(def) => value
 func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 	v := reflect.ValueOf(f.Fn)
-	name := runtime.FuncForPC(reflect.ValueOf(f.Fn).Pointer()).Name()
-	m := c.getFuncInfo(name)
+	m := c.pool.FuncInfo(f.Fn)
 	if m == nil {
 		log.Error("not find method in exe")
 		os.Exit(2)
 	}
 	params := req.URL.Query()
-	f.Ids.Range(func(key, value any) bool {
-		params.Add(key.(string), value.(string))
-		return true
+	//
+	f.Ids.Range(func(key, value string) {
+		params.Add(key, value)
 	})
 
 	paramsV := make([]reflect.Value, len(m.Param))
@@ -130,15 +126,7 @@ func toPtr(obj interface{}) reflect.Value {
 }
 
 func (c *callerDefault) getFuncInfo(name string) *def.MethodInfo {
-	once.Do(func() {
-		err := mg.Invoke(func(poolMd *def.MethodsPools) {
-			pool = poolMd
-		})
-		if err != nil {
-			panic(err)
-		}
-	})
-	mInfo := pool.Get(name)
+	mInfo := c.pool.Get(name)
 	if mInfo != nil {
 		return mInfo
 	}

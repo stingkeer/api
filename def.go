@@ -8,7 +8,6 @@ import (
 	"gitee.com/fast_api/api/dwarf"
 	ihttp "gitee.com/fast_api/api/http"
 	"gitee.com/fast_api/api/log"
-	"gitee.com/fast_api/api/mg"
 	"net/http"
 	"os"
 	"runtime/debug"
@@ -31,13 +30,6 @@ func (ad *Server) Maker() *dwarf.DwarfMaker {
 
 func (ad *Server) Config() *Config {
 	return &ad.conf
-}
-
-func init() {
-	err := mg.Provide(NewServer)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func NewServer(pool *def.MethodsPools) *Server {
@@ -109,16 +101,4 @@ func (ad *Server) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 func (ad *Server) SetLogTrimPrefix(prefixM string) {
 	ad.prefix = prefixM
-}
-
-func printArgs(args []dwarf.ArgsMeta) string {
-	var s strings.Builder
-	l := len(args) - 1
-	for i, arg := range args {
-		s.WriteString(arg.Name)
-		if i != l {
-			s.WriteString(",")
-		}
-	}
-	return s.String()
 }

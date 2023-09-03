@@ -40,3 +40,6 @@ api.GET(func() interface{} {
 }, "/download")
 api.StartService(":8011")
 ```
+```shell
+go build -gcflags all=-N -l
+```

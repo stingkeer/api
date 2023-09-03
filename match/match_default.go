@@ -20,7 +20,7 @@ func (m *MatchImpl) Match(url *url.URL) *def.Entry {
 	}
 	ent := data.(*def.Entry)
 	for i := 0; i < len(e); i++ {
-		ent.Ids.Store(e[i], pv[i])
+		ent.Ids.Set(e[i], pv[i])
 	}
 	log.Debugf("Url path = %s is matched", url.Path)
 	return data.(*def.Entry)

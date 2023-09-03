@@ -2,21 +2,25 @@ package def
 
 import (
 	"gitee.com/fast_api/api/dwarf"
-	"gitee.com/fast_api/api/mg"
+	"gitee.com/fast_api/api/log"
 	"gitee.com/fast_api/api/utils"
 	"net/http"
 	"reflect"
-	"sync"
+	"runtime"
 )
 
 type MethodsPools struct {
-	utils.Map[string, MethodInfo]
+	utils.Map[string, *MethodInfo]
 }
 
-func init() {
-	mg.Provide(func() *MethodsPools {
-		return &MethodsPools{}
-	})
+func (m *MethodsPools) FuncInfo(fn any) *MethodInfo {
+	name := runtime.FuncForPC(reflect.ValueOf(fn).Pointer()).Name()
+	mInfo := m.Get(name)
+	if mInfo != nil {
+		return mInfo
+	}
+	log.Errorf("not find name [%s]", name)
+	return nil
 }
 
 type Param struct {
@@ -30,6 +34,7 @@ type MethodInfo struct {
 	Method     *Entry                    `json:"-"`
 	MethodName string                    `json:"method_name"`
 	Param      map[string]dwarf.ArgsMeta `json:"param"`
+	Middleware []MiddleWare
 }
 
 type Content struct {
@@ -42,7 +47,7 @@ type Entry struct {
 	Group      string
 	HttpMethod string
 	Fn         interface{}
-	Ids        sync.Map
+	Ids        utils.Map[string, string]
 }
 
 type ParamWarp struct {

@@ -14,13 +14,15 @@ type ApiInter struct {
 	match     def.Match
 	caller    def.Caller
 	serialize def.Serialize
+	pool      *def.MethodsPools
 }
 
-func NewApiIntercept(match def.Match, caller def.Caller, serialize def.Serialize) intercept.HttpIntercept {
+func NewApiIntercept(match def.Match, caller def.Caller, serialize def.Serialize, pool *def.MethodsPools) intercept.HttpIntercept {
 	return &ApiInter{
 		match:     match,
 		caller:    caller,
 		serialize: serialize,
+		pool:      pool,
 	}
 }
 
@@ -49,6 +51,13 @@ func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
 		return false
 	}
 	if entry.Fn != nil {
+		//m := api.pool.FuncInfo(entry.Fn)
+		//if len(m.Middleware) > 0 {
+		//	for i := 0; i < len(m.Middleware); i++ {
+		//		handle := m.Middleware[i]
+		//		//TODO Middleware
+		//	}
+		//}
 		iRet := api.caller.Call(entry, req)
 		if !doWithRet(iRet, rw, req) {
 			if iRet == nil {
@@ -89,8 +98,8 @@ func WriteRetResponse(rw http.ResponseWriter, req *http.Request, adapter def.Ret
 		mHeader := v.Append(&readHead{
 			req: req,
 		})
-		for k, v := range mHeader {
-			header.Add(k, v)
+		for k, v1 := range mHeader {
+			header.Add(k, v1)
 		}
 	}
 

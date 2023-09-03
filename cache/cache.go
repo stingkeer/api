@@ -5,7 +5,6 @@ import (
 	"gitee.com/fast_api/api/call"
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/http"
-	"gitee.com/fast_api/api/mg"
 	"io"
 	"reflect"
 	"time"
@@ -34,9 +33,7 @@ func init() {
 		if len(invokeReturn) > 1 {
 			cache := validCache(invokeReturn)
 			if cache != nil {
-				mg.Invoke(func(serialize def.Serialize) {
-					persistenceCache.Set(key, processCache.EncodeValue(serialize, invokeReturn[0]), cache.ExpireTime_())
-				})
+				persistenceCache.Set(key, processCache.EncodeValue(def.DefaultContext.Serialize, invokeReturn[0]), cache.ExpireTime_())
 			}
 		}
 		return invokeReturn

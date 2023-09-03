@@ -1,10 +1,9 @@
-package swgger
+package swagger
 
 import (
 	"fmt"
 	"gitee.com/fast_api/api/call/types"
 	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/mg"
 	"math/rand"
 	"reflect"
 	"strings"
@@ -52,51 +51,46 @@ type Entry struct {
 	} `json:"security"`
 }
 
-func GenSwagger() Swagger {
+func GenSwagger(ctx *def.Context) Swagger {
 	definitionsMap = make(map[string]Object)
 	return Swagger{
 		Swagger:     "2.0",
-		Paths:       genPaths(),
+		Paths:       genPaths(ctx),
 		Definitions: definitionsMap,
 		Schemes:     []string{"http", "https"},
 		Host:        "localhost:8080",
 	}
 }
 
-func genPaths() map[string]map[string]Entry {
+func genPaths(ctx *def.Context) map[string]map[string]Entry {
 	en := make(map[string]map[string]Entry)
-	err := mg.Invoke(func(pool *def.MethodsPools) {
-		pool.Range(func(s string, info *def.MethodInfo) {
-			entry := make(map[string]Entry)
-			mEn := Entry{}
-			var params []Parameter
-			for name, p := range info.Param {
-				typ, format := DataType(p.Typ)
-				mp, req := ParameterIN(p.Typ)
-				parameter := Parameter{
-					Name:     name,
-					In:       mp,
-					Required: req,
-				}
-				if typ == "Object" {
-					parameter.Schema = map[string]string{
-						"$ref": format,
-					}
-				} else {
-					parameter.Type = typ
-					parameter.Format = format
-				}
-				params = append(params, parameter)
+	ctx.Pool.Range(func(s string, info *def.MethodInfo) {
+		entry := make(map[string]Entry)
+		mEn := Entry{}
+		var params []Parameter
+		for name, p := range info.Param {
+			typ, format := DataType(p.Typ)
+			mp, req := ParameterIN(p.Typ)
+			parameter := Parameter{
+				Name:     name,
+				In:       mp,
+				Required: req,
 			}
-			mEn.Parameters = params
-			mEn.Produces = MimeTypes()
-			entry[strings.ToLower(info.Method.HttpMethod)] = mEn
-			en[info.Method.Url] = entry
-		})
+			if typ == "Object" {
+				parameter.Schema = map[string]string{
+					"$ref": format,
+				}
+			} else {
+				parameter.Type = typ
+				parameter.Format = format
+			}
+			params = append(params, parameter)
+		}
+		mEn.Parameters = params
+		mEn.Produces = MimeTypes()
+		entry[strings.ToLower(info.Method.HttpMethod)] = mEn
+		en[info.Method.Url] = entry
 	})
-	if err != nil {
-		panic(err)
-	}
 	return en
 }
 

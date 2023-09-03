@@ -1,4 +1,4 @@
-package swgger
+package swagger
 
 import (
 	"reflect"

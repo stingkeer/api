@@ -1,17 +1,12 @@
 package api
 
 import (
-	"gitee.com/fast_api/api/mg"
+	"gitee.com/fast_api/api/def"
+	_ "gitee.com/fast_api/api/kit"
 	"net/http"
 )
 
-var server *Server
-
-func init() {
-	mg.Invoke(func(s *Server) {
-		server = s
-	})
-}
+var server = NewServer(def.DefaultContext.Pool)
 
 func StartService(f ConfigFun) {
 	if f != nil {
