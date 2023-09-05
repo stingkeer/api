@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"reflect"
 	"runtime"
+	"sync"
 )
 
 type MethodsPools struct {
@@ -35,6 +36,7 @@ type MethodInfo struct {
 	MethodName string                    `json:"method_name"`
 	Param      map[string]dwarf.ArgsMeta `json:"param"`
 	Middleware []MiddleWare
+	KV         sync.Map
 }
 
 type Content struct {

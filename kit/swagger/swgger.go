@@ -11,6 +11,7 @@ import (
 
 //impl open-api
 //https://swagger.io/resources/open-api/
+//https://swagger.io/specification/v3/
 
 type Swagger struct {
 	Swagger     string                      `json:"swagger,omitempty"`
@@ -67,6 +68,12 @@ func genPaths(ctx *def.Context) map[string]map[string]Entry {
 	ctx.Pool.Range(func(s string, info *def.MethodInfo) {
 		entry := make(map[string]Entry)
 		mEn := Entry{}
+		if commit, b := info.KV.Load("swagger.description"); b {
+			mEn.Description = commit.(string)
+		}
+		if summary, b := info.KV.Load("swagger.summary"); b {
+			mEn.Summary = summary.(string)
+		}
 		var params []Parameter
 		for name, p := range info.Param {
 			typ, format := DataType(p.Typ)

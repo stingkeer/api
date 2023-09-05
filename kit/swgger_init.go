@@ -12,5 +12,8 @@ import (
 func init() {
 	core.HttpM(http.MethodGet, def.DefaultContext)(func() swagger.Swagger {
 		return swagger.GenSwagger(def.DefaultContext)
-	}, "/api/swagger").Swagger("swagger spec json api")
+	}, "/api/swagger").Swagger(func(swagger def.SwaggerOps) {
+		swagger.SetSummary("swagger json data")
+		swagger.SetDescription("auto gen from api.")
+	})
 }

@@ -33,11 +33,13 @@ func (o *Option) SetMethod(md *MethodInfo) *Option {
 	return o
 }
 
-func (o *Option) Swagger(commit string) *Option {
+func (o *Option) Swagger(opsFn func(swagger SwaggerOps)) *Option {
+	opsFn(&swaggerImpl{o.mi})
 	return o
 }
 
 func (o *Option) SetMiddleware(m ...MiddleWare) *Option {
+	o.mi.Middleware = append(o.mi.Middleware, m...)
 	return o
 }
 
