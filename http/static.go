@@ -51,6 +51,10 @@ func (s *Static) Http(rw http.ResponseWriter, req *http.Request) bool {
 	return false
 }
 
+// HandleStatic
+// path is the mapping url
+// dirPath is the real path
+// fileSystem open[ join(path + dirPath) ]
 func (s *Static) HandleStatic(path, dirPath string, fileSystem http.FileSystem) {
 	s.m[path] = staticEntry{
 		fs:      fileSystem,
