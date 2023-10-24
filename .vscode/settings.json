@@ -1,0 +1,7 @@
+{
+    "commentTranslate.hover.enabled": false,
+    "go.buildFlags": [
+        "-tags=swagger"
+    ],
+    "go.testTags": "swagger",
+}

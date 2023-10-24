@@ -2,13 +2,14 @@ package http
 
 import (
 	"encoding/json"
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/intercept"
-	"gitee.com/fast_api/api/log"
 	"net/http"
 	"runtime/debug"
 	"sort"
 	"sync"
+
+	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/intercept"
+	"gitee.com/fast_api/api/log"
 )
 
 type Handles []intercept.HttpIntercept

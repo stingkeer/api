@@ -1,9 +1,10 @@
 package api
 
 import (
+	"net/http"
+
 	"gitee.com/fast_api/api/def"
 	_ "gitee.com/fast_api/api/kit"
-	"net/http"
 )
 
 var server = NewServer(def.DefaultContext.Pool)
