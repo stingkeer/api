@@ -1,12 +1,18 @@
 package core
 
 import (
+	_ "unsafe"
+
 	"gitee.com/fast_api/api/call"
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/http"
+	"gitee.com/fast_api/api/intercept"
 	"gitee.com/fast_api/api/match"
 	"gitee.com/fast_api/api/serialize"
 )
+
+//go:linkname addHttpHandle gitee.com/fast_api/api/http.addHttpHandle
+func addHttpHandle(f intercept.HttpIntercept)
 
 func init() {
 	json := &serialize.JsonConvertImpl{}
@@ -18,8 +24,8 @@ func init() {
 		Caller:    call.NewCaller(json, pool),
 	}
 	//
-	http.AddHttpHandle(http.NewApiIntercept(def.DefaultContext.Match, def.DefaultContext.Caller, def.DefaultContext.Serialize, pool))
+	addHttpHandle(http.NewApiIntercept(def.DefaultContext.Match, def.DefaultContext.Caller, def.DefaultContext.Serialize, pool))
 
 	//
-	http.AddHttpHandle(http.DefaultStatic)
+	addHttpHandle(http.DefaultStatic)
 }

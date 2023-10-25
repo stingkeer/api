@@ -2,12 +2,13 @@ package http
 
 import (
 	"encoding/json"
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/intercept"
-	"gitee.com/fast_api/api/log"
 	"io"
 	"net/http"
 	"reflect"
+
+	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/intercept"
+	"gitee.com/fast_api/api/log"
 )
 
 type ApiInter struct {
@@ -142,6 +143,6 @@ func WriteResponse(rw http.ResponseWriter, req *http.Request, content *def.Conte
 
 }
 
-func (api *ApiInter) Order() int {
-	return 100
+func (api *ApiInter) Order() def.HandlerOrder {
+	return def.Handler_API
 }

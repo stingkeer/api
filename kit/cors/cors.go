@@ -1,9 +1,11 @@
 package cors
 
 import (
-	"gitee.com/fast_api/api"
-	"github.com/rs/cors"
 	"net/http"
+
+	"gitee.com/fast_api/api"
+	"gitee.com/fast_api/api/def"
+	"github.com/rs/cors"
 )
 
 func init() {
@@ -23,6 +25,6 @@ func (c *Handle) Http(rw http.ResponseWriter, req *http.Request) bool {
 	return false
 }
 
-func (c *Handle) Order() int {
+func (c *Handle) Order() def.HandlerOrder {
 	return 10
 }

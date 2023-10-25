@@ -1,14 +1,15 @@
 package intercept
 
 import (
-	"gitee.com/fast_api/api/def"
 	"net/http"
 	"reflect"
+
+	"gitee.com/fast_api/api/def"
 )
 
 type HttpIntercept interface {
 	Http(rw http.ResponseWriter, req *http.Request) bool
-	Order() int
+	Order() def.HandlerOrder
 }
 
 type MethodIntercept interface {

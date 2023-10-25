@@ -41,8 +41,16 @@ func DoHttp(rw http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func AddHttpHandle(f intercept.HttpIntercept) {
+func addHttpHandle(f intercept.HttpIntercept) {
 	httpHandles = append(httpHandles, f)
+}
+
+func AddHttpHandle(f intercept.HttpIntercept) {
+	if f.Order() <= 100 {
+		log.Error("HttpIntercept Must be greater than or equal to 100")
+		return
+	}
+	addHttpHandle(f)
 }
 
 func WriteError(err interface{}, rw http.ResponseWriter) {

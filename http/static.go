@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"gitee.com/fast_api/api/def"
 )
 
 var DefaultStatic = NewStatic()
@@ -97,8 +99,8 @@ func (s *Static) HandleStatic(path, dirPath string, fileSystem http.FileSystem, 
 	}
 }
 
-func (s *Static) Order() int {
-	return 99
+func (s *Static) Order() def.HandlerOrder {
+	return def.Handler_STATIC
 }
 
 // /web/a.js  /web/*
