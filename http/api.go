@@ -48,20 +48,19 @@ func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
 		//	}
 		//}
 		iRet := api.caller.Call(entry, req)
-		if !doWithRet(iRet, rw, req) {
-			if iRet == nil {
-				WriteResponse(rw, req, nil)
-				return false
-			}
-			//default return json
-			h := api.serialize.Encode(iRet)
-			if h == nil {
-				WriteResponse(rw, req, nil)
-				return false
-			}
-			WriteResponse(rw, req, h)
-			return false
+		if iRet == nil {
+			WriteResponse(rw, req, nil)
+			return true
 		}
+		if doWithRet(iRet, rw, req) {
+			return true
+		}
+		h := api.serialize.Encode(iRet)
+		if h != nil {
+			WriteResponse(rw, req, h)
+			return true
+		}
+		return false
 
 	}
 	return false
