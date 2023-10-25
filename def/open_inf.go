@@ -17,6 +17,12 @@ type Match interface {
 }
 
 type Caller interface {
+	// CallerTrace
 	// Call request ==> object
 	Call(f *Entry, req *http.Request) interface{}
+}
+
+type CallerTrace interface {
+	Before() bool
+	After()
 }
