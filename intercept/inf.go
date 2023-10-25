@@ -8,6 +8,8 @@ import (
 )
 
 type HttpIntercept interface {
+	// HttpIntercept
+	// if return true, indicating interception and not executing backwards
 	Http(rw http.ResponseWriter, req *http.Request) bool
 	Order() def.HandlerOrder
 }

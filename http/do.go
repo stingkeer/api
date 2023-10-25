@@ -46,7 +46,7 @@ func addHttpHandle(f intercept.HttpIntercept) {
 }
 
 func AddHttpHandle(f intercept.HttpIntercept) {
-	if f.Order() <= 100 {
+	if f.Order() <= 100 || f.Order() > 1000 {
 		log.Error("HttpIntercept Must be greater than or equal to 100")
 		return
 	}

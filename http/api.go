@@ -27,24 +27,12 @@ func NewApiIntercept(match def.Match, caller def.Caller, serialize def.Serialize
 	}
 }
 
-func (api *ApiInter) NotFindPath(rw http.ResponseWriter, req *http.Request) {
-	con := api.serialize.Encode(map[string]string{
-		"path": req.URL.String(),
-		"msg":  "Not find Path",
-	})
-	header := rw.Header()
-	header.Add("Content-Type", con.ContentType)
-	rw.WriteHeader(http.StatusNotFound)
-	rw.Write(con.Bytes)
-}
-
 func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
 	log.Tracef("incoming req HttpMethod [%s] , Url [%s]", req.Method, req.URL.String())
 	entry := api.match.Match(req.URL)
 	req.Header.Del(def.HEAD_CONST)
 	if nil == entry {
 		log.Tracef("not match %s", req.URL)
-		api.NotFindPath(rw, req)
 		return false
 	}
 	if req.Method != entry.HttpMethod {
