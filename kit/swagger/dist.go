@@ -3,8 +3,9 @@ package swagger
 import (
 	"embed"
 	"fmt"
-	"gitee.com/fast_api/api/http"
 	stdhttp "net/http"
+
+	"gitee.com/fast_api/api/http"
 )
 
 //go:embed ui/*

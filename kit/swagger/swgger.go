@@ -2,11 +2,13 @@ package swagger
 
 import (
 	"fmt"
-	"gitee.com/fast_api/api/call/types"
-	"gitee.com/fast_api/api/def"
 	"math/rand"
+	"os"
 	"reflect"
 	"strings"
+
+	"gitee.com/fast_api/api/call/types"
+	"gitee.com/fast_api/api/def"
 )
 
 //impl open-api
@@ -54,12 +56,13 @@ type Entry struct {
 
 func GenSwagger(ctx *def.Context) Swagger {
 	definitionsMap = make(map[string]Object)
+	host := os.Getenv("api.listen")
 	return Swagger{
 		Swagger:     "2.0",
 		Paths:       genPaths(ctx),
 		Definitions: definitionsMap,
 		Schemes:     []string{"http", "https"},
-		Host:        "localhost:8080",
+		Host:        host,
 	}
 }
 

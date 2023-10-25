@@ -4,14 +4,16 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/dwarf"
-	ihttp "gitee.com/fast_api/api/http"
-	"gitee.com/fast_api/api/log"
+	"net"
 	"net/http"
 	"os"
 	"runtime/debug"
 	"strings"
+
+	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/dwarf"
+	ihttp "gitee.com/fast_api/api/http"
+	"gitee.com/fast_api/api/log"
 )
 
 type ConfigFun func(conf *Config) *Config
@@ -35,7 +37,7 @@ func (ad *Server) Config() *Config {
 func NewServer(pool *def.MethodsPools) *Server {
 	config := Config{
 		dwarf:  dwarf.NewDwarfMaker(),
-		listen: ":8080",
+		listen: "0.0.0.0:8080",
 	}
 	return &Server{pool: pool, conf: config, maker: config.dwarf}
 }
@@ -69,6 +71,8 @@ func (ad *Server) trimPrefix(s string) string {
 }
 
 func (ad *Server) ListenAndServe() {
+	host, port, _ := net.SplitHostPort(ad.conf.Listen())
+	os.Setenv("api.listen", fmt.Sprintf("%s:%s", host, port))
 	log.Infof("listen addr %s", ad.conf.Listen())
 	log.Error(http.ListenAndServe(ad.conf.Listen(), ad))
 }
