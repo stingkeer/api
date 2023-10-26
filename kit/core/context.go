@@ -7,6 +7,7 @@ import (
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/http"
 	"gitee.com/fast_api/api/intercept"
+	"gitee.com/fast_api/api/kit/handler"
 	"gitee.com/fast_api/api/match"
 	"gitee.com/fast_api/api/serialize"
 )
@@ -25,9 +26,10 @@ func init() {
 	}
 	//
 	addHttpHandle(http.NewApiIntercept(def.DefaultContext.Match, def.DefaultContext.Caller, def.DefaultContext.Serialize, pool))
-
 	//
 	addHttpHandle(http.NewNotFind(def.DefaultContext.Serialize))
 	//
 	addHttpHandle(http.DefaultStatic)
+	//
+	addHttpHandle(&handler.GZip{})
 }

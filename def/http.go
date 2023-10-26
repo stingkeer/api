@@ -47,6 +47,7 @@ func (o *Option) SetMiddleware(m ...MiddleWare) *Option {
 }
 
 const (
+	Content_Encoding    = "Content-Encoding"
 	Content_JSON        = "application/json"
 	CONTENT_STREAM      = "application/octet-stream"
 	CONTENT_HTML        = "text/html"
