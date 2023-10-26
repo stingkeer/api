@@ -2,8 +2,6 @@ package rettypes
 
 import (
 	"fmt"
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/log"
 	"io"
 	"net/http"
 	"os"
@@ -11,6 +9,9 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+
+	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/log"
 )
 
 type Stream struct {
@@ -27,7 +28,7 @@ type Stream struct {
 	name        *string
 }
 
-//Read(p []byte) (n int, err error)
+// Read(p []byte) (n int, err error)
 func (s *Stream) Read(p []byte) (n int, err error) {
 	iTotal := s.end - s.start + 1
 	if s.readTotal+int64(len(p)) < iTotal {
@@ -63,8 +64,9 @@ func NewStream(io io.Reader) *Stream {
 	}
 }
 
-func (s *Stream) SetRateLimit(bytesPerSec float64) {
+func (s *Stream) SetRateLimit(bytesPerSec float64) *Stream {
 	s.rLimit.SetRateLimit(bytesPerSec)
+	return s
 }
 
 func (s *Stream) ContentType() string {
@@ -102,7 +104,7 @@ func (s *Stream) Close() error {
 	return nil
 }
 
-//bytes=0-1023
+// bytes=0-1023
 func (s *Stream) parseRange(hRange string) {
 	kv := strings.Split(hRange, "=")
 	sEnd := strings.Split(kv[1], "-")
@@ -178,8 +180,9 @@ func (s *Stream) AddHeader(k, v string) {
 	s.heads[k] = v
 }
 
-func (s *Stream) SetName(name string) {
+func (s *Stream) SetName(name string) *Stream {
 	s.name = &name
+	return s
 }
 
 func (s *Stream) reSetFileName() {

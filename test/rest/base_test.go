@@ -57,9 +57,7 @@ func TestDownFile(t *testing.T) {
 		api.GET(func() any {
 			f, e := os.Open("d:/download/QmfWv8FfpKiCWsueKfXDLrgyqXZsEuGFJFBL7TfjNmxkAw")
 			fmt.Println(e)
-			stream := api.NewStream(f)
-			stream.SetRateLimit(500000)
-			return stream
+			return api.NewStream(f).SetRateLimit(500000)
 		}, "/download")
 	})
 }
