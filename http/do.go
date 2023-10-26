@@ -2,10 +2,10 @@ package http
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"runtime/debug"
 	"sort"
-	"sync"
 
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/intercept"
@@ -15,16 +15,18 @@ import (
 type Handles []intercept.HttpIntercept
 
 var (
-	g           sync.Once
-	httpHandles Handles
+	httpHandleZero    Handles
+	httpHandles       Handles
+	httpHandlesGT1000 Handles
 )
 
-func DoHttp(rw http.ResponseWriter, req *http.Request) {
-	g.Do(func() {
-		sort.Slice(httpHandles, func(i, j int) bool {
-			return httpHandles[i].Order() < httpHandles[j].Order()
-		})
+func (h Handles) Sort() {
+	sort.Slice(h, func(i, j int) bool {
+		return h[i].Order() < h[j].Order()
 	})
+}
+
+func DoHttp(rw http.ResponseWriter, req *http.Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			WriteError(handleError(err), rw)
@@ -32,23 +34,49 @@ func DoHttp(rw http.ResponseWriter, req *http.Request) {
 			debug.PrintStack()
 		}
 	}()
+	//execute system and user handler
 	for _, handle := range httpHandles {
 		if handle != nil {
 			if handle.Http(rw, req) {
-				break
+				return
+			}
+		}
+	}
+	//execute order == 0 handler
+	for _, handle := range httpHandleZero {
+		if handle != nil {
+			if handle.Http(rw, req) {
+				return
+			}
+		}
+	}
+	//execute order >= 1000 handler
+	for _, handle := range httpHandlesGT1000 {
+		if handle != nil {
+			if handle.Http(rw, req) {
+				return
 			}
 		}
 	}
 }
 
 func addHttpHandle(f intercept.HttpIntercept) {
+	if f.Order() == 0 {
+		httpHandleZero = append(httpHandleZero, f)
+		return
+	}
+	if f.Order() >= 1000 {
+		httpHandlesGT1000 = append(httpHandlesGT1000, f)
+		httpHandlesGT1000.Sort()
+		return
+	}
 	httpHandles = append(httpHandles, f)
+	httpHandles.Sort()
 }
 
 func AddHttpHandle(f intercept.HttpIntercept) {
 	if f.Order() <= 100 || f.Order() > 1000 {
-		log.Error("HttpIntercept Must be greater than or equal to 100")
-		return
+		panic(fmt.Errorf("HttpIntercept order %d Must be greater than or equal to 100", f.Order()))
 	}
 	addHttpHandle(f)
 }

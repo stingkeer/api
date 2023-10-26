@@ -3,14 +3,9 @@ package cors
 import (
 	"net/http"
 
-	"gitee.com/fast_api/api"
 	"gitee.com/fast_api/api/def"
 	"github.com/rs/cors"
 )
-
-func init() {
-	api.AddHttpHandle(NewCorsHandle(cors.Default()))
-}
 
 type Handle struct {
 	cors *cors.Cors
@@ -26,5 +21,5 @@ func (c *Handle) Http(rw http.ResponseWriter, req *http.Request) bool {
 }
 
 func (c *Handle) Order() def.HandlerOrder {
-	return 10
+	return 0
 }
