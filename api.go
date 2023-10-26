@@ -1,12 +1,13 @@
 package api
 
 import (
+	stdhttp "net/http"
+
 	"gitee.com/fast_api/api/call"
 	"gitee.com/fast_api/api/call/rettypes"
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/http"
 	"gitee.com/fast_api/api/kit/core"
-	stdhttp "net/http"
 )
 
 var (
@@ -35,4 +36,6 @@ var (
 	Static = http.DefaultStatic.HandleStatic
 
 	NewRedirect = rettypes.NewRedirect
+
+	NewResp = rettypes.NewResp
 )

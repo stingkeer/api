@@ -41,13 +41,16 @@ func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
 	}
 	if entry.Fn != nil {
 		iRet := api.caller.Call(entry, req)
+		//Returns null handling
 		if iRet == nil {
 			WriteResponse(rw, req, nil)
 			return true
 		}
+		// RetAdapter handling
 		if doWithRet(iRet, rw, req) {
 			return true
 		}
+		// Serialize the value
 		h := api.serialize.Encode(iRet)
 		if h != nil {
 			WriteResponse(rw, req, h)
@@ -72,10 +75,12 @@ func doWithRet(value interface{}, rw http.ResponseWriter, req *http.Request) boo
 func WriteRetResponse(rw http.ResponseWriter, req *http.Request, adapter def.RetAdapter) {
 	appendSysHeader(rw, req)
 	header := rw.Header()
+	//set ContentType
 	header.Add("Content-Type", adapter.ContentType())
 
 	//if struct impl def.AppendHeader ,can def header
 	if v, b := adapter.(def.AppendHeader); b {
+		//Call the return handler and assign append
 		mHeader := v.Append(&readHead{
 			req: req,
 		})
@@ -84,15 +89,18 @@ func WriteRetResponse(rw http.ResponseWriter, req *http.Request, adapter def.Ret
 		}
 	}
 
+	//set http status
 	if v, b := adapter.(def.HttpStatus); b {
 		rw.WriteHeader(v.Code())
 	}
 
+	//return http io
 	_, err := io.Copy(rw, adapter.Return())
 	if err != nil {
 		log.Error(err)
 	}
 
+	//close
 	if v, b := adapter.(io.Closer); b {
 		v.Close()
 	}
