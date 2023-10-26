@@ -2,16 +2,19 @@ package call
 
 import (
 	"fmt"
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/intercept"
-	"gitee.com/fast_api/api/log"
-	"gitee.com/fast_api/api/utils"
 	"io"
 	"net/http"
 	"os"
 	"reflect"
 	"strings"
+
+	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/intercept"
+	"gitee.com/fast_api/api/log"
+	"gitee.com/fast_api/api/utils"
 )
+
+var _ def.Caller = (*callerDefault)(nil)
 
 type callerDefault struct {
 	serialize  def.Serialize

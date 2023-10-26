@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -11,17 +12,24 @@ func handle1() string {
 	return "hello,word"
 }
 
-func handle2() {
-
+func handle2() string {
+	return "handle2"
 }
 
-func loginAuth(rw http.ResponseWriter, req *http.Request) bool {
-	return true
+func LoginAuth(req *http.Request) (ret any) {
+	fmt.Println("LoginAuth")
+	return nil
+}
+
+func LoginCookie(req *http.Request) (ret any) {
+	fmt.Println("LoginCookie")
+	return "Cookie not find"
 }
 
 func Test_middleware(t *testing.T) {
 	api.AddRoutes(
 		api.GET(handle1, "/login"),
 		api.GET(handle2, "/showOrder"),
-	).Middleware(loginAuth)
+	).Middleware(LoginAuth, LoginCookie)
+	api.StartService(nil)
 }

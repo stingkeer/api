@@ -6,7 +6,10 @@ import (
 
 type (
 	HttpMethod func(f any, url string) *Option
-	MiddleWare func(rw http.ResponseWriter, req *http.Request) bool
+	// MiddleWare
+	// If ret == nil The next MiddleWare will continue
+	// if ret != nil Ret will be used as the result
+	MiddleWare func(req *http.Request) (ret any)
 )
 
 var DefaultContext *Context

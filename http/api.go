@@ -40,13 +40,6 @@ func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
 		return false
 	}
 	if entry.Fn != nil {
-		//m := api.pool.FuncInfo(entry.Fn)
-		//if len(m.Middleware) > 0 {
-		//	for i := 0; i < len(m.Middleware); i++ {
-		//		handle := m.Middleware[i]
-		//		//TODO Middleware
-		//	}
-		//}
 		iRet := api.caller.Call(entry, req)
 		if iRet == nil {
 			WriteResponse(rw, req, nil)

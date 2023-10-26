@@ -21,7 +21,7 @@ func init() {
 		Serialize: json,
 		Match:     match.NewMatchImpl(),
 		Pool:      pool,
-		Caller:    call.NewCaller(json, pool),
+		Caller:    call.NewTraceCaller(json, pool),
 	}
 	//
 	addHttpHandle(http.NewApiIntercept(def.DefaultContext.Match, def.DefaultContext.Caller, def.DefaultContext.Serialize, pool))
