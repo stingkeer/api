@@ -16,6 +16,7 @@ var server = NewServer(def.DefaultContext.Pool)
 
 func StartService(ops ...Optional) error {
 	apply(&defaultConf, ops...)
+	log.Infof("listen addr %s", defaultConf.listen)
 	server := &http.Server{
 		Addr:    defaultConf.listen,
 		Handler: server,
@@ -29,6 +30,7 @@ func StartService(ops ...Optional) error {
 
 func StartTLSService(ops ...Optional) error {
 	apply(&defaultConf, ops...)
+	log.Infof("listen addr %s", defaultConf.listen)
 	t, err := loadTls(&defaultConf)
 	if err != nil {
 		log.Error(err)

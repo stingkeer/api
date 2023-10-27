@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"fmt"
 	"testing"
 
 	"gitee.com/fast_api/api"
@@ -96,5 +97,5 @@ func TestHttp3(t *testing.T) {
 	api.GET(func() any {
 		return "hello,word"
 	}, "/hello")
-	api.StartTLSService(api.WithTLS([]byte(cert), []byte(key)))
+	fmt.Println(api.StartTLSService(api.WithTLS([]byte(cert), []byte(key))))
 }
