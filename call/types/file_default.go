@@ -1,15 +1,18 @@
 package types
 
 import (
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/log"
 	"mime/multipart"
 	"reflect"
+
+	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/log"
 )
+
+var _ def.Adapter = (*FileType)(nil)
 
 type FileType struct{}
 
-func (f FileType) Mapper(param def.ParamWarp) reflect.Value {
+func (f FileType) Mapper(param *def.ParamWarp) reflect.Value {
 	newT := reflect.New(param.PTyp)
 	reader, err := param.MultipartReader()
 	if err != nil {

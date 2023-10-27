@@ -5,6 +5,19 @@ import (
 	"net/url"
 )
 
+type Request struct {
+	*http.Request
+	rw http.ResponseWriter
+}
+
+func (r *Request) ResponseWriter() http.ResponseWriter {
+	return r.rw
+}
+
+func WithRequest(rw http.ResponseWriter, req *http.Request) *Request {
+	return &Request{rw: rw, Request: req}
+}
+
 type Serialize interface {
 	Encode(interface{}) *Content
 	// Decode interface{} is out
@@ -19,7 +32,7 @@ type Match interface {
 type Caller interface {
 	// CallerTrace
 	// Call request ==> object
-	Call(f *Entry, req *http.Request) interface{}
+	Call(f *Entry, req *Request) interface{}
 }
 
 type CallerTrace interface {

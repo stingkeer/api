@@ -2,14 +2,20 @@ package types
 
 import (
 	"encoding/json"
-	"gitee.com/fast_api/api/def"
 	"net/http"
 	"reflect"
+
+	"gitee.com/fast_api/api/def"
+)
+
+var (
+	_ def.Adapter = (*HttpType)(nil)
+	_ def.Adapter = (*HeadType)(nil)
 )
 
 type HttpType struct{}
 
-func (f HttpType) Mapper(param def.ParamWarp) reflect.Value {
+func (f HttpType) Mapper(param *def.ParamWarp) reflect.Value {
 	return reflect.ValueOf(param.Request)
 }
 
@@ -31,8 +37,8 @@ func (f *HeadType) Cookie(name string) (*http.Cookie, error) {
 	return f.req.Cookie(name)
 }
 
-func (f HeadType) Mapper(param def.ParamWarp) reflect.Value {
-	f.req = &param.Request
+func (f HeadType) Mapper(param *def.ParamWarp) reflect.Value {
+	f.req = param.Request.Request
 	return reflect.ValueOf(&f)
 }
 

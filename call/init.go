@@ -14,6 +14,7 @@ func init() {
 	RegisterTypeMapper(&types.FileType{})
 	RegisterTypeMapper(&types.HttpType{})
 	RegisterTypeMapper(&types.HeadType{})
+	RegisterTypeMapper(&types.WSType{})
 	RegisterTypeMapper(&types.TypeRequire{BaseType: base})
 
 	RegisterGenericTypeMapper(&types.TypeRequireG{})

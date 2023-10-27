@@ -1,16 +1,19 @@
 package types
 
 import (
+	"reflect"
+	"strconv"
+
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/log"
 	"gitee.com/fast_api/api/utils"
-	"reflect"
-	"strconv"
 )
+
+var _ def.Adapter = (*BaseType)(nil)
 
 type BaseType struct{}
 
-func (b *BaseType) Mapper(p def.ParamWarp) reflect.Value {
+func (b *BaseType) Mapper(p *def.ParamWarp) reflect.Value {
 	dest := p.PTyp
 	value := p.PValue
 	if value == "" {

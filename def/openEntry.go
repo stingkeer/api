@@ -1,13 +1,13 @@
 package def
 
 import (
-	"gitee.com/fast_api/api/dwarf"
-	"gitee.com/fast_api/api/log"
-	"gitee.com/fast_api/api/utils"
-	"net/http"
 	"reflect"
 	"runtime"
 	"sync"
+
+	"gitee.com/fast_api/api/dwarf"
+	"gitee.com/fast_api/api/log"
+	"gitee.com/fast_api/api/utils"
 )
 
 type MethodsPools struct {
@@ -53,7 +53,7 @@ type Entry struct {
 }
 
 type ParamWarp struct {
-	http.Request
+	Request
 	PTyp   reflect.Type
 	PValue string
 	Path   string

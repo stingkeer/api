@@ -2,15 +2,18 @@ package types
 
 import (
 	"fmt"
-	"gitee.com/fast_api/api/def"
 	"math/big"
 	"reflect"
+
+	"gitee.com/fast_api/api/def"
 )
+
+var _ def.Adapter = (*BigType)(nil)
 
 type BigType struct {
 }
 
-func (f BigType) Mapper(param def.ParamWarp) reflect.Value {
+func (f BigType) Mapper(param *def.ParamWarp) reflect.Value {
 	if in, b := new(big.Int).SetString(param.PValue, 10); b {
 		return reflect.ValueOf(*in).Convert(param.PTyp)
 	}

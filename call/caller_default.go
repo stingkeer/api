@@ -53,7 +53,7 @@ func RegisterGenericTypeMapper(adapter def.Adapter) {
 }
 
 // Call request == call(def) => value
-func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
+func (c *callerDefault) Call(f *def.Entry, req *def.Request) interface{} {
 	v := reflect.ValueOf(f.Fn)
 	m := c.pool.FuncInfo(f.Fn)
 	if m == nil {
@@ -69,7 +69,7 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 	paramsV := make([]reflect.Value, len(m.Param))
 	//TODO
 	for pName, p := range m.Param {
-		pw := def.ParamWarp{Request: *req}
+		pw := &def.ParamWarp{Request: *req}
 		pw.PTyp = v.Type().In(p.Order)
 		pw.PName = pName
 		if t, b := adapters[p.Typ]; b {
@@ -81,7 +81,6 @@ func (c *callerDefault) Call(f *def.Entry, req *http.Request) interface{} {
 		}
 		// adapterGeneric
 		if pw.PTyp.Kind() == reflect.Struct {
-			fmt.Println(pw.PTyp.String())
 			tName, _ := TypeInfo(pw.PTyp.String())
 			if td, b1 := adapterGeneric[tName]; b1 {
 				if param, exist := params[pName]; exist {

@@ -1,8 +1,6 @@
 package call
 
 import (
-	"net/http"
-
 	"gitee.com/fast_api/api/def"
 )
 
@@ -20,12 +18,12 @@ func NewTraceCaller(serialize def.Serialize, pool *def.MethodsPools) *TraceCalle
 	}}
 }
 
-func (t *TraceCaller) Call(f *def.Entry, req *http.Request) interface{} {
+func (t *TraceCaller) Call(f *def.Entry, req *def.Request) interface{} {
 	m := t.pool.FuncInfo(f.Fn)
 	if len(m.Middleware) > 0 {
 		for i := 0; i < len(m.Middleware); i++ {
 			handle := m.Middleware[i]
-			if v := handle(req); v != nil {
+			if v := handle(req.Request); v != nil {
 				return v
 			}
 		}

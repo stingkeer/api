@@ -6,7 +6,7 @@ import (
 )
 
 type Adapter interface {
-	Mapper(param ParamWarp) reflect.Value
+	Mapper(param *ParamWarp) reflect.Value
 	Register() []reflect.Type
 }
 

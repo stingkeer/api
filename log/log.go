@@ -136,5 +136,5 @@ func (*defaultLogger) Warn(args ...interface{}) {
 
 // Warnf implements Logger.
 func (*defaultLogger) Warnf(format string, args ...interface{}) {
-	panic("unimplemented")
+	fmt.Println(fmt.Sprintf(format, args...))
 }

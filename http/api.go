@@ -40,7 +40,7 @@ func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
 		return false
 	}
 	if entry.Fn != nil {
-		iRet := api.caller.Call(entry, req)
+		iRet := api.caller.Call(entry, def.WithRequest(rw, req))
 		//Returns null handling
 		if iRet == nil {
 			WriteResponse(rw, req, nil)

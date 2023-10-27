@@ -2,15 +2,18 @@ package types
 
 import (
 	"fmt"
-	"gitee.com/fast_api/api/def"
 	"reflect"
+
+	"gitee.com/fast_api/api/def"
 )
+
+var _ def.Adapter = (*TypeRequire)(nil)
 
 type TypeRequire struct {
 	BaseType
 }
 
-func (b *TypeRequire) Mapper(p def.ParamWarp) reflect.Value {
+func (b *TypeRequire) Mapper(p *def.ParamWarp) reflect.Value {
 	if p.PValue == "" {
 		panic(fmt.Sprintf("param %s is require", p.PName))
 	}

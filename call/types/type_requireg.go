@@ -1,15 +1,18 @@
 package types
 
 import (
-	"gitee.com/fast_api/api/def"
 	"reflect"
+
+	"gitee.com/fast_api/api/def"
 )
+
+var _ def.Adapter = (*TypeRequireG)(nil)
 
 type TypeRequireG struct {
 	TypeRequire
 }
 
-func (b *TypeRequireG) Mapper(p def.ParamWarp) reflect.Value {
+func (b *TypeRequireG) Mapper(p *def.ParamWarp) reflect.Value {
 	return b.TypeRequire.Mapper(p)
 }
 
