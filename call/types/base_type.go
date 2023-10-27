@@ -41,7 +41,7 @@ func (b *BaseType) Mapper(p *def.ParamWarp) reflect.Value {
 		}
 		return reflect.ValueOf(s).Convert(dest)
 	case reflect.Float32, reflect.Float64:
-		s, e := strconv.ParseFloat(value, 10)
+		s, e := strconv.ParseFloat(value, 64)
 		if e != nil {
 			panic(e)
 		}
