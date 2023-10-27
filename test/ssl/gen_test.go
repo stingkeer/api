@@ -7,22 +7,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"testing"
-
-	"gitee.com/fast_api/api"
 )
 
 func TestGen(t *testing.T) {
 	certSetup()
-}
-
-func TestTLSServer(t *testing.T) {
-	api.GET(func() interface{} {
-		return "hello word"
-	}, "/tls")
-	api.StartTLSService(func(conf *api.Config) *api.Config {
-		// ":8033", "ca.pem", "cert.pem", "key.pem"
-		return conf
-	})
 }
 
 func TestTLSClient(t *testing.T) {

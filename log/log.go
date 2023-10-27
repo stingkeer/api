@@ -1,9 +1,9 @@
 package log
 
-import "github.com/sirupsen/logrus"
+import "fmt"
 
 var (
-	std Logger
+	std Logger = &defaultLogger{}
 )
 
 // Trace logs a message at level Trace on the standard logger.
@@ -74,8 +74,67 @@ func SetLevel(level Level, f func(logger Logger)) {
 	f(std)
 }
 
-func init() {
-	if std == nil {
-		std = logrus.New()
-	}
+var _ Logger = (*defaultLogger)(nil)
+
+type defaultLogger struct {
+}
+
+// Debug implements Logger.
+func (*defaultLogger) Debug(args ...interface{}) {
+	fmt.Println(args...)
+}
+
+// Debugf implements Logger.
+func (*defaultLogger) Debugf(format string, args ...interface{}) {
+	fmt.Println(fmt.Sprintf(format, args...))
+}
+
+// Error implements Logger.
+func (*defaultLogger) Error(args ...interface{}) {
+	fmt.Println(args...)
+}
+
+// Errorf implements Logger.
+func (*defaultLogger) Errorf(format string, args ...interface{}) {
+	fmt.Println(fmt.Sprintf(format, args...))
+}
+
+// Fatal implements Logger.
+func (*defaultLogger) Fatal(args ...interface{}) {
+	fmt.Println(args...)
+}
+
+// Info implements Logger.
+func (*defaultLogger) Info(args ...interface{}) {
+	fmt.Println(args...)
+}
+
+// Infof implements Logger.
+func (*defaultLogger) Infof(format string, args ...interface{}) {
+	fmt.Println(fmt.Sprintf(format, args...))
+}
+
+// Panic implements Logger.
+func (*defaultLogger) Panic(args ...interface{}) {
+	fmt.Println(args...)
+}
+
+// Trace implements Logger.
+func (*defaultLogger) Trace(args ...interface{}) {
+	fmt.Println(args...)
+}
+
+// Tracef implements Logger.
+func (*defaultLogger) Tracef(format string, args ...interface{}) {
+	fmt.Println(fmt.Sprintf(format, args...))
+}
+
+// Warn implements Logger.
+func (*defaultLogger) Warn(args ...interface{}) {
+	fmt.Println(args...)
+}
+
+// Warnf implements Logger.
+func (*defaultLogger) Warnf(format string, args ...interface{}) {
+	panic("unimplemented")
 }

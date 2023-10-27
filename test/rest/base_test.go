@@ -12,12 +12,7 @@ import (
 	"gitee.com/fast_api/api/cache"
 	"gitee.com/fast_api/api/def"
 	r "gitee.com/fast_api/api/test/R"
-	"github.com/sirupsen/logrus"
 )
-
-func init() {
-	logrus.SetLevel(logrus.TraceLevel)
-}
 
 func TestGetHeader(t *testing.T) {
 	r.Test(func() {
