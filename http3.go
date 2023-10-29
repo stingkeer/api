@@ -3,7 +3,10 @@
 package api
 
 import (
+	"crypto/tls"
 	"errors"
+	"net"
+	"net/http"
 
 	"gitee.com/fast_api/api/def"
 	_ "gitee.com/fast_api/api/kit"
@@ -19,21 +22,75 @@ func StartService(ops ...Optional) error {
 
 func StartTLSService(ops ...Optional) error {
 	apply(&defaultConf, ops...)
-	log.Infof("listen addr %s", defaultConf.listen)
+	log.Infof("QUIC listen addr %s", defaultConf.listen)
 
 	t, err := loadTls(&defaultConf)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
-	server := &http3.Server{
+	quicServer := &http3.Server{
 		Addr:      defaultConf.listen,
 		Handler:   server,
 		TLSConfig: t,
 	}
-	if err := server.ListenAndServe(); err != nil {
+
+	hErr := make(chan error)
+	qErr := make(chan error)
+	go func() {
+		hErr <- httpTls(&defaultConf, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			quicServer.SetQuicHeaders(w.Header())
+			server.ServeHTTP(w, r)
+		}))
+	}()
+	go func() {
+		qErr <- quicServer.Serve(nil)
+	}()
+
+	select {
+	case err := <-hErr:
+		quicServer.Close()
+		return err
+	case err := <-qErr:
+		// Cannot close the HTTP server or wait for requests to complete properly :/
+		return err
+	}
+}
+
+func httpTls(s *ServerConfig, handler http.Handler) error {
+	t, err := loadTls(s)
+	if err != nil {
 		log.Error(err)
 		return err
+	}
+	server := &http.Server{
+		Addr:      s.listen,
+		Handler:   handler,
+		TLSConfig: t,
+	}
+	config := t.Clone()
+
+	// if !strSliceContains(config.NextProtos, "http/1.1") {
+	// 	config.NextProtos = append(config.NextProtos, "http/1.1")
+	// }
+
+	// if server.shuttingDown() {
+	// 	return http.ErrServerClosed
+	// }
+
+	addr := server.Addr
+	if addr == "" {
+		addr = ":https"
+	}
+	ln, err := net.Listen("tcp", addr)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	defer ln.Close()
+	tlsListener := tls.NewListener(ln, config)
+	if err := server.Serve(tlsListener); err != nil {
+		log.Error(err)
 	}
 	return nil
 }

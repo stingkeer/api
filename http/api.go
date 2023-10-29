@@ -43,7 +43,8 @@ func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
 		iRet := api.caller.Call(entry, def.WithRequest(rw, req))
 		//Returns null handling
 		if iRet == nil {
-			WriteResponse(rw, req, nil)
+			// TODO Fix me
+			// WriteResponse(rw, req, nil)
 			return true
 		}
 		// RetAdapter handling

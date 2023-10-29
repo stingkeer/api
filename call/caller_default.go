@@ -116,9 +116,10 @@ func (c *callerDefault) Call(f *def.Entry, req *def.Request) interface{} {
 	}
 	if len(vs) == 0 {
 		log.Warn("call method no return")
-		return reflect.ValueOf(nil)
+		return nil
 	}
-	return vs[0].Interface()
+	x := vs[0]
+	return x.Interface()
 }
 
 func toPtr(obj interface{}) reflect.Value {
