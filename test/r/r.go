@@ -2,6 +2,7 @@ package r
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -97,6 +98,20 @@ func (r *Request) Do(respFn func(resp *Response)) {
 		return
 	}
 	respFn(&Response{resp: resp, t: r.t})
+}
+
+func (r *Request) SetBody(obj []byte) *Request {
+	r.req.Body = io.NopCloser(bytes.NewBuffer(obj))
+	return r
+}
+
+func (r *Request) SetJsonBody(obj any) *Request {
+	bs, err := json.Marshal(obj)
+	if err != nil {
+		r.t.Error(err)
+	}
+	r.req.Body = io.NopCloser(bytes.NewBuffer(bs))
+	return r
 }
 
 func (r *Request) AddHeader(key, value string) *Request {

@@ -111,3 +111,19 @@ func TestResp(t *testing.T) {
 		}
 	})
 }
+
+func TestPostBody(t *testing.T) {
+	x := "{\"name\":\"w\",\"pass\":\"12345\"}"
+	r.Test(t, func() def.Option {
+		return api.POST(func(a struct {
+			Name string `json:"name,omitempty"`
+			Pass string `json:"pass,omitempty"`
+		}) any {
+			return a
+		}, "/login")
+	}).Request().SetBody([]byte(x)).Do(func(resp *r.Response) {
+		if resp.BodyString() != x {
+			t.Error("TestPostBody error")
+		}
+	})
+}

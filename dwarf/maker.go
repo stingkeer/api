@@ -87,7 +87,7 @@ func (h *DwarfMaker) load(exe *string) {
 	if path == "" {
 		panic("DwarfMaker load path == nil")
 	}
-	fmt.Printf("system os %s\n", runtime.GOOS)
+	fmt.Printf("system [%s/%s] %s\n", runtime.GOOS, runtime.GOARCH, path)
 	switch runtime.GOOS {
 	case "windows":
 		h.openData = func() *dwarf.Reader {
