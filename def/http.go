@@ -5,7 +5,7 @@ import (
 )
 
 type (
-	HttpMethod func(f any, url string) *Option
+	HttpMethod func(f any, url string) Option
 	// MiddleWare
 	// If ret == nil The next MiddleWare will continue
 	// if ret != nil Ret will be used as the result
@@ -21,32 +21,17 @@ type Context struct {
 	Serialize Serialize
 }
 
-type Option struct {
-	mi  *MethodInfo
-	ctx *Context
-}
-
-func (o *Option) SetContext(ctx *Context) *Option {
-	o.ctx = ctx
-	return o
-}
-
-func (o *Option) SetMethod(md *MethodInfo) *Option {
-	o.mi = md
-	return o
-}
-
-func (o *Option) Swagger(opsFn func(swagger SwaggerOps)) *Option {
-	opsFn(&swaggerImpl{o.mi})
-	return o
-}
-
-func (o *Option) SetMiddleware(m ...MiddleWare) *Option {
-	o.mi.Middleware = append(o.mi.Middleware, m...)
-	return o
+type Option interface {
+	SetContext(ctx *Context) Option
+	SetMethod(md *MethodInfo) Option
+	Swagger(opsFn func(swagger SwaggerOps)) Option
+	SetMiddleware(m ...MiddleWare) Option
+	Path() string
+	Method() string
 }
 
 const (
+	Content_Type        = "Content-Type"
 	Content_Encoding    = "Content-Encoding"
 	Content_JSON        = "application/json"
 	CONTENT_STREAM      = "application/octet-stream"

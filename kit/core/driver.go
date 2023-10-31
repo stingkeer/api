@@ -39,7 +39,7 @@ func HttpM(method string, ctx *def.Context) def.HttpMethod {
 	//init dwarf
 	once.Do(makerInit)
 
-	return func(f interface{}, url string) *def.Option {
+	return func(f interface{}, url string) def.Option {
 		entry := &def.Entry{
 			Url:        url,
 			HttpMethod: method,
@@ -64,9 +64,62 @@ func HttpM(method string, ctx *def.Context) def.HttpMethod {
 			panic(err)
 		}
 		log.Infof("[%s] %s(%s) mapping url = %s", entry.HttpMethod, findM.MethodName, printArgs(findM.Args), entry.Url)
-		op := def.Option{}
+		op := option{url: url, method: method}
 		op.SetMethod(methodInfo)
 		op.SetContext(ctx)
 		return &op
 	}
+}
+
+var (
+	_ def.Option     = (*option)(nil)
+	_ def.SwaggerOps = (*swaggerImpl)(nil)
+)
+
+type option struct {
+	mi          *def.MethodInfo
+	ctx         *def.Context
+	url, method string
+}
+
+// Method implements def.Option.
+func (o *option) Method() string {
+	return o.method
+}
+
+// Path implements def.Option.
+func (o *option) Path() string {
+	return o.url
+}
+
+func (o *option) SetContext(ctx *def.Context) def.Option {
+	o.ctx = ctx
+	return o
+}
+
+func (o *option) SetMethod(md *def.MethodInfo) def.Option {
+	o.mi = md
+	return o
+}
+
+func (o *option) Swagger(opsFn func(swagger def.SwaggerOps)) def.Option {
+	opsFn(&swaggerImpl{o.mi})
+	return o
+}
+
+func (o *option) SetMiddleware(m ...def.MiddleWare) def.Option {
+	o.mi.Middleware = append(o.mi.Middleware, m...)
+	return o
+}
+
+type swaggerImpl struct {
+	mi *def.MethodInfo
+}
+
+func (s *swaggerImpl) SetSummary(title string) {
+	s.mi.KV.Store("swagger.summary", title)
+}
+
+func (s *swaggerImpl) SetDescription(description string) {
+	s.mi.KV.Store("swagger.description", description)
 }

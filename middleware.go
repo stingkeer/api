@@ -3,7 +3,7 @@ package api
 import "gitee.com/fast_api/api/def"
 
 type MiddlewareOps struct {
-	ops []*def.Option
+	ops []def.Option
 }
 
 func (m *MiddlewareOps) Middleware(mw ...def.MiddleWare) *MiddlewareOps {
@@ -17,6 +17,6 @@ func (m *MiddlewareOps) WithPrefix(...def.MiddleWare) *MiddlewareOps {
 	return m
 }
 
-func AddRoutes(os ...*def.Option) *MiddlewareOps {
+func AddRoutes(os ...def.Option) *MiddlewareOps {
 	return &MiddlewareOps{ops: os}
 }

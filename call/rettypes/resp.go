@@ -21,9 +21,11 @@ type Resp struct {
 	code        int
 	contentType string
 	serialize   def.Serialize
+	reader      io.Reader
 }
 
 func NewResp(resp any) *Resp {
+
 	return &Resp{
 		res:         resp,
 		code:        http.StatusOK,
@@ -34,6 +36,11 @@ func NewResp(resp any) *Resp {
 
 func (r *Resp) SetCode(code int) *Resp {
 	r.code = code
+	return r
+}
+
+func (r *Resp) SetReader(reader io.Reader) *Resp {
+	r.reader = reader
 	return r
 }
 
@@ -79,6 +86,9 @@ func (r *Resp) Register() []reflect.Type {
 // Return implements def.RetAdapter.
 // ReadOnly
 func (r *Resp) Return() io.Reader {
-	context := r.serialize.Encode(r.res)
-	return bytes.NewBuffer(context.Bytes)
+	if r.reader == nil {
+		context := r.serialize.Encode(r.res)
+		return bytes.NewBuffer(context.Bytes)
+	}
+	return r.reader
 }

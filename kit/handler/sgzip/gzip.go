@@ -1,4 +1,4 @@
-package gzip
+package sgzip
 
 import (
 	"compress/gzip"
