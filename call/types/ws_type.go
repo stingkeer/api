@@ -6,7 +6,6 @@ import (
 
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/kit/ws"
-	"gitee.com/fast_api/api/log"
 	"github.com/gorilla/websocket"
 )
 
@@ -29,15 +28,11 @@ func (*WSType) Mapper(param *def.ParamWarp) reflect.Value {
 			panic(err)
 		}
 		if param.PTyp.Kind() == reflect.Ptr {
-			return reflect.ValueOf(ws.NewWSCtx(nil, c))
+			return reflect.ValueOf(ws.NewWSCtx(c))
 		}
 		if param.PTyp.Kind() == reflect.Struct {
-			return reflect.ValueOf(ws.NewWSCtx(nil, c)).Elem()
+			return reflect.ValueOf(ws.NewWSCtx(c)).Elem()
 		}
-		c.SetCloseHandler(func(code int, text string) error {
-			log.Debug(code, text)
-			return nil
-		})
 
 	}
 	panic("Not a websocket connection")

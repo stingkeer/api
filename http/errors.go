@@ -1,15 +1,16 @@
 package http
 
 import (
-	"gitee.com/fast_api/api/def"
 	"reflect"
+
+	"gitee.com/fast_api/api/def"
 )
 
 type ErrorHandler func(err interface{}) interface{}
 
 var errorsMap = make(map[reflect.Type]ErrorHandler)
 
-func handleError(err interface{}) interface{} {
+func handleError(err any) interface{} {
 	if v, b := errorsMap[reflect.TypeOf(err)]; b {
 		return v(err)
 	}

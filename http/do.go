@@ -85,7 +85,7 @@ func AddHttpHandle(f intercept.HttpIntercept) {
 	addHttpHandle(f)
 }
 
-func WriteError(err interface{}, rw http.ResponseWriter) {
+func WriteError(err any, rw http.ResponseWriter) {
 	bytes, e := json.Marshal(err)
 	if e != nil {
 		panic(e)

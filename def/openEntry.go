@@ -44,6 +44,9 @@ type Content struct {
 	Bytes       []byte
 }
 
+// Empty
+type Empty string
+
 type Entry struct {
 	Url        string
 	Group      string
