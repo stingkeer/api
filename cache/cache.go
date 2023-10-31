@@ -2,12 +2,13 @@ package cache
 
 import (
 	"bytes"
-	"gitee.com/fast_api/api/call"
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/http"
 	"io"
 	"reflect"
 	"time"
+
+	"gitee.com/fast_api/api/call"
+	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/http"
 )
 
 var (
@@ -21,7 +22,7 @@ func init() {
 	call.SetMethodProxy(func(fn call.MethodCaller, m *def.MethodInfo, args []reflect.Value) []reflect.Value {
 		key := []byte(m.MethodName + "@")
 		encodeKey := processCache.EncodeKey(m, args)
-		if encodeKey != nil && len(encodeKey) > 0 {
+		if len(encodeKey) > 0 {
 			key = append(key, encodeKey...)
 		}
 		if cv := persistenceCache.Get(key); cv != nil {

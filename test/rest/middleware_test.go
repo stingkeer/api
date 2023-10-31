@@ -31,5 +31,5 @@ func Test_middleware(t *testing.T) {
 		api.GET(handle1, "/login"),
 		api.GET(handle2, "/showOrder"),
 	).Middleware(LoginAuth, LoginCookie)
-	api.StartService(nil)
+	api.StartService()
 }

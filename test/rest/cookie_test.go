@@ -18,8 +18,10 @@ func TestCookie(t *testing.T) {
 			cookie.Value = "hello"
 			header.SetCookie(cookie)
 		}, "/cookie")
-	}).DoRequestNobody(func(resp *r.Response) {
-
+	}).Request().SetCookie("username", "my").Do(func(resp *r.Response) {
+		cookie := resp.Cookies()[0]
+		if cookie.Name != "username" || cookie.Value != "hello" {
+			t.Error("TestCookie Error")
+		}
 	})
-	//cookie
 }

@@ -2,11 +2,12 @@ package cache
 
 import (
 	"fmt"
-	"gitee.com/fast_api/api/def"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
+
+	"gitee.com/fast_api/api/def"
 )
 
 type ProcessCache interface {
@@ -56,14 +57,14 @@ type defaultPersistenceCache struct {
 	cache sync.Map
 }
 
-func (d defaultPersistenceCache) Set(key []byte, value []byte, ttl time.Duration) {
+func (d *defaultPersistenceCache) Set(key []byte, value []byte, ttl time.Duration) {
 	d.cache.Store(string(key), cEntry{
 		data: value,
 		t:    time.Now().Add(ttl),
 	})
 }
 
-func (d defaultPersistenceCache) Get(key []byte) []byte {
+func (d *defaultPersistenceCache) Get(key []byte) []byte {
 	if f, b := d.cache.Load(string(key)); b && f != nil {
 		entry := f.(cEntry)
 		if entry.t.After(time.Now()) {

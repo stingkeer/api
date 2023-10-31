@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"net/http"
 	"testing"
 
 	"gitee.com/fast_api/api"
@@ -14,7 +15,7 @@ func TestNewRedirect(t *testing.T) {
 			return api.NewRedirect("https://www.google.com")
 		}, "/redirect")
 	}).DoRequestNobody(func(resp *r.Response) {
-		if resp.Code() != 302 && resp.Header("host") != "https://www.google.com" {
+		if resp.Code() != http.StatusFound && resp.Header("host") != "https://www.google.com" {
 			t.Errorf("expect code 302 but %d", resp.Code())
 		}
 	})
