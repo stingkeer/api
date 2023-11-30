@@ -10,23 +10,39 @@ import (
 	"gitee.com/fast_api/api/def"
 )
 
-var DefaultStatic = NewStatic()
+var (
+	DefaultStatic           = NewStatic()
+	_             StaticOps = (*staticEntry)(nil)
+)
 
 type (
 	StaticOps interface {
 		Rewrite(orig string, replace string)
+		DefaultFile(file string)
 	}
 	staticEntry struct {
-		fs      http.FileSystem
-		dirPath string
-		rewrite map[string]string
+		fs          http.FileSystem
+		dirPath     string
+		rewrite     map[string]string
+		defaultFile string
 	}
 	StaticOption func(StaticOps)
 )
 
+// DefaultFile implements StaticOps.
+func (s *staticEntry) DefaultFile(file string) {
+	s.defaultFile = file
+}
+
 func StaticRewrite(orig string, replace string) StaticOption {
 	return func(ops StaticOps) {
 		ops.Rewrite(orig, replace)
+	}
+}
+
+func StaticDefaultFile(file string) StaticOption {
+	return func(ops StaticOps) {
+		ops.DefaultFile(file)
 	}
 }
 
@@ -51,6 +67,13 @@ func (s *staticEntry) ServeHTTP(rw http.ResponseWriter, req *http.Request) bool 
 	}
 
 	f, err := s.fs.Open(path.Join(s.dirPath, pathWriter))
+	if err != nil {
+		if s.defaultFile == "" {
+			return false
+		} else {
+			f, err = s.fs.Open(path.Join(s.dirPath, s.defaultFile))
+		}
+	}
 	if err != nil {
 		return false
 	}
@@ -93,10 +116,12 @@ func (s *Static) HandleStatic(path, dirPath string, fileSystem http.FileSystem, 
 		dirPath: dirPath,
 		rewrite: make(map[string]string),
 	}
-	s.m[path] = entry
+
 	for _, op := range sOps {
 		op(&entry)
 	}
+
+	s.m[path] = entry
 }
 
 func (s *Static) Order() def.HandlerOrder {
