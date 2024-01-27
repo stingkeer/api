@@ -2,7 +2,9 @@ package http
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"reflect"
 
@@ -11,11 +13,48 @@ import (
 	"gitee.com/fast_api/api/log"
 )
 
+var (
+	_ intercept.HttpIntercept = (*ApiInter)(nil)
+	_ intercept.HttpIntercept = (*ApiRespose)(nil)
+)
+
 type ApiInter struct {
 	match     def.Match
 	caller    def.Caller
 	serialize def.Serialize
 	pool      *def.MethodsPools
+}
+
+type ApiRespose struct {
+}
+
+func NewApiRespose() *ApiRespose {
+	return &ApiRespose{}
+}
+
+// Http implements intercept.HttpIntercept.
+func (resp *ApiRespose) Http(rw http.ResponseWriter, req *http.Request, ctx *intercept.HttpContext) bool {
+	if _, load := ctx.LoadAndDelete("CALLDATA_NIL"); load {
+		WriteResponse(rw, req, nil)
+		return true
+	}
+	// RetAdapter handling
+	if v, load := ctx.LoadAndDelete("CALLDATA_RetAdapter"); load {
+		WriteRetResponse(rw, req, v.(def.RetAdapter))
+		return true
+	}
+
+	if v, load := ctx.LoadAndDelete("CALLDATA"); load {
+		WriteResponse(rw, req, v.(*def.Content))
+		return true
+	}
+	fmt.Printf("no match %p %s\n", ctx, req.RequestURI)
+	return false
+}
+
+// Order implements intercept.HttpIntercept.
+func (*ApiRespose) Order() def.HandlerOrder {
+	return math.MaxUint - 100
 }
 
 func NewApiIntercept(match def.Match, caller def.Caller, serialize def.Serialize, pool *def.MethodsPools) intercept.HttpIntercept {
@@ -27,53 +66,46 @@ func NewApiIntercept(match def.Match, caller def.Caller, serialize def.Serialize
 	}
 }
 
-func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request) bool {
+func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request, ctx *intercept.HttpContext) bool {
 	log.Tracef("incoming req HttpMethod [%s] , Url [%s]", req.Method, req.URL.String())
 	entry := api.match.Match(req.URL)
 	req.Header.Del(def.HEAD_CONST)
 	if nil == entry {
 		log.Tracef("not match %s", req.URL)
+		ctx.Store("Match", 0)
 		return false
 	}
 	if req.Method != entry.HttpMethod {
 		log.Warnf("not support HttpMethod %s", req.Method)
+		ctx.Store("Match_Method", req.Method)
 		return false
 	}
 	if entry.Fn != nil {
 		iRet := api.caller.Call(entry, def.WithRequest(rw, req))
 		//Returns null handling
 		if iRet == def.Empty("") {
-			return true
+			return false
 		}
 		if iRet == nil {
-			WriteResponse(rw, req, nil)
-			return true
+			ctx.Store("CALLDATA_NIL", 1)
+			return false
 		}
 		// RetAdapter handling
-		if doWithRet(iRet, rw, req) {
-			return true
+		typ := reflect.TypeOf(iRet)
+		if _, b := retAdapters[typ]; b {
+			ctx.Store("CALLDATA_RetAdapter", iRet)
+			return false
 		}
 		// Serialize the value
 		h := api.serialize.Encode(iRet)
 		if h != nil {
-			WriteResponse(rw, req, h)
-			return true
+			ctx.Store("CALLDATA", h)
+			return false
 		}
-
 		return false
 
 	}
 	return false
-}
-
-func doWithRet(value interface{}, rw http.ResponseWriter, req *http.Request) bool {
-	typ := reflect.TypeOf(value)
-	if _, b := retAdapters[typ]; b {
-		WriteRetResponse(rw, req, value.(def.RetAdapter))
-		return true
-	} else {
-		return false
-	}
 }
 
 func WriteRetResponse(rw http.ResponseWriter, req *http.Request, adapter def.RetAdapter) {

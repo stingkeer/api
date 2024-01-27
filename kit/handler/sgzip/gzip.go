@@ -14,7 +14,7 @@ var _ intercept.HttpIntercept = (*GZip)(nil)
 type GZip struct{}
 
 // Http implements intercept.HttpIntercept.
-func (g *GZip) Http(rw http.ResponseWriter, req *http.Request) bool {
+func (g *GZip) Http(rw http.ResponseWriter, req *http.Request, ctx *intercept.HttpContext) bool {
 	if strings.Contains(req.Header.Get(def.Content_Encoding), "gzip") {
 		reader, err := gzip.NewReader(req.Body)
 		if err != nil {

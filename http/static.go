@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/intercept"
 )
 
 var (
@@ -97,10 +98,14 @@ func NewStatic() *Static {
 	return &Static{m: make(map[string]staticEntry)}
 }
 
-func (s *Static) Http(rw http.ResponseWriter, req *http.Request) bool {
+func (s *Static) Http(rw http.ResponseWriter, req *http.Request, ctx *intercept.HttpContext) bool {
 	for reg, handler := range s.m {
 		if ok, _ := s.match(req.URL.Path, reg); ok {
-			return handler.ServeHTTP(rw, req)
+			b := handler.ServeHTTP(rw, req)
+			if b {
+				ctx.SkipResponse()
+			}
+			return b
 		}
 	}
 	return false

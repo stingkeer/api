@@ -34,27 +34,36 @@ func DoHttp(rw http.ResponseWriter, req *http.Request) {
 			debug.PrintStack()
 		}
 	}()
-	//execute system and user handler
-	for _, handle := range httpHandles {
-		if handle != nil {
-			if handle.Http(rw, req) {
-				return
-			}
-		}
-	}
+
+	mP := intercept.NewHttpContext()
 	//execute order == 0 handler
 	for _, handle := range httpHandleZero {
 		if handle != nil {
-			if handle.Http(rw, req) {
-				return
+			if handle.Http(rw, req, mP) {
+				break
 			}
 		}
 	}
+
+	//execute system and user handler
+	for _, handle := range httpHandles {
+		if handle != nil {
+			if handle.Http(rw, req, mP) {
+				break
+			}
+		}
+	}
+
+	if mP.IsSkipResponse() {
+		return
+	}
+
+	//Response area
 	//execute order >= 1000 handler
 	for _, handle := range httpHandlesGT1000 {
 		if handle != nil {
-			if handle.Http(rw, req) {
-				return
+			if handle.Http(rw, req, mP) {
+				break
 			}
 		}
 	}
@@ -79,7 +88,7 @@ func AddHttpHandle(f intercept.HttpIntercept) {
 		addHttpHandle(f)
 		return
 	}
-	if f.Order() <= 100 || f.Order() > 1000 {
+	if f.Order() > 100 && f.Order() < 1000 {
 		panic(fmt.Errorf("HttpIntercept order %d Must be greater than or equal to 100", f.Order()))
 	}
 	addHttpHandle(f)

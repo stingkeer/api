@@ -26,6 +26,8 @@ func init() {
 	}
 	//
 	addHttpHandle(http.NewApiIntercept(def.DefaultContext.Match, def.DefaultContext.Caller, def.DefaultContext.Serialize, pool))
+
+	addHttpHandle(http.NewApiRespose())
 	//
 	addHttpHandle(http.NewNotFind(def.DefaultContext.Serialize))
 	//
