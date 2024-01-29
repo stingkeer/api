@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"math"
 	"net/http"
 
@@ -23,12 +22,8 @@ func NewNotFind(serialize def.Serialize) *NotFind {
 
 // Http implements intercept.HttpIntercept.
 func (n *NotFind) Http(rw http.ResponseWriter, req *http.Request, ctx *intercept.HttpContext) bool {
-	if _, load := ctx.LoadAndDelete("Match"); load {
+	if _, load := ctx.LoadAndDelete("MATCH"); load {
 		n.notFindPath(rw, req, "Not find Path")
-		return true
-	}
-	if v, load := ctx.LoadAndDelete("Match_Method"); load {
-		n.notFindPath(rw, req, fmt.Sprintf("Method %s not support", v))
 		return true
 	}
 	return true

@@ -72,12 +72,12 @@ func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request, ctx *interc
 	req.Header.Del(def.HEAD_CONST)
 	if nil == entry {
 		log.Tracef("not match %s", req.URL)
-		ctx.Store("Match", 0)
+		ctx.Store("MATCH", 0)
 		return false
 	}
 	if req.Method != entry.HttpMethod {
 		log.Warnf("not support HttpMethod %s", req.Method)
-		ctx.Store("Match_Method", req.Method)
+		ctx.Store("MATCH_METHOD", req.Method)
 		return false
 	}
 	if entry.Fn != nil {
