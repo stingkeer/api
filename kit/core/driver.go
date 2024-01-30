@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -114,6 +115,11 @@ func (o *option) SetMiddleware(m ...def.MiddleWare) def.Option {
 
 type swaggerImpl struct {
 	mi *def.MethodInfo
+}
+
+// SetParameterDescription implements def.SwaggerOps.
+func (s *swaggerImpl) SetParameterDescription(name string, description string) {
+	s.mi.KV.Store(fmt.Sprintf("swagger.parameter.%s", name), description)
 }
 
 func (s *swaggerImpl) SetSummary(title string) {

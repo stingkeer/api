@@ -86,6 +86,10 @@ func genPaths(ctx *def.Context) map[string]map[string]Entry {
 				In:       mp,
 				Required: req,
 			}
+			//Description of setting parameters
+			if description, b := info.KV.Load(fmt.Sprintf("swagger.parameter.%s", name)); b {
+				parameter.Description = description.(string)
+			}
 			if typ == "Object" {
 				parameter.Schema = map[string]string{
 					"$ref": format,
@@ -116,7 +120,6 @@ func DataType(t reflect.Type) (typ, format string) {
 		{
 			requireTyps := append(g.Register(), g0.Register()...)
 			if index := search(len(requireTyps), func(i int) bool {
-				fmt.Println(requireTyps[i], t)
 				return requireTyps[i] == t
 			}); index > 0 {
 				return DataType(requireTyps[index].Field(0).Type)

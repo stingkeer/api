@@ -13,5 +13,5 @@ var _static embed.FS
 
 func init() {
 	http.DefaultStatic.HandleStatic("/ui/*", "", stdhttp.FS(_static))
-	fmt.Println("swagger ui http://ip:port/ui/index.html")
+	fmt.Printf("\n[swagger ui] http://ip:port/ui/index.html\n\n")
 }
