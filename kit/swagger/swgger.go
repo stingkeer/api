@@ -11,7 +11,9 @@ import (
 	"gitee.com/fast_api/api/def"
 )
 
-//impl open-api
+//TODO Response type no implement
+
+//Implement the open-api protocol
 //https://swagger.io/resources/open-api/
 //https://swagger.io/specification/v3/
 
@@ -24,34 +26,27 @@ type Swagger struct {
 }
 
 type Parameter struct {
-	Name        string            `json:"name"`
-	In          string            `json:"in"`
-	Description string            `json:"description"`
-	Required    bool              `json:"required"`
-	Type        string            `json:"type"`
+	Name        string            `json:"name,omitempty"`
+	In          string            `json:"in,omitempty"`
+	Description string            `json:"description,omitempty"`
+	Required    bool              `json:"required,omitempty"`
+	Type        string            `json:"type,omitempty"`
 	Format      string            `json:"format,omitempty"`
 	Schema      map[string]string `json:"schema,omitempty"`
 }
 
 type Entry struct {
-	Tags        []string    `json:"tags"`
-	Summary     string      `json:"summary"`
-	Description string      `json:"description"`
-	OperationId string      `json:"operationId"`
-	Consumes    []string    `json:"consumes"`
-	Produces    []string    `json:"produces"`
-	Parameters  []Parameter `json:"parameters"`
-	Responses   struct {
-		Field1 struct {
-			Description string `json:"description"`
-			Schema      struct {
-				Ref string `json:"$ref"`
-			} `json:"schema"`
-		} `json:"200"`
-	} `json:"responses"`
-	Security []struct {
-		PetstoreAuth []string `json:"petstore_auth"`
-	} `json:"security"`
+	Tags        []string     `json:"tags,omitempty"`
+	Summary     string       `json:"summary,omitempty"`
+	Description string       `json:"description,omitempty"`
+	OperationId string       `json:"operation_id,omitempty"`
+	Consumes    []string     `json:"consumes,omitempty"`
+	Produces    []string     `json:"produces,omitempty"`
+	Parameters  []Parameter  `json:"parameters,omitempty"`
+	Responses   map[uint]any `json:"responses,omitempty"`
+	Security    []struct {
+		PetstoreAuth []string `json:"petstore_auth,omitempty"`
+	} `json:"security,omitempty"`
 }
 
 func GenSwagger(ctx *def.Context) Swagger {
@@ -70,16 +65,25 @@ func genPaths(ctx *def.Context) map[string]map[string]Entry {
 	en := make(map[string]map[string]Entry)
 	ctx.Pool.Range(func(s string, info *def.MethodInfo) {
 		entry := make(map[string]Entry)
-		mEn := Entry{}
+		//initialization
+		mEn := Entry{
+			Consumes: consumes(),
+			Responses: map[uint]any{
+				200: map[string]string{
+					"description": "successful operation",
+				},
+			},
+		}
+
 		if commit, b := info.KV.Load("swagger.description"); b {
 			mEn.Description = commit.(string)
 		}
 		if summary, b := info.KV.Load("swagger.summary"); b {
 			mEn.Summary = summary.(string)
 		}
-		var params []Parameter
+		var params []Parameter = []Parameter{}
 		for name, p := range info.Param {
-			typ, format := DataType(p.Typ)
+			typ, format := ParameterDataType(p.Typ)
 			mp, req := ParameterIN(p.Typ)
 			parameter := Parameter{
 				Name:     name,
@@ -90,7 +94,7 @@ func genPaths(ctx *def.Context) map[string]map[string]Entry {
 			if description, b := info.KV.Load(fmt.Sprintf("swagger.parameter.%s", name)); b {
 				parameter.Description = description.(string)
 			}
-			if typ == "Object" {
+			if typ == "Object" && format != "" {
 				parameter.Schema = map[string]string{
 					"$ref": format,
 				}
@@ -101,7 +105,7 @@ func genPaths(ctx *def.Context) map[string]map[string]Entry {
 			params = append(params, parameter)
 		}
 		mEn.Parameters = params
-		mEn.Produces = MimeTypes()
+		mEn.Produces = ResponseMimeTypes()
 		entry[strings.ToLower(info.Method.HttpMethod)] = mEn
 		en[info.Method.Url] = entry
 	})
@@ -114,7 +118,7 @@ var (
 )
 
 // DataType https://swagger.io/specification/v2/#data-type-format
-func DataType(t reflect.Type) (typ, format string) {
+func ParameterDataType(t reflect.Type) (typ, format string) {
 	switch t.Kind() {
 	case reflect.Struct:
 		{
@@ -122,7 +126,7 @@ func DataType(t reflect.Type) (typ, format string) {
 			if index := search(len(requireTyps), func(i int) bool {
 				return requireTyps[i] == t
 			}); index > 0 {
-				return DataType(requireTyps[index].Field(0).Type)
+				return ParameterDataType(requireTyps[index].Field(0).Type)
 			} else {
 				return "Object", definitions(t)
 			}
@@ -173,7 +177,7 @@ func definitions(t reflect.Type) string {
 	properties := make(map[string]Cell)
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
-		dt, format := DataType(field.Type)
+		dt, format := ParameterDataType(field.Type)
 		fName := getFieldName("json", field)
 		if fName == "" {
 			fName = field.Name
@@ -191,6 +195,10 @@ func definitions(t reflect.Type) string {
 	return fmt.Sprintf("#/definitions/%s", key)
 }
 
+func consumes() []string {
+	return []string{"application/json"}
+}
+
 //Mime Types
 //text/plain; charset=utf-8
 //application/json
@@ -203,7 +211,7 @@ func definitions(t reflect.Type) string {
 //application/vnd.github.v3.diff
 //application/vnd.github.v3.patch
 
-func MimeTypes() []string {
+func ResponseMimeTypes() []string {
 	return []string{"application/json"}
 }
 

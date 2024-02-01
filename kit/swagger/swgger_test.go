@@ -1,12 +1,17 @@
 package swagger
 
 import (
+	"encoding/json"
+	"fmt"
 	"reflect"
 	"testing"
 )
 
 func TestDataType(t *testing.T) {
-
+	var params []Parameter = []Parameter{}
+	fmt.Println(params)
+	dd, _ := json.Marshal(params)
+	fmt.Println(string(dd))
 }
 
 func TestDefine(t *testing.T) {
