@@ -11,9 +11,13 @@ import (
 )
 
 var (
-	GET  = core.HttpM(stdhttp.MethodGet, def.DefaultContext)
-	POST = core.HttpM(stdhttp.MethodPost, def.DefaultContext)
-	PUT  = core.HttpM(stdhttp.MethodPut, def.DefaultContext)
+	HEAD    = core.HttpM(stdhttp.MethodHead, def.DefaultContext)
+	GET     = core.HttpM(stdhttp.MethodGet, def.DefaultContext)
+	POST    = core.HttpM(stdhttp.MethodPost, def.DefaultContext)
+	PUT     = core.HttpM(stdhttp.MethodPut, def.DefaultContext)
+	PATCH   = core.HttpM(stdhttp.MethodPatch, def.DefaultContext)
+	DELETE  = core.HttpM(stdhttp.MethodDelete, def.DefaultContext)
+	OPTIONS = core.HttpM(stdhttp.MethodOptions, def.DefaultContext)
 
 	// RegisterErrorHandler error handler
 	RegisterErrorHandler = http.RegisterErrorHandler
