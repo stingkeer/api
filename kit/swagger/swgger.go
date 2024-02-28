@@ -2,6 +2,7 @@ package swagger
 
 import (
 	"fmt"
+	"math/big"
 	"math/rand"
 	"os"
 	"reflect"
@@ -83,8 +84,8 @@ func genPaths(ctx *def.Context) map[string]map[string]Entry {
 		}
 		var params []Parameter = []Parameter{}
 		for name, p := range info.Param {
-			typ, format := ParameterDataType(p.Typ)
-			mp, req := ParameterIN(p.Typ)
+			typ, format := parameterDataType(p.Typ)
+			mp, req := parameterIN(p.Typ)
 			parameter := Parameter{
 				Name:     name,
 				In:       mp,
@@ -118,7 +119,10 @@ var (
 )
 
 // DataType https://swagger.io/specification/v2/#data-type-format
-func ParameterDataType(t reflect.Type) (typ, format string) {
+func parameterDataType(t reflect.Type) (typ, format string) {
+	if reflect.TypeOf((*big.Int)(nil)) == t {
+		return "integer", "int64"
+	}
 	switch t.Kind() {
 	case reflect.Struct:
 		{
@@ -126,14 +130,14 @@ func ParameterDataType(t reflect.Type) (typ, format string) {
 			if index := search(len(requireTyps), func(i int) bool {
 				return requireTyps[i] == t
 			}); index > 0 {
-				return ParameterDataType(requireTyps[index].Field(0).Type)
+				return parameterDataType(requireTyps[index].Field(0).Type)
 			} else {
 				return "Object", definitions(t)
 			}
 		}
-	case reflect.Int8, reflect.Int16, reflect.Int32:
+	case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Uint8, reflect.Uint16, reflect.Uint32:
 		return "integer", "int32"
-	case reflect.Int, reflect.Int64:
+	case reflect.Int, reflect.Int64, reflect.Uint64:
 		return "integer", "int64"
 	case reflect.String:
 		return "string", ""
@@ -173,11 +177,12 @@ type Cell struct {
 
 var definitionsMap map[string]Object
 
+// Check type
 func definitions(t reflect.Type) string {
 	properties := make(map[string]Cell)
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
-		dt, format := ParameterDataType(field.Type)
+		dt, format := parameterDataType(field.Type)
 		fName := getFieldName("json", field)
 		if fName == "" {
 			fName = field.Name
@@ -224,8 +229,9 @@ func search(t int, f func(int) bool) int {
 	return -1
 }
 
-// ParameterIN Required. The location of the parameter. Possible values are "query", "header", "path", "formData" or "body"
-func ParameterIN(t reflect.Type) (in string, require bool) {
+// ParameterIN Required. The location of the parameter.
+// Possible values are "query", "header", "path", "formData" or "body"
+func parameterIN(t reflect.Type) (in string, require bool) {
 	requireTyps := append(g.Register(), g0.Register()...)
 	switch t.Kind() {
 	case reflect.Struct:

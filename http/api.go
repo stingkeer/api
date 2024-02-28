@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"math"
 	"net/http"
@@ -48,7 +47,6 @@ func (resp *ApiRespose) Http(rw http.ResponseWriter, req *http.Request, ctx *int
 		WriteResponse(rw, req, v.(*def.Content))
 		return true
 	}
-	fmt.Printf("no match %p %s\n", ctx, req.RequestURI)
 	return false
 }
 
