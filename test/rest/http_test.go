@@ -39,6 +39,18 @@ func TestSetHeader(t *testing.T) {
 	})
 }
 
+func TestBigIntPtr(t *testing.T) {
+	r.Test(t, func() def.Option {
+		return api.GET(func(a *big.Int) any {
+			return a.String()
+		}, "/bigint")
+	}).Request().AddParam("a", "10000").Do(func(resp *r.Response) {
+		if resp.BodyString() != "10000" {
+			t.Error("big.Int error")
+		}
+	})
+}
+
 func TestBigInt(t *testing.T) {
 	r.Test(t, func() def.Option {
 		return api.GET(func(a big.Int) any {
