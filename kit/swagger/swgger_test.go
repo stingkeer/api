@@ -8,7 +8,7 @@ import (
 )
 
 func TestDataType(t *testing.T) {
-	var params []Parameter = []Parameter{}
+	var params []ParameterObject = []ParameterObject{}
 	fmt.Println(params)
 	dd, _ := json.Marshal(params)
 	fmt.Println(string(dd))

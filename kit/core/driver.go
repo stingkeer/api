@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"os"
 	"strings"
 	"sync"
@@ -73,14 +72,18 @@ func HttpM(method string, ctx *def.Context) def.HttpMethod {
 }
 
 var (
-	_ def.Option     = (*option)(nil)
-	_ def.SwaggerOps = (*swaggerImpl)(nil)
+	_ def.Option = (*option)(nil)
 )
 
 type option struct {
 	mi          *def.MethodInfo
 	ctx         *def.Context
 	url, method string
+}
+
+// SetKV implements def.Option.
+func (o *option) StoreKV(key string, v any) {
+	o.mi.KV.Store(key, v)
 }
 
 // Method implements def.Option.
@@ -104,28 +107,11 @@ func (o *option) SetMethod(md *def.MethodInfo) def.Option {
 }
 
 func (o *option) Swagger(opsFn func(swagger def.SwaggerOps)) def.Option {
-	opsFn(&swaggerImpl{o.mi})
+	opsFn(&swaggerImpl{mi: o.mi, SwaggerSecurit: SwaggerSecurit{Ops: []def.Option{o}}})
 	return o
 }
 
 func (o *option) SetMiddleware(m ...def.MiddleWare) def.Option {
 	o.mi.Middleware = append(o.mi.Middleware, m...)
 	return o
-}
-
-type swaggerImpl struct {
-	mi *def.MethodInfo
-}
-
-// SetParameterDescription implements def.SwaggerOps.
-func (s *swaggerImpl) SetParameterDescription(name string, description string) {
-	s.mi.KV.Store(fmt.Sprintf("swagger.parameter.%s", name), description)
-}
-
-func (s *swaggerImpl) SetSummary(title string) {
-	s.mi.KV.Store("swagger.summary", title)
-}
-
-func (s *swaggerImpl) SetDescription(description string) {
-	s.mi.KV.Store("swagger.description", description)
 }

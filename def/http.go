@@ -24,6 +24,7 @@ type Context struct {
 type Option interface {
 	SetContext(ctx *Context) Option
 	SetMethod(md *MethodInfo) Option
+	StoreKV(key string, v any)
 	Swagger(opsFn func(swagger SwaggerOps)) Option
 	SetMiddleware(m ...MiddleWare) Option
 	Path() string
