@@ -16,11 +16,20 @@ var (
 type HttpType struct{}
 
 func (f HttpType) Mapper(param *def.ParamWarp) reflect.Value {
-	return reflect.ValueOf(param.Request)
+	if param.PTyp.Kind() == reflect.Struct {
+		return reflect.ValueOf(param.Request.Request).Elem()
+	}
+	if param.PTyp.Kind() == reflect.Ptr {
+		return reflect.ValueOf(param.Request.Request)
+	}
+	return reflect.Zero(param.PTyp)
 }
 
 func (f HttpType) Register() []reflect.Type {
-	return []reflect.Type{reflect.TypeOf((*http.Request)(nil)).Elem()}
+	return []reflect.Type{
+		reflect.TypeOf((*http.Request)(nil)).Elem(),
+		reflect.TypeOf((*http.Request)(nil)),
+	}
 }
 
 type HeadType struct {

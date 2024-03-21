@@ -3,11 +3,12 @@ package utils
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"gitee.com/fast_api/api/log"
 	"io"
 	"reflect"
 	"regexp"
 	"strings"
+
+	"gitee.com/fast_api/api/log"
 )
 
 // SplitFuncName
@@ -43,14 +44,16 @@ func Md5String(s string) string {
 
 // DefaultCallValue
 // other param set default value
-func DefaultCallValue(kind reflect.Kind) reflect.Value {
-	switch kind {
+func DefaultCallValue(typ reflect.Type) reflect.Value {
+	switch typ.Kind() {
+	case reflect.Bool:
+		return reflect.ValueOf(false)
 	case reflect.String:
 		return reflect.ValueOf("")
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return reflect.ValueOf(0)
+		return reflect.ValueOf(0).Convert(typ)
 	default:
-		log.Errorf("DefaultCallValue error kind %s", kind)
+		log.Errorf("DefaultCallValue error kind %s", typ.Kind())
 	}
 	return reflect.ValueOf(nil)
 }

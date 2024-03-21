@@ -29,5 +29,8 @@ func (f BigType) Mapper(param *def.ParamWarp) reflect.Value {
 }
 
 func (f BigType) Register() []reflect.Type {
-	return []reflect.Type{reflect.TypeOf((*big.Int)(nil)).Elem(), reflect.TypeOf((*big.Int)(nil))}
+	return []reflect.Type{
+		reflect.TypeOf((*big.Int)(nil)).Elem(),
+		reflect.TypeOf((*big.Int)(nil)),
+	}
 }

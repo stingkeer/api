@@ -17,7 +17,7 @@ func (b *BaseType) Mapper(p *def.ParamWarp) reflect.Value {
 	dest := p.PTyp
 	value := p.PValue
 	if value == "" {
-		return utils.DefaultCallValue(dest.Kind())
+		return utils.DefaultCallValue(dest)
 	}
 	switch dest.Kind() {
 	case reflect.Bool:

@@ -2,8 +2,9 @@ package serialize
 
 import (
 	"encoding/json"
-	"gitee.com/fast_api/api/def"
 	"reflect"
+
+	"gitee.com/fast_api/api/def"
 )
 
 type JsonConvertImpl struct{}

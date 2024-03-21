@@ -3,7 +3,6 @@ package intercept
 import (
 	"net/http"
 	"reflect"
-	"sync"
 
 	"gitee.com/fast_api/api/def"
 )
@@ -16,15 +15,40 @@ type HttpIntercept interface {
 }
 
 type HttpContext struct {
-	sync.Map
+	m map[string]any
 }
 
 func NewHttpContext() *HttpContext {
-	return &HttpContext{}
+	return &HttpContext{m: make(map[string]any)}
+}
+
+func (hc *HttpContext) Clear() {
+	clear(hc.m)
+}
+
+func (hc *HttpContext) Store(key string, v any) {
+	hc.m[key] = v
+}
+
+func (hc *HttpContext) LoadAndDelete(key string) (any, bool) {
+	if v, b := hc.m[key]; b {
+		delete(hc.m, key)
+		return v, b
+	}
+	return nil, false
 }
 
 func (hc *HttpContext) SkipResponse() {
 	hc.Store("SkipResponse", 1)
+}
+
+func (hc *HttpContext) Load(key string) (any, bool) {
+	if v, b := hc.m[key]; b {
+		return v, b
+	} else {
+		return nil, false
+	}
+
 }
 
 func (hc *HttpContext) IsSkipResponse() bool {

@@ -3,7 +3,6 @@ package call
 import (
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"reflect"
 	"strings"
@@ -52,6 +51,44 @@ func RegisterGenericTypeMapper(adapter def.Adapter) {
 	}
 }
 
+func (c *callerDefault) decodeToStruct(ptyp reflect.Type, bytes []byte) reflect.Value {
+	fmt.Println(ptyp)
+	newT := reflect.New(ptyp)
+	//decode data to struct
+	err1 := c.serialize.Decode(bytes, newT.Interface())
+	if err1 != nil {
+		panic(err1)
+	}
+	return newT.Elem()
+}
+
+func (c *callerDefault) doSlice(ptyp reflect.Type, bytes []byte) reflect.Value {
+
+	switch ptyp.Elem().Kind() {
+	case reflect.Uint8:
+		return reflect.ValueOf(bytes)
+	default:
+		return c.decodeToStruct(ptyp, bytes)
+	}
+}
+
+func (c *callerDefault) doBody(pw *def.ParamWarp) reflect.Value {
+
+	bytes, err := io.ReadAll(pw.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	switch pw.PTyp.Kind() {
+	case reflect.String:
+		return reflect.ValueOf(string(bytes))
+	case reflect.Slice:
+		return c.doSlice(pw.PTyp, bytes)
+	}
+
+	return c.decodeToStruct(pw.PTyp, bytes)
+}
+
 // Call request == call(def) => value
 func (c *callerDefault) Call(f *def.Entry, req *def.Request) interface{} {
 	v := reflect.ValueOf(f.Fn)
@@ -67,11 +104,29 @@ func (c *callerDefault) Call(f *def.Entry, req *def.Request) interface{} {
 	})
 
 	paramsV := make([]reflect.Value, len(m.Param))
-	//TODO
+
+	bodyCount := 0
+
 	for pName, p := range m.Param {
 		pw := &def.ParamWarp{Request: *req}
 		pw.PTyp = v.Type().In(p.Order)
 		pw.PName = pName
+
+		if bodyCount >= 2 {
+			panic(fmt.Errorf("there can only be one structure in a method body %s", f.HttpMethod))
+		}
+
+		// Process body
+		// only one struct type in method !
+		// only name's body struct can convert to data
+		if pName == "body" {
+			paramsV[p.Order] = c.doBody(pw)
+			//inc ptr for count struct number
+			bodyCount++
+			continue
+		}
+
+		//First determine the basic type assignment
 		if t, b := adapters[p.Typ]; b {
 			if param, exist := params[pName]; exist {
 				pw.PValue = param[0]
@@ -90,23 +145,14 @@ func (c *callerDefault) Call(f *def.Entry, req *def.Request) interface{} {
 				continue
 			}
 		}
-		if (pw.PTyp.Kind() == reflect.Struct || pw.PTyp.Kind() == reflect.Slice) && req.Method == http.MethodPost {
-			newT := reflect.New(pw.PTyp)
-			bytes, err := io.ReadAll(req.Body)
-			if err != nil {
-				panic(err)
-			}
-			err1 := c.serialize.Decode(bytes, newT.Interface())
-			if err1 != nil {
-				panic(err1)
-			}
-			paramsV[p.Order] = newT.Elem()
-			continue
+
+		if pw.PTyp.Kind() == reflect.Struct {
+			panic("not support this format")
 		}
 		//default value
 		log.Warnf("[not support %s ] set default value", pw.PTyp)
 		fmt.Println(pw.PTyp.Kind(), reflect.TypeOf((*def.IntReq)(nil)).Elem())
-		paramsV[p.Order] = utils.DefaultCallValue(pw.PTyp.Kind())
+		paramsV[p.Order] = utils.DefaultCallValue(pw.PTyp)
 	}
 	var vs []reflect.Value
 	if c.mIntercept == nil {

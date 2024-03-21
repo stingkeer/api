@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"runtime/debug"
 	"sort"
+	"sync"
 
 	"gitee.com/fast_api/api/def"
 	"gitee.com/fast_api/api/intercept"
@@ -18,6 +19,12 @@ var (
 	httpHandleZero    Handles
 	httpHandles       Handles
 	httpHandlesGT1000 Handles
+
+	pool = sync.Pool{
+		New: func() any {
+			return intercept.NewHttpContext()
+		},
+	}
 )
 
 func (h Handles) Sort() {
@@ -35,7 +42,12 @@ func DoHttp(rw http.ResponseWriter, req *http.Request) {
 		}
 	}()
 
-	mP := intercept.NewHttpContext()
+	mP := pool.Get().(*intercept.HttpContext)
+	defer func() {
+		mP.Clear()
+		pool.Put(mP)
+	}()
+
 	//execute order == 0 handler
 	for _, handle := range httpHandleZero {
 		if handle != nil {

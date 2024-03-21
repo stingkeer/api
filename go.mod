@@ -1,6 +1,6 @@
 module gitee.com/fast_api/api
 
-go 1.19
+go 1.21
 
 require (
 	github.com/quic-go/quic-go v0.39.2

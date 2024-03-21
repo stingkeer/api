@@ -27,6 +27,17 @@ func TestGetHeader(t *testing.T) {
 
 }
 
+func TestInt64(t *testing.T) {
+	r.Test(t, func() def.Option {
+		return api.GET(func(a int64, b int64) any {
+			return a
+		}, "/int64")
+	}).Request().AddParam("a", "1").Do(func(resp *r.Response) {
+		fmt.Println(resp.BodyString())
+	})
+
+}
+
 func TestSetHeader(t *testing.T) {
 	r.Test(t, func() def.Option {
 		return api.GET(func(a def.Header) {
@@ -36,6 +47,21 @@ func TestSetHeader(t *testing.T) {
 		if resp.Header("token") != "nnnnn" {
 			t.Error("not set header")
 		}
+	})
+}
+
+func TestBodyString(t *testing.T) {
+	var ss string
+	fmt.Println(json.Unmarshal([]byte("dasdf"), &ss))
+	//because many options
+	//Post /body?a=xxx
+	//Post /body raw data
+	r.Test(t, func() def.Option {
+		return api.POST(func(body string) any {
+			return body
+		}, "/body")
+	}).Request().SetBody([]byte("hello")).Do(func(resp *r.Response) {
+		fmt.Println(resp.BodyString())
 	})
 }
 
@@ -130,13 +156,59 @@ func TestResp(t *testing.T) {
 func TestPostBody(t *testing.T) {
 	x := "{\"name\":\"w\",\"pass\":\"12345\"}"
 	r.Test(t, func() def.Option {
-		return api.POST(func(a struct {
+		return api.POST(func(body struct {
 			Name string `json:"name,omitempty"`
 			Pass string `json:"pass,omitempty"`
 		}) any {
-			return a
+			return body
 		}, "/login")
 	}).Request().SetBody([]byte(x)).Do(func(resp *r.Response) {
+		resp.AssetBody(x)
+	})
+}
+
+func TestBodyBytes(t *testing.T) {
+	var ss string
+	fmt.Println(json.Unmarshal([]byte("dasdf"), &ss))
+	//because many options
+	//Post /body?a=xxx
+	//Post /body raw data
+	r.Test(t, func() def.Option {
+		return api.POST(func(body []byte) any {
+			return body
+		}, "/body")
+	}).Request().SetBody([]byte("hello")).Do(func(resp *r.Response) {
+		fmt.Println(resp.BodyString())
+	})
+}
+
+func TestBodySlice(t *testing.T) {
+	str := `["aaa","bbbb","ccc"]`
+	//because many options
+	//Post /body?a=xxx
+	//Post /body raw data
+	r.Test(t, func() def.Option {
+		return api.POST(func(body []string) any {
+			return body
+		}, "/body")
+	}).Request().SetBody([]byte(str)).Do(func(resp *r.Response) {
+		if str != resp.BodyString() {
+			t.Error("TestBodySlice fail")
+		}
+	})
+}
+
+func TestBodyAndParam(t *testing.T) {
+	x := "{\"name\":\"w\",\"pass\":\"12345\"}"
+	r.Test(t, func() def.Option {
+		return api.POST(func(body struct {
+			Name string `json:"name,omitempty"`
+			Pass string `json:"pass,omitempty"`
+		}, ok def.StringReq) any {
+			fmt.Println("ok = ", ok)
+			return body
+		}, "/bodyParam")
+	}).Request().SetBody([]byte(x)).AddParam("ok", "hello").Do(func(resp *r.Response) {
 		resp.AssetBody(x)
 	})
 }
