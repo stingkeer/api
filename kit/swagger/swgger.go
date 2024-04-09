@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"sort"
 	"strings"
 
 	"gitee.com/fast_api/api/call/types"
@@ -55,6 +56,7 @@ type License struct {
 }
 
 type ParameterObject struct {
+	Index           int            `json:"-"`
 	Name            string         `json:"name,omitempty"`
 	In              string         `json:"in,omitempty"`
 	Description     string         `json:"description,omitempty"`
@@ -90,7 +92,7 @@ func GenSwagger(ctx *def.Context) Swagger {
 		Openapi: "3.0.0",
 		Paths:   genPaths(ctx),
 		Info: SwaggerInfo{
-			Title:       "api Gen",
+			Title:       "Golang API Generate",
 			Description: "This is a sample server for api",
 		},
 		Schemes: []string{"http", "https"},
@@ -103,6 +105,10 @@ func GenSwagger(ctx *def.Context) Swagger {
 }
 
 func genPaths(ctx *def.Context) map[string]map[string]OperationObject {
+	//clear all maps
+	clear(definitionsMap)
+	clear(securityDefinitionsMap)
+
 	en := make(map[string]map[string]OperationObject)
 	ctx.Pool.Range(func(s string, info *def.MethodInfo) {
 		entry := make(map[string]OperationObject)
@@ -131,8 +137,13 @@ func genPaths(ctx *def.Context) map[string]map[string]OperationObject {
 		if commit, b := info.KV.Load("swagger.description"); b {
 			mEn.Description = commit.(string)
 		}
+
 		if summary, b := info.KV.Load("swagger.summary"); b {
 			mEn.Summary = summary.(string)
+		}
+
+		if tag, b := info.KV.Load("swagger.tag"); b {
+			mEn.Tags = []string{tag.(string)}
 		}
 
 		var reqBodys []*RequestBodyObject
@@ -141,6 +152,7 @@ func genPaths(ctx *def.Context) map[string]map[string]OperationObject {
 			typ, format := parameterDataType(p.Typ)
 			in, req := parameterIN(p.Typ)
 			parameter := ParameterObject{
+				Index:    p.Order,
 				Name:     name,
 				In:       in,
 				Required: req,
@@ -173,6 +185,12 @@ func genPaths(ctx *def.Context) map[string]map[string]OperationObject {
 			}
 			params = append(params, parameter)
 		}
+
+		//sort param
+		sort.Slice(params, func(i, j int) bool {
+			return params[i].Index < params[j].Index
+		})
+
 		//TODO mul req bodys
 		if len(reqBodys) > 0 {
 			mEn.RequestBody = reqBodys[0]

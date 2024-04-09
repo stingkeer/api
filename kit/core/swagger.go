@@ -50,6 +50,10 @@ func (s *swaggerImpl) SetSummary(title string) {
 	s.mi.KV.Store("swagger.summary", title)
 }
 
+func (s *swaggerImpl) SetTag(tag string) {
+	s.mi.KV.Store("swagger.tag", tag)
+}
+
 func (s *swaggerImpl) SetDescription(description string) {
 	s.mi.KV.Store("swagger.description", description)
 }

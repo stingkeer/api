@@ -9,6 +9,7 @@ type SwaggerSecurity interface {
 type SwaggerOps interface {
 	SwaggerSecurity
 	SetSummary(title string)
+	SetTag(tag string)
 	SetDescription(description string)
 	SetParameterDescription(name, description string)
 }
