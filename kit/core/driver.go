@@ -38,7 +38,6 @@ func makerInit() {
 func HttpM(method string, ctx *def.Context) def.HttpMethod {
 	//init dwarf
 	once.Do(makerInit)
-
 	return func(f interface{}, url string) def.Option {
 		entry := &def.Entry{
 			Url:        url,

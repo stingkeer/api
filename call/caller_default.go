@@ -3,6 +3,7 @@ package call
 import (
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"reflect"
 	"strings"
@@ -52,7 +53,6 @@ func RegisterGenericTypeMapper(adapter def.Adapter) {
 }
 
 func (c *callerDefault) decodeToStruct(ptyp reflect.Type, bytes []byte) reflect.Value {
-	fmt.Println(ptyp)
 	newT := reflect.New(ptyp)
 	//decode data to struct
 	err1 := c.serialize.Decode(bytes, newT.Interface())
@@ -87,6 +87,32 @@ func (c *callerDefault) doBody(pw *def.ParamWarp) reflect.Value {
 	}
 
 	return c.decodeToStruct(pw.PTyp, bytes)
+}
+
+func (c *callerDefault) doStructParam(params url.Values, pw *def.ParamWarp) reflect.Value {
+	t := pw.PTyp
+	v := reflect.New(pw.PTyp).Elem()
+
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		if field.Type.Kind() == reflect.Struct {
+			v.Field(i).Set(c.doStructParam(params, &def.ParamWarp{Request: pw.Request, PTyp: field.Type}))
+			continue
+		}
+		jsonTag := field.Tag.Get("json")
+		if jsonTag == "" {
+			continue
+		}
+		tags := strings.Split(jsonTag, ",")
+		firstName := tags[0]
+		if t, b := adapters[field.Type]; b {
+			if pv := params.Get(firstName); pv != "" {
+				mV := t.Mapper(&def.ParamWarp{Request: pw.Request, PTyp: field.Type, PName: jsonTag, PValue: pv})
+				v.Field(i).Set(mV)
+			}
+		}
+	}
+	return v
 }
 
 // Call request == call(def) => value
@@ -134,6 +160,7 @@ func (c *callerDefault) Call(f *def.Entry, req *def.Request) interface{} {
 			paramsV[p.Order] = t.Mapper(pw)
 			continue
 		}
+
 		// adapterGeneric
 		if pw.PTyp.Kind() == reflect.Struct {
 			tName, _ := TypeInfo(pw.PTyp.String())
@@ -147,13 +174,16 @@ func (c *callerDefault) Call(f *def.Entry, req *def.Request) interface{} {
 		}
 
 		if pw.PTyp.Kind() == reflect.Struct {
-			panic("not support this format")
+			paramsV[p.Order] = c.doStructParam(params, pw)
+			continue
 		}
+
 		//default value
 		log.Warnf("[not support %s ] set default value", pw.PTyp)
-		fmt.Println(pw.PTyp.Kind(), reflect.TypeOf((*def.IntReq)(nil)).Elem())
+		// fmt.Println(pw.PTyp.Kind(), reflect.TypeOf((*def.IntReq)(nil)).Elem())
 		paramsV[p.Order] = utils.DefaultCallValue(pw.PTyp)
 	}
+
 	var vs []reflect.Value
 	if c.mIntercept == nil {
 		vs = v.Call(paramsV)

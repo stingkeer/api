@@ -212,3 +212,57 @@ func TestBodyAndParam(t *testing.T) {
 		resp.AssetBody(x)
 	})
 }
+
+func TestOnlyParam1(t *testing.T) {
+	r.Test(t, func() def.Option {
+		return api.POST(func(aaa struct {
+			Name string `json:"name,omitempty"`
+			Pass string `json:"pass,omitempty"`
+		}) any {
+			return aaa
+		}, "/bodyParam")
+	}).Request().AddParam("name", "hello").AddParam("pass", "2342342").Do(func(resp *r.Response) {
+		fmt.Println(resp.BodyString())
+	})
+}
+
+func TestOnlyParam2(t *testing.T) {
+	r.Test(t, func() def.Option {
+		return api.POST(func(aaa struct {
+			Name string `json:"name1,omitempty"`
+			Pass string `json:"pass,omitempty"`
+		}, bbb struct {
+			Name string `json:"name,omitempty"`
+			Pass string `json:"pass,omitempty"`
+		}) any {
+			return map[string]any{"bbbb": bbb, "aaa": aaa}
+		}, "/onlyParam")
+	}).Request().AddParam("name", "hello").AddParam("pass", "2342342").AddParam("name1", "hello").Do(func(resp *r.Response) {
+		fmt.Println(resp.BodyString())
+	})
+}
+
+func TestOnlyParam3(t *testing.T) {
+	type Page struct {
+		OffSet int `json:"offSet"`
+		Page   int `json:"page"`
+	}
+	r.Test(t, func() def.Option {
+		return api.POST(func(aaa struct {
+			Page
+			Name string `json:"name1,omitempty"`
+			Pass string `json:"pass,omitempty"`
+		}) any {
+			return map[string]any{"aaa": aaa}
+		}, "/onlyParam")
+	}).Request().
+		AddParam("name", "hello").
+		AddParam("pass", "2342342").
+		AddParam("pass", "2342342").
+		AddParam("name1", "hello").
+		AddParam("offSet", "1").
+		AddParam("page", "10").
+		Do(func(resp *r.Response) {
+			fmt.Println(resp.BodyString())
+		})
+}

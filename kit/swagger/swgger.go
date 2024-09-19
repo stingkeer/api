@@ -23,13 +23,13 @@ import (
 //https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md
 
 type Swagger struct {
-	Servers    []Server                              `json:"servers,omitempty"`
 	Openapi    string                                `json:"openapi,omitempty"`
+	Info       SwaggerInfo                           `json:"info,omitempty"`
+	Servers    []Server                              `json:"servers,omitempty"`
 	Paths      map[string]map[string]OperationObject `json:"paths,omitempty"`
 	Schemes    []string                              `json:"schemes,omitempty"`
 	Host       string                                `json:"host,omitempty"`
 	Components map[string]any                        `json:"components,omitempty"`
-	Info       SwaggerInfo                           `json:"info,omitempty"`
 }
 
 type Server struct {
@@ -89,11 +89,16 @@ func GenSwagger(ctx *def.Context) Swagger {
 				Description: "swagger api ui",
 			},
 		},
-		Openapi: "3.0.0",
+		Openapi: "3.0.3",
 		Paths:   genPaths(ctx),
 		Info: SwaggerInfo{
 			Title:       "Golang API Generate",
 			Description: "This is a sample server for api",
+			Contact: Contact{
+				Name:  "api",
+				URL:   "api",
+				Email: "golang@gmail.com",
+			},
 		},
 		Schemes: []string{"http", "https"},
 		Host:    host,
@@ -119,7 +124,11 @@ func genPaths(ctx *def.Context) map[string]map[string]OperationObject {
 				200: map[string]any{
 					"description": "successful operation",
 					"content": map[string]any{
-						"application/json": map[string]any{},
+						"application/json": map[string]any{
+							"schema": map[string]string{
+								"type": "object",
+							},
+						},
 					},
 				},
 			},
@@ -162,25 +171,35 @@ func genPaths(ctx *def.Context) map[string]map[string]OperationObject {
 				continue
 			}
 
-			if typ == "Object" || typ == "array" {
-				if info.Method.HttpMethod == http.MethodPost {
-					reqBodys = append(reqBodys, JsonRefRequestBody(format, typ))
-				} else {
+			switch typ {
+			case "object":
+				{
+					if info.Method.HttpMethod == http.MethodPost {
+						reqBodys = append(reqBodys, JsonRefRequestBody(format, typ))
+					}
+
+				}
+			case "array":
+				{
 					parameter.Schema = map[string]any{
-						"type": typ,
-						"$ref": format,
+						"type": "array",
+						"items": map[string]any{
+							"$ref": format,
+						},
 					}
 				}
-			} else {
-				parameter.Schema = map[string]any{
-					"type": typ,
-				}
-				if format != "" {
-					parameter.Schema["format"] = format
-				}
-				//Description of setting parameters
-				if description, b := info.KV.Load(fmt.Sprintf("swagger.parameter.%s", name)); b {
-					parameter.Description = description.(string)
+			default:
+				{
+					parameter.Schema = map[string]any{
+						"type": typ,
+					}
+					if format != "" {
+						parameter.Schema["format"] = format
+					}
+					//Description of setting parameters
+					if description, b := info.KV.Load(fmt.Sprintf("swagger.parameter.%s", name)); b {
+						parameter.Description = description.(string)
+					}
 				}
 			}
 			params = append(params, parameter)
@@ -222,7 +241,7 @@ func parameterDataType(t reflect.Type) (typ, format string) {
 			}); index > 0 {
 				return parameterDataType(requireTyps[index].Field(0).Type)
 			} else {
-				return "Object", definitions(t)
+				return "object", definitions(t)
 			}
 		}
 	case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Uint8, reflect.Uint16, reflect.Uint32:
@@ -231,6 +250,8 @@ func parameterDataType(t reflect.Type) (typ, format string) {
 		return "integer", "int64"
 	case reflect.String:
 		return "string", ""
+	case reflect.Interface:
+		return "object", ""
 	case reflect.Bool:
 		return "boolean", ""
 	case reflect.Array, reflect.Slice:
@@ -258,13 +279,18 @@ var _ = `"definitions": {
     },`
 
 type Object struct {
-	Typ        string          `json:"type,omitempty"`
-	Properties map[string]Cell `json:"properties"`
+	Typ        string         `json:"type,omitempty"`
+	Properties map[string]any `json:"properties"`
 }
 
 type Cell struct {
 	Typ    string `json:"type"`
 	Format string `json:"format,omitempty"`
+}
+
+type CellArray struct {
+	Typ   string         `json:"type"`
+	Items map[string]any `json:"items"`
 }
 
 var (
@@ -284,7 +310,7 @@ func loadSecurityDefinition(v map[string]*core.SecurityObject) string {
 
 // Check type
 func definitions(t reflect.Type) string {
-	properties := make(map[string]Cell)
+	properties := make(map[string]any)
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 		dt, format := parameterDataType(field.Type)
@@ -292,7 +318,13 @@ func definitions(t reflect.Type) string {
 		if fName == "" {
 			fName = field.Name
 		}
-		properties[fName] = Cell{Typ: dt, Format: format}
+		if dt == "array" {
+			properties[fName] = CellArray{Typ: dt, Items: map[string]any{
+				"$ref": format,
+			}}
+		} else {
+			properties[fName] = Cell{Typ: dt, Format: format}
+		}
 	}
 	key := t.Name()
 	if t.Name() == "" {

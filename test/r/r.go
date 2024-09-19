@@ -59,6 +59,7 @@ type Request struct {
 	req *http.Request
 	t   *testing.T
 	url *url.URL
+	vs  url.Values
 }
 
 type Response struct {
@@ -173,9 +174,8 @@ func (r *Request) AddHeader(key, value string) *Request {
 }
 
 func (r *Request) AddParam(key, value string) *Request {
-	vs := make(url.Values)
-	vs.Add(key, value)
-	url, err := url.Parse(fmt.Sprintf("%s?%s", r.url, vs.Encode()))
+	r.vs.Add(key, value)
+	url, err := url.Parse(fmt.Sprintf("%s?%s", r.url, r.vs.Encode()))
 	if err != nil {
 		r.t.Error(err)
 	}
@@ -184,16 +184,16 @@ func (r *Request) AddParam(key, value string) *Request {
 }
 
 func (c *client) Request() *Request {
-	url, err := url.Parse(fmt.Sprintf("http://localhost:8080%s", c.op.Path()))
+	sUrl, err := url.Parse(fmt.Sprintf("http://localhost:8080%s", c.op.Path()))
 	if err != nil {
 		c.t.Error(err)
 	}
-	req, err := http.NewRequest(c.op.Method(), url.String(), nil)
+	req, err := http.NewRequest(c.op.Method(), sUrl.String(), nil)
 	if err != nil {
 		c.t.Error("The creation request failed:", err)
 		return nil
 	}
-	return &Request{t: c.t, url: url, req: req}
+	return &Request{t: c.t, url: sUrl, req: req, vs: make(url.Values)}
 }
 
 // Request implements Client.
