@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"math/big"
 	"math/rand"
-	"net/http"
 	"os"
 	"reflect"
+	"regexp"
+	"slices"
 	"sort"
 	"strings"
 
@@ -109,6 +110,34 @@ func GenSwagger(ctx *def.Context) Swagger {
 	return s
 }
 
+func genStructParam(t reflect.Type) []ParameterObject {
+	if t.Kind() != reflect.Struct {
+		return nil
+	}
+	var res []ParameterObject
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		typ, format := parameterDataType(field.Type)
+		in, req := parameterIN("", field.Type, "")
+		newVar := ParameterObject{
+			In:       in,
+			Required: req,
+		}
+		newVar.Schema = map[string]any{
+			"type":   typ,
+			"format": format,
+		}
+		if v, ok := field.Tag.Lookup("json"); ok {
+			newVar.Name = v
+		} else {
+			continue
+		}
+
+		res = append(res, newVar)
+	}
+	return res
+}
+
 func genPaths(ctx *def.Context) map[string]map[string]OperationObject {
 	//clear all maps
 	clear(definitionsMap)
@@ -157,9 +186,11 @@ func genPaths(ctx *def.Context) map[string]map[string]OperationObject {
 
 		var reqBodys []*RequestBodyObject
 		var params []ParameterObject = []ParameterObject{}
+		url := strings.ReplaceAll(info.Method.Url, "<", "{")
+		url = strings.ReplaceAll(url, ">", "}")
 		for name, p := range info.Param {
 			typ, format := parameterDataType(p.Typ)
-			in, req := parameterIN(p.Typ)
+			in, req := parameterIN(info.Method.Url, p.Typ, name)
 			parameter := ParameterObject{
 				Index:    p.Order,
 				Name:     name,
@@ -174,10 +205,15 @@ func genPaths(ctx *def.Context) map[string]map[string]OperationObject {
 			switch typ {
 			case "object":
 				{
-					if info.Method.HttpMethod == http.MethodPost {
+					if name == "body" {
 						reqBodys = append(reqBodys, JsonRefRequestBody(format, typ))
+					} else {
+						ps := genStructParam(p.Typ)
+						if len(ps) > 0 {
+							params = append(params, ps...)
+						}
+						continue
 					}
-
 				}
 			case "array":
 				{
@@ -196,6 +232,7 @@ func genPaths(ctx *def.Context) map[string]map[string]OperationObject {
 					if format != "" {
 						parameter.Schema["format"] = format
 					}
+
 					//Description of setting parameters
 					if description, b := info.KV.Load(fmt.Sprintf("swagger.parameter.%s", name)); b {
 						parameter.Description = description.(string)
@@ -217,7 +254,7 @@ func genPaths(ctx *def.Context) map[string]map[string]OperationObject {
 			mEn.Parameters = params
 		}
 		entry[strings.ToLower(info.Method.HttpMethod)] = mEn
-		en[info.Method.Url] = entry
+		en[url] = entry
 	})
 	return en
 }
@@ -370,10 +407,29 @@ var (
 	header types.HeadType
 )
 
+func getPaths(url string) []string {
+	re := regexp.MustCompile(`<([^>]+)>`)
+	matches := re.FindAllStringSubmatch(url, -1)
+
+	var paths []string
+	for _, match := range matches {
+		if len(match) > 1 {
+			paths = append(paths, match[1])
+		}
+	}
+	return paths
+}
+
 // ParameterIN Required. The location of the parameter.
 // The location of the parameter. Possible values are "query", "header", "path" or "cookie"
 // TODO only support query
-func parameterIN(t reflect.Type) (in string, require bool) {
+func parameterIN(url string, t reflect.Type, pName string) (in string, require bool) {
+	if url != "" && pName != "" {
+		paths := getPaths(url)
+		if slices.Index(paths, pName) >= 0 {
+			return "path", true
+		}
+	}
 	requireTyps := append(g.Register(), g0.Register()...)
 	if index := search(len(requireTyps), func(i int) bool {
 		return requireTyps[i] == t

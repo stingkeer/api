@@ -20,3 +20,18 @@ func TestDefine(t *testing.T) {
 	}{}
 	definitions(reflect.TypeOf(a))
 }
+
+func TestStructParam(t *testing.T) {
+	type S struct {
+		Page int `json:"page"`
+		Size int `json:"size"`
+	}
+
+	type B struct {
+		S
+		A int `json:"a"`
+		B int `json:"b"`
+	}
+	xx := genStructParam(reflect.TypeOf(B{}))
+	fmt.Println(xx)
+}
