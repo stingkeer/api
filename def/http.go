@@ -34,9 +34,10 @@ type Option interface {
 const (
 	Content_Type        = "Content-Type"
 	Content_Encoding    = "Content-Encoding"
-	Content_JSON        = "application/json"
+	Accept_Encoding     = "Accept-Encoding"
+	Content_JSON        = "application/json;charset=utf-8"
 	CONTENT_STREAM      = "application/octet-stream"
-	CONTENT_HTML        = "text/html"
+	CONTENT_HTML        = "text/html;charset=utf-8"
 	HEAD_CONST          = "_API_HEADER_TYPE_"
 	CONTENT_DISPOSITION = "Content-Disposition"
 )

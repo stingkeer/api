@@ -30,7 +30,7 @@ func StartService(ops ...Optional) error {
 
 func StartTLSService(ops ...Optional) error {
 	apply(&defaultConf, ops...)
-	log.Infof("listen addr %s", defaultConf.listen)
+	log.Infof("listen tls addr %s", defaultConf.listen)
 	t, err := loadTls(&defaultConf)
 	if err != nil {
 		log.Error(err)

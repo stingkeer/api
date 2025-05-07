@@ -22,15 +22,17 @@ var (
 )
 
 func loadTls(s *ServerConfig) (tconf *tls.Config, err error) {
+	if s.tlsConfig != nil {
+		s.tlsConfig = &tls.Config{}
+	}
 	certs := make([]tls.Certificate, 1)
 	certs[0], err = tls.X509KeyPair(defaultConf.certPEMBlock, defaultConf.keyPEMBlock)
 	if err != nil {
 		log.Error(err)
 		return nil, err
 	}
-	return &tls.Config{
-		Certificates: certs,
-	}, err
+	s.tlsConfig.Certificates = certs
+	return s.tlsConfig, nil
 }
 
 type ServerMain struct {
@@ -53,6 +55,12 @@ func (ad *ServerMain) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 func WithListen(s string) Optional {
 	return func(conf *ServerConfig) {
 		conf.listen = s
+	}
+}
+
+func WithTLSConfig(tlsConfig *tls.Config) Optional {
+	return func(conf *ServerConfig) {
+		conf.tlsConfig = tlsConfig
 	}
 }
 

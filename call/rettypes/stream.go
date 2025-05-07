@@ -176,6 +176,10 @@ func (s *Stream) Code() int {
 	return http.StatusOK
 }
 
+func (s *Stream) SetCode(code int) {
+	s.code = code
+}
+
 func (s *Stream) AddHeader(k, v string) {
 	s.heads[k] = v
 }

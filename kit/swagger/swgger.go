@@ -13,6 +13,7 @@ import (
 
 	"gitee.com/fast_api/api/call/types"
 	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/dwarf"
 	"gitee.com/fast_api/api/kit/core"
 )
 
@@ -28,7 +29,6 @@ type Swagger struct {
 	Info       SwaggerInfo                           `json:"info,omitempty"`
 	Servers    []Server                              `json:"servers,omitempty"`
 	Paths      map[string]map[string]OperationObject `json:"paths,omitempty"`
-	Schemes    []string                              `json:"schemes,omitempty"`
 	Host       string                                `json:"host,omitempty"`
 	Components map[string]any                        `json:"components,omitempty"`
 }
@@ -39,12 +39,12 @@ type Server struct {
 }
 
 type SwaggerInfo struct {
-	Title          string  `json:"title"`
-	Description    string  `json:"description"`
-	TermsOfService string  `json:"termsOfService"`
-	Contact        Contact `json:"contact"`
-	License        License `json:"license"`
-	Version        string  `json:"version"`
+	Title          string `json:"title"`
+	Description    string `json:"description"`
+	TermsOfService string `json:"termsOfService"`
+	// Contact        Contact `json:"contact"`
+	License License `json:"license"`
+	Version string  `json:"version"`
 }
 type Contact struct {
 	Name  string `json:"name"`
@@ -95,14 +95,13 @@ func GenSwagger(ctx *def.Context) Swagger {
 		Info: SwaggerInfo{
 			Title:       "Golang API Generate",
 			Description: "This is a sample server for api",
-			Contact: Contact{
-				Name:  "api",
-				URL:   "api",
-				Email: "golang@gmail.com",
-			},
+			// Contact: Contact{
+			// 	Name:  "api",
+			// 	URL:   "api",
+			// 	Email: "golang@gmail.com",
+			// },
 		},
-		Schemes: []string{"http", "https"},
-		Host:    host,
+		Host: host,
 	}
 	s.Components = make(map[string]any)
 	s.Components["schemas"] = definitionsMap
@@ -136,6 +135,43 @@ func genStructParam(t reflect.Type) []ParameterObject {
 		res = append(res, newVar)
 	}
 	return res
+}
+
+func parseQuery(typ, format string, p dwarf.ArgsMeta) (params []ParameterObject, parameter *ParameterObject) {
+	switch typ {
+	case "object":
+		{
+
+			ps := genStructParam(p.Typ)
+			if len(ps) > 0 {
+				params = append(params, ps...)
+			}
+
+		}
+	case "array":
+		{
+			var p ParameterObject
+			p.Schema = map[string]any{
+				"type": "array",
+				"items": map[string]any{
+					"$ref": format,
+				},
+			}
+			parameter = &p
+		}
+	default:
+		{
+			var p ParameterObject
+			p.Schema = map[string]any{
+				"type": typ,
+			}
+			if format != "" {
+				p.Schema["format"] = format
+			}
+			parameter = &p
+		}
+	}
+	return
 }
 
 func genPaths(ctx *def.Context) map[string]map[string]OperationObject {
@@ -191,55 +227,32 @@ func genPaths(ctx *def.Context) map[string]map[string]OperationObject {
 		for name, p := range info.Param {
 			typ, format := parameterDataType(p.Typ)
 			in, req := parameterIN(info.Method.Url, p.Typ, name)
-			parameter := ParameterObject{
-				Index:    p.Order,
-				Name:     name,
-				In:       in,
-				Required: req,
-			}
 
 			if in == "pass" {
 				continue
 			}
 
-			switch typ {
-			case "object":
-				{
-					if name == "body" {
-						reqBodys = append(reqBodys, JsonRefRequestBody(format, typ))
-					} else {
-						ps := genStructParam(p.Typ)
-						if len(ps) > 0 {
-							params = append(params, ps...)
-						}
-						continue
-					}
-				}
-			case "array":
-				{
-					parameter.Schema = map[string]any{
-						"type": "array",
-						"items": map[string]any{
-							"$ref": format,
-						},
-					}
-				}
-			default:
-				{
-					parameter.Schema = map[string]any{
-						"type": typ,
-					}
-					if format != "" {
-						parameter.Schema["format"] = format
-					}
-
+			if name == "body" {
+				reqBodys = append(reqBodys, JsonRefRequestBody(format, typ))
+			} else {
+				arrs, parameter := parseQuery(typ, format, p)
+				if parameter != nil {
+					parameter.Index = p.Order
+					parameter.Name = name
+					parameter.In = in
+					parameter.Required = req
 					//Description of setting parameters
 					if description, b := info.KV.Load(fmt.Sprintf("swagger.parameter.%s", name)); b {
 						parameter.Description = description.(string)
 					}
+					params = append(params, *parameter)
+				}
+
+				if len(arrs) > 0 {
+					params = append(params, arrs...)
 				}
 			}
-			params = append(params, parameter)
+
 		}
 
 		//sort param
@@ -250,9 +263,8 @@ func genPaths(ctx *def.Context) map[string]map[string]OperationObject {
 		//TODO mul req bodys
 		if len(reqBodys) > 0 {
 			mEn.RequestBody = reqBodys[0]
-		} else {
-			mEn.Parameters = params
 		}
+		mEn.Parameters = params
 		entry[strings.ToLower(info.Method.HttpMethod)] = mEn
 		en[url] = entry
 	})
@@ -316,8 +328,9 @@ var _ = `"definitions": {
     },`
 
 type Object struct {
-	Typ        string         `json:"type,omitempty"`
-	Properties map[string]any `json:"properties"`
+	Typ                  string         `json:"type,omitempty"`
+	Properties           map[string]any `json:"properties,omitempty"`
+	AdditionalProperties bool           `json:"additionalProperties"`
 }
 
 type Cell struct {
@@ -346,7 +359,17 @@ func loadSecurityDefinition(v map[string]*core.SecurityObject) string {
 }
 
 // Check type
-func definitions(t reflect.Type) string {
+func definitions(t reflect.Type) (ref string) {
+	if t.Kind() != reflect.Struct {
+		return ""
+	}
+
+	key := t.Name()
+
+	if isDefTypes(t) {
+		return ""
+	}
+
 	properties := make(map[string]any)
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
@@ -363,10 +386,11 @@ func definitions(t reflect.Type) string {
 			properties[fName] = Cell{Typ: dt, Format: format}
 		}
 	}
-	key := t.Name()
+
 	if t.Name() == "" {
 		key = fmt.Sprintf("Struct%d", rand.Int31())
 	}
+
 	definitionsMap[key] = Object{
 		Typ:        "object",
 		Properties: properties,
@@ -403,10 +427,6 @@ func search(t int, f func(int) bool) int {
 	return -1
 }
 
-var (
-	header types.HeadType
-)
-
 func getPaths(url string) []string {
 	re := regexp.MustCompile(`<([^>]+)>`)
 	matches := re.FindAllStringSubmatch(url, -1)
@@ -436,10 +456,8 @@ func parameterIN(url string, t reflect.Type, pName string) (in string, require b
 	}); index > 0 {
 		return "query", true
 	}
-	headerRegs := header.Register()
-	if index := search(len(headerRegs), func(i int) bool {
-		return headerRegs[i] == t
-	}); index > 0 {
+
+	if isDefTypes(t) {
 		return "pass", true
 	}
 	return "query", false

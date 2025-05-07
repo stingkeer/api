@@ -5,6 +5,10 @@ import (
 	"gitee.com/fast_api/api/kit/core"
 )
 
+// def.MiddleWare is func(req *http.Request) (ret any)
+// When ret is nil, continue to the next interceptor
+// Otherwise, ret will be applied until exit
+
 type MiddlewareOps struct {
 	ops []def.Option
 }
@@ -25,4 +29,12 @@ func (m *MiddlewareOps) WithPrefix(...def.MiddleWare) *MiddlewareOps {
 
 func AddRoutes(os ...def.Option) *MiddlewareOps {
 	return &MiddlewareOps{ops: os}
+}
+
+func Routes(os ...def.Option) *MiddlewareOps {
+	return AddRoutes(os...)
+}
+
+func RoutesMiddleware(os ...def.Option) *MiddlewareOps {
+	return AddRoutes(os...)
 }

@@ -2,10 +2,16 @@ package rettypes
 
 import (
 	"bytes"
-	"gitee.com/fast_api/api/def"
 	"io"
 	"net/http"
 	"reflect"
+
+	"gitee.com/fast_api/api/def"
+)
+
+var (
+	_ def.AppendHeader = (*Redirect)(nil)
+	_ def.RetAdapter   = (*Redirect)(nil)
 )
 
 type Redirect struct {

@@ -1,12 +1,18 @@
 package rettypes
 
 import (
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/log"
 	"html/template"
 	"io"
 	"io/fs"
 	"reflect"
+
+	"gitee.com/fast_api/api/def"
+	"gitee.com/fast_api/api/log"
+)
+
+var (
+	_ def.ContentType = (*Html)(nil)
+	_ def.RetAdapter  = (*Html)(nil)
 )
 
 type Html struct {

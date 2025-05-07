@@ -33,7 +33,18 @@ var (
 
 	NewStream = rettypes.NewStream
 
-	Html     = rettypes.NewHtml
+	Html = rettypes.NewHtml
+
+	// HtmlView
+	//
+	//  go:embed view
+	//  var view embed.FS
+	//
+	//  func htmpList(format def.StringReq) any {
+	//        //.....messages
+	//        return api.HtmlView(view, "view/list.html", messages)
+	//  }
+	//
 	HtmlView = rettypes.HtmlView
 
 	// Static static web

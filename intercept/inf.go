@@ -38,6 +38,8 @@ func (hc *HttpContext) LoadAndDelete(key string) (any, bool) {
 	return nil, false
 }
 
+// SkipResponse
+// Skip Response
 func (hc *HttpContext) SkipResponse() {
 	hc.Store("SkipResponse", 1)
 }

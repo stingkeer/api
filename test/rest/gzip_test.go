@@ -19,12 +19,31 @@ func TestGzip(t *testing.T) {
 			return map[string]string{"status": "OK"}
 		}, "/gzip")
 	}).With(func() {
-		gzipClient(t)
+		gzipClient(t, func(s []byte) {
+			var r map[string]string
+			if json.Unmarshal(s, &r) == nil && r["status"] != "OK" {
+				t.Errorf("except %s but %s", "OK", string(s))
+			}
+		})
 	})
-
 }
 
-func gzipClient(t *testing.T) {
+func TestHtmlGzip(t *testing.T) {
+	type H struct {
+		Hello string
+	}
+	r.Test(t, func() def.Option {
+		return api.GET(func() any {
+			return api.Html(`<h>{{.Hello}}</h>`, H{Hello: "my"})
+		}, "/gzip")
+	}).With(func() {
+		gzipClient(t, func(s []byte) {
+			fmt.Println(s)
+		})
+	})
+}
+
+func gzipClient(t *testing.T, f func(s []byte)) {
 	req, err := http.NewRequest("GET", "http://localhost:8080/gzip", nil)
 	if err != nil {
 		fmt.Println("The creation request failed:", err)
@@ -48,9 +67,8 @@ func gzipClient(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		var r map[string]string
-		if json.Unmarshal(bys, &r) == nil && r["status"] != "OK" {
-			t.Errorf("except %s but %s", "OK", string(bys))
+		if f != nil {
+			f(bys)
 		}
 	} else {
 		t.Errorf("Not gzip request")

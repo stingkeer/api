@@ -2,7 +2,7 @@ package def
 
 type SwaggerSecurity interface {
 	SecuritCookie(name string, cookieName string)
-	SecuritApiHeader(name string, headerName string)
+	SecuritApiHeader(securityTag string, headerName string)
 	SecuritJwt(name string)
 }
 

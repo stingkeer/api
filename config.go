@@ -1,8 +1,13 @@
 package api
 
-import "gitee.com/fast_api/api/dwarf"
+import (
+	"crypto/tls"
+
+	"gitee.com/fast_api/api/dwarf"
+)
 
 type ServerConfig struct {
+	tlsConfig                             *tls.Config
 	listen                                string
 	dwarf                                 *dwarf.DwarfMaker
 	loadPath                              *string

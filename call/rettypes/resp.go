@@ -24,8 +24,9 @@ type Resp struct {
 	reader      io.Reader
 }
 
+// NewResp By default, use json ContextType
+// The incoming resp will be serialized
 func NewResp(resp any) *Resp {
-
 	return &Resp{
 		res:         resp,
 		code:        http.StatusOK,

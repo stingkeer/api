@@ -7,7 +7,14 @@ import (
 	"gitee.com/fast_api/api/def"
 )
 
+var _ def.Serialize = (*JsonConvertImpl)(nil)
+
 type JsonConvertImpl struct{}
+
+// ContentType implements def.Serialize.
+func (c *JsonConvertImpl) ContentType() string {
+	return def.Content_JSON
+}
 
 func (c *JsonConvertImpl) Decode(bytes []byte, vpr interface{}) error {
 	return json.Unmarshal(bytes, vpr)

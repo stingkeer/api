@@ -19,6 +19,7 @@ func WithRequest(rw http.ResponseWriter, req *http.Request) *Request {
 }
 
 type Serialize interface {
+	ContentType() string
 	Encode(interface{}) *Content
 	// Decode interface{} is out
 	Decode([]byte, interface{}) error
@@ -29,8 +30,8 @@ type Match interface {
 	Add(key string, data interface{})
 }
 
+// Caller
 type Caller interface {
-	// CallerTrace
 	// Call request ==> object
 	Call(f *Entry, req *Request) interface{}
 }

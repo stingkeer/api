@@ -20,24 +20,24 @@ type SwaggerSecurit struct {
 }
 
 // SecuritApiHeader implements def.SwaggerOps.
-func (s *SwaggerSecurit) SecuritApiHeader(name string, headerName string) {
+func (s *SwaggerSecurit) SecuritApiHeader(securityTag string, headerName string) {
 	for i := 0; i < len(s.Ops); i++ {
-		s.Ops[i].StoreKV("swagger.securit", SecuritApiHeader(name, headerName))
+		s.Ops[i].StoreKV("swagger.securit", SecuritApiHeader(securityTag, headerName))
 	}
 
 }
 
 // SecuritCookie implements def.SwaggerOps.
-func (s *SwaggerSecurit) SecuritCookie(name string, cookieName string) {
+func (s *SwaggerSecurit) SecuritCookie(securityTag string, cookieName string) {
 	for i := 0; i < len(s.Ops); i++ {
-		s.Ops[i].StoreKV("swagger.securit", SecuritCookie(name, cookieName))
+		s.Ops[i].StoreKV("swagger.securit", SecuritCookie(securityTag, cookieName))
 	}
 }
 
 // SecuritJwt implements def.SwaggerOps.
-func (s *SwaggerSecurit) SecuritJwt(name string) {
+func (s *SwaggerSecurit) SecuritJwt(securityTag string) {
 	for i := 0; i < len(s.Ops); i++ {
-		s.Ops[i].StoreKV("swagger.securit", SecuritJwt(name))
+		s.Ops[i].StoreKV("swagger.securit", SecuritJwt(securityTag))
 	}
 }
 
@@ -67,9 +67,9 @@ type SecurityObject struct {
 	BearerFormat string `json:"bearerformat,omitempty"`
 }
 
-func SecuritCookie(name string, cookieName string) map[string]*SecurityObject {
+func SecuritCookie(securityTag string, cookieName string) map[string]*SecurityObject {
 	return map[string]*SecurityObject{
-		name: {
+		securityTag: {
 			Typ:  "apiKey",
 			In:   "cookie",
 			Name: cookieName,
@@ -77,9 +77,9 @@ func SecuritCookie(name string, cookieName string) map[string]*SecurityObject {
 	}
 }
 
-func SecuritApiHeader(name string, headerName string) map[string]*SecurityObject {
+func SecuritApiHeader(securityTag string, headerName string) map[string]*SecurityObject {
 	return map[string]*SecurityObject{
-		name: {
+		securityTag: {
 			Typ:  "apiKey",
 			In:   "header",
 			Name: headerName,
@@ -87,9 +87,9 @@ func SecuritApiHeader(name string, headerName string) map[string]*SecurityObject
 	}
 }
 
-func SecuritJwt(name string) map[string]*SecurityObject {
+func SecuritJwt(securityTag string) map[string]*SecurityObject {
 	return map[string]*SecurityObject{
-		name: {
+		securityTag: {
 			Typ:          "http",
 			Scheme:       "bearer",
 			BearerFormat: "JWT",
