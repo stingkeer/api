@@ -3,11 +3,11 @@ package api
 import (
 	stdhttp "net/http"
 
-	"go.aew.app/api/call"
-	"go.aew.app/api/call/rettypes"
-	"go.aew.app/api/def"
-	"go.aew.app/api/http"
-	"go.aew.app/api/kit/core"
+	"go.aew.app/api.v1/call"
+	"go.aew.app/api.v1/call/rettypes"
+	"go.aew.app/api.v1/def"
+	"go.aew.app/api.v1/http"
+	"go.aew.app/api.v1/kit/core"
 )
 
 var (

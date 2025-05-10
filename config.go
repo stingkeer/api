@@ -3,7 +3,7 @@ package api
 import (
 	"crypto/tls"
 
-	"go.aew.app/api/dwarf"
+	"go.aew.app/api.v1/dwarf"
 )
 
 type ServerConfig struct {

@@ -3,7 +3,7 @@ package http
 import (
 	"reflect"
 
-	"go.aew.app/api/def"
+	"go.aew.app/api.v1/def"
 )
 
 type ErrorHandler func(err interface{}) interface{}

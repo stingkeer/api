@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"os"
 
-	"go.aew.app/api/def"
-	"go.aew.app/api/dwarf"
-	ihttp "go.aew.app/api/http"
-	"go.aew.app/api/log"
+	"go.aew.app/api.v1/def"
+	"go.aew.app/api.v1/dwarf"
+	ihttp "go.aew.app/api.v1/http"
+	"go.aew.app/api.v1/log"
 )
 
 type Optional func(conf *ServerConfig)

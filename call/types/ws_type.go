@@ -5,8 +5,8 @@ import (
 	"reflect"
 
 	"github.com/gorilla/websocket"
-	"go.aew.app/api/def"
-	"go.aew.app/api/kit/ws"
+	"go.aew.app/api.v1/def"
+	"go.aew.app/api.v1/kit/ws"
 )
 
 var _ def.Adapter = (*WSType)(nil)

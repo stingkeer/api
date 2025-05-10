@@ -1,8 +1,8 @@
 package api
 
 import (
-	"go.aew.app/api/def"
-	"go.aew.app/api/kit/core"
+	"go.aew.app/api.v1/def"
+	"go.aew.app/api.v1/kit/core"
 )
 
 // def.MiddleWare is func(req *http.Request) (ret any)

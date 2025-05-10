@@ -3,7 +3,7 @@ package swagger
 import (
 	"reflect"
 
-	"go.aew.app/api/call/types"
+	"go.aew.app/api.v1/call/types"
 )
 
 var (

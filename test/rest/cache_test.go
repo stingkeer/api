@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"go.aew.app/api"
-	"go.aew.app/api/cache"
-	"go.aew.app/api/def"
-	"go.aew.app/api/test/r"
+	"go.aew.app/api.v1"
+	"go.aew.app/api.v1/cache"
+	"go.aew.app/api.v1/def"
+	"go.aew.app/api.v1/test/r"
 )
 
 func TestCache(t *testing.T) {
@@ -25,5 +25,4 @@ func TestCache(t *testing.T) {
 	if i != 1 || j != 3 {
 		t.Errorf("TestCache Error")
 	}
-
 }

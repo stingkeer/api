@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"go.aew.app/api"
-	"go.aew.app/api/def"
-	"go.aew.app/api/kit/ws"
-	"go.aew.app/api/test/r"
+	"go.aew.app/api.v1"
+	"go.aew.app/api.v1/def"
+	"go.aew.app/api.v1/kit/ws"
+	"go.aew.app/api.v1/test/r"
 )
 
 type People struct {

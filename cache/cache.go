@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"time"
 
-	"go.aew.app/api/call"
-	"go.aew.app/api/def"
-	"go.aew.app/api/http"
+	"go.aew.app/api.v1/call"
+	"go.aew.app/api.v1/def"
+	"go.aew.app/api.v1/http"
 )
 
 var (

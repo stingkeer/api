@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/rs/cors"
-	"go.aew.app/api/def"
+	"go.aew.app/api.v1/def"
 )
 
 type Handle struct {

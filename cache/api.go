@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"go.aew.app/api/def"
+	"go.aew.app/api.v1/def"
 )
 
 type ProcessCache interface {

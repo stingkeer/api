@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"go.aew.app/api"
+	"go.aew.app/api.v1"
 )
 
 func TestStatic(t *testing.T) {

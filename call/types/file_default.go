@@ -4,8 +4,8 @@ import (
 	"mime/multipart"
 	"reflect"
 
-	"go.aew.app/api/def"
-	"go.aew.app/api/log"
+	"go.aew.app/api.v1/def"
+	"go.aew.app/api.v1/log"
 )
 
 var _ def.Adapter = (*FileType)(nil)

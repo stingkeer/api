@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"go.aew.app/api"
-	"go.aew.app/api/def"
+	"go.aew.app/api.v1"
+	"go.aew.app/api.v1/def"
 )
 
 type Client interface {

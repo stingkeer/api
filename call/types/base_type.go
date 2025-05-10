@@ -4,9 +4,9 @@ import (
 	"reflect"
 	"strconv"
 
-	"go.aew.app/api/def"
-	"go.aew.app/api/log"
-	"go.aew.app/api/utils"
+	"go.aew.app/api.v1/def"
+	"go.aew.app/api.v1/log"
+	"go.aew.app/api.v1/utils"
 )
 
 var _ def.Adapter = (*BaseType)(nil)

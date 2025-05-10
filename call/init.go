@@ -1,9 +1,9 @@
 package call
 
 import (
-	"go.aew.app/api/call/rettypes"
-	"go.aew.app/api/call/types"
-	"go.aew.app/api/http"
+	"go.aew.app/api.v1/call/rettypes"
+	"go.aew.app/api.v1/call/types"
+	"go.aew.app/api.v1/http"
 )
 
 func init() {

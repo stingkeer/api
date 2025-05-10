@@ -3,16 +3,16 @@ package core
 import (
 	_ "unsafe"
 
-	"go.aew.app/api/call"
-	"go.aew.app/api/def"
-	"go.aew.app/api/http"
-	"go.aew.app/api/intercept"
-	"go.aew.app/api/kit/handler/sgzip"
-	"go.aew.app/api/match"
-	"go.aew.app/api/serialize"
+	"go.aew.app/api.v1/call"
+	"go.aew.app/api.v1/def"
+	"go.aew.app/api.v1/http"
+	"go.aew.app/api.v1/intercept"
+	"go.aew.app/api.v1/kit/handler/sgzip"
+	"go.aew.app/api.v1/match"
+	"go.aew.app/api.v1/serialize"
 )
 
-//go:linkname addHttpHandle go.aew.app/api/http.addHttpHandle
+//go:linkname addHttpHandle go.aew.app/api.v1/http.addHttpHandle
 func addHttpHandle(f intercept.HttpIntercept)
 
 func init() {

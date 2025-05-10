@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"go.aew.app/api"
+	"go.aew.app/api.v1"
 )
 
 func handle1() string {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"go.aew.app/api"
+	"go.aew.app/api.v1"
 )
 
 var cert = `-----BEGIN CERTIFICATE-----

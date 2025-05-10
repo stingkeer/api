@@ -1,6 +1,6 @@
 package ws
 
-import "go.aew.app/api/log"
+import "go.aew.app/api.v1/log"
 
 var (
 	cPool map[string]*WSCtx = make(map[string]*WSCtx)

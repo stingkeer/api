@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"go.aew.app/api/def"
-	"go.aew.app/api/log"
+	"go.aew.app/api.v1/def"
+	"go.aew.app/api.v1/log"
 )
 
 var (

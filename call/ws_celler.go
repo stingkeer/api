@@ -2,7 +2,7 @@ package call
 
 import (
 	"github.com/gorilla/websocket"
-	"go.aew.app/api/def"
+	"go.aew.app/api.v1/def"
 )
 
 var _ def.Caller = (*WsCaller)(nil)

@@ -5,9 +5,9 @@ import (
 	"strings"
 	"sync"
 
-	"go.aew.app/api/def"
-	"go.aew.app/api/dwarf"
-	"go.aew.app/api/log"
+	"go.aew.app/api.v1/def"
+	"go.aew.app/api.v1/dwarf"
+	"go.aew.app/api.v1/log"
 )
 
 var (

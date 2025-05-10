@@ -5,9 +5,9 @@ import (
 	"runtime"
 	"sync"
 
-	"go.aew.app/api/dwarf"
-	"go.aew.app/api/log"
-	"go.aew.app/api/utils"
+	"go.aew.app/api.v1/dwarf"
+	"go.aew.app/api.v1/log"
+	"go.aew.app/api.v1/utils"
 )
 
 type MethodsPools struct {

@@ -3,7 +3,7 @@ package types
 import (
 	"reflect"
 
-	"go.aew.app/api/def"
+	"go.aew.app/api.v1/def"
 )
 
 var _ def.Adapter = (*TypeRequireG)(nil)

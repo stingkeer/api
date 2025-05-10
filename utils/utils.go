@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"go.aew.app/api/log"
+	"go.aew.app/api.v1/log"
 )
 
 // SplitFuncName

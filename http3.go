@@ -9,9 +9,9 @@ import (
 	"net/http"
 
 	"github.com/quic-go/quic-go/http3"
-	"go.aew.app/api/def"
-	_ "go.aew.app/api/kit"
-	"go.aew.app/api/log"
+	"go.aew.app/api.v1/def"
+	_ "go.aew.app/api.v1/kit"
+	"go.aew.app/api.v1/log"
 )
 
 var server = NewServer(def.DefaultContext.Pool)

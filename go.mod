@@ -1,4 +1,4 @@
-module go.aew.app/api
+module go.aew.app/api.v1
 
 go 1.21
 

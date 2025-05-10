@@ -11,10 +11,10 @@ import (
 	"sort"
 	"strings"
 
-	"go.aew.app/api/call/types"
-	"go.aew.app/api/def"
-	"go.aew.app/api/dwarf"
-	"go.aew.app/api/kit/core"
+	"go.aew.app/api.v1/call/types"
+	"go.aew.app/api.v1/def"
+	"go.aew.app/api.v1/dwarf"
+	"go.aew.app/api.v1/kit/core"
 )
 
 //TODO Response type no implement

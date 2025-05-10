@@ -4,8 +4,8 @@ import (
 	"math"
 	"net/http"
 
-	"go.aew.app/api/def"
-	"go.aew.app/api/intercept"
+	"go.aew.app/api.v1/def"
+	"go.aew.app/api.v1/intercept"
 )
 
 var (

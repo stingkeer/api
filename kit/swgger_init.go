@@ -5,9 +5,9 @@ package kit
 import (
 	"net/http"
 
-	"go.aew.app/api/def"
-	"go.aew.app/api/kit/core"
-	"go.aew.app/api/kit/swagger"
+	"go.aew.app/api.v1/def"
+	"go.aew.app/api.v1/kit/core"
+	"go.aew.app/api.v1/kit/swagger"
 )
 
 func init() {
