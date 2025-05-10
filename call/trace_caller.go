@@ -1,7 +1,7 @@
 package call
 
 import (
-	"gitee.com/fast_api/api/def"
+	"go.aew.app/api/def"
 )
 
 var _ def.Caller = (*TraceCaller)(nil)

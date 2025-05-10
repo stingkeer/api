@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"time"
 
-	"gitee.com/fast_api/api/call"
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/http"
+	"go.aew.app/api/call"
+	"go.aew.app/api/def"
+	"go.aew.app/api/http"
 )
 
 var (

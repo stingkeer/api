@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"gitee.com/fast_api/api/def"
+	"go.aew.app/api/def"
 )
 
 var _ def.Adapter = (*TypeRequire)(nil)

@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"os"
 
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/dwarf"
-	ihttp "gitee.com/fast_api/api/http"
-	"gitee.com/fast_api/api/log"
+	"go.aew.app/api/def"
+	"go.aew.app/api/dwarf"
+	ihttp "go.aew.app/api/http"
+	"go.aew.app/api/log"
 )
 
 type Optional func(conf *ServerConfig)

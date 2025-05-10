@@ -3,8 +3,8 @@ package cors
 import (
 	"net/http"
 
-	"gitee.com/fast_api/api/def"
 	"github.com/rs/cors"
+	"go.aew.app/api/def"
 )
 
 type Handle struct {

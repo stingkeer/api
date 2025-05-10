@@ -5,9 +5,9 @@ import (
 	"runtime"
 	"sync"
 
-	"gitee.com/fast_api/api/dwarf"
-	"gitee.com/fast_api/api/log"
-	"gitee.com/fast_api/api/utils"
+	"go.aew.app/api/dwarf"
+	"go.aew.app/api/log"
+	"go.aew.app/api/utils"
 )
 
 type MethodsPools struct {

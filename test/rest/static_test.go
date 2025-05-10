@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"gitee.com/fast_api/api"
+	"go.aew.app/api"
 )
 
 func TestStatic(t *testing.T) {

@@ -6,8 +6,8 @@ import (
 	"io/fs"
 	"reflect"
 
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/log"
+	"go.aew.app/api/def"
+	"go.aew.app/api/log"
 )
 
 var (

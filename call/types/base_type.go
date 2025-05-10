@@ -4,9 +4,9 @@ import (
 	"reflect"
 	"strconv"
 
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/log"
-	"gitee.com/fast_api/api/utils"
+	"go.aew.app/api/def"
+	"go.aew.app/api/log"
+	"go.aew.app/api/utils"
 )
 
 var _ def.Adapter = (*BaseType)(nil)

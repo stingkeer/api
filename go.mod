@@ -1,4 +1,4 @@
-module gitee.com/fast_api/api
+module go.aew.app/api
 
 go 1.21
 

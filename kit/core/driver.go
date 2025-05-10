@@ -5,9 +5,9 @@ import (
 	"strings"
 	"sync"
 
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/dwarf"
-	"gitee.com/fast_api/api/log"
+	"go.aew.app/api/def"
+	"go.aew.app/api/dwarf"
+	"go.aew.app/api/log"
 )
 
 var (

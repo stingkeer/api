@@ -5,7 +5,7 @@ import (
 	"fmt"
 	stdhttp "net/http"
 
-	"gitee.com/fast_api/api/http"
+	"go.aew.app/api/http"
 )
 
 //go:embed ui/*

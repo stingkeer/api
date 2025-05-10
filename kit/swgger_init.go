@@ -3,10 +3,11 @@
 package kit
 
 import (
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/kit/core"
-	"gitee.com/fast_api/api/kit/swagger"
 	"net/http"
+
+	"go.aew.app/api/def"
+	"go.aew.app/api/kit/core"
+	"go.aew.app/api/kit/swagger"
 )
 
 func init() {

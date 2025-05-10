@@ -6,7 +6,7 @@ import (
 )
 
 var includeRegex = []string{
-	"^gitee.com/fast_api/.+$",
+	"^go.aew.app/.+$",
 }
 
 func isInclude(pkg string) bool {

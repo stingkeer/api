@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"gitee.com/fast_api/api/def"
+	"go.aew.app/api/def"
 )
 
 var _ def.Serialize = (*JsonConvertImpl)(nil)

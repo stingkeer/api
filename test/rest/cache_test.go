@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"gitee.com/fast_api/api"
-	"gitee.com/fast_api/api/cache"
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/test/r"
+	"go.aew.app/api"
+	"go.aew.app/api/cache"
+	"go.aew.app/api/def"
+	"go.aew.app/api/test/r"
 )
 
 func TestCache(t *testing.T) {

@@ -1,8 +1,9 @@
 package http
 
 import (
-	"gitee.com/fast_api/api/def"
 	"reflect"
+
+	"go.aew.app/api/def"
 )
 
 var retAdapters = make(map[reflect.Type]def.RetAdapter)

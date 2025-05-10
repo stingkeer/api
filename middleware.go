@@ -1,8 +1,8 @@
 package api
 
 import (
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/kit/core"
+	"go.aew.app/api/def"
+	"go.aew.app/api/kit/core"
 )
 
 // def.MiddleWare is func(req *http.Request) (ret any)

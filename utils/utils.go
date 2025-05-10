@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"gitee.com/fast_api/api/log"
+	"go.aew.app/api/log"
 )
 
 // SplitFuncName

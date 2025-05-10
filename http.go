@@ -7,9 +7,9 @@ import (
 	"net"
 	"net/http"
 
-	"gitee.com/fast_api/api/def"
-	_ "gitee.com/fast_api/api/kit"
-	"gitee.com/fast_api/api/log"
+	"go.aew.app/api/def"
+	_ "go.aew.app/api/kit"
+	"go.aew.app/api/log"
 )
 
 var server = NewServer(def.DefaultContext.Pool)

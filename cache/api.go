@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"gitee.com/fast_api/api/def"
+	"go.aew.app/api/def"
 )
 
 type ProcessCache interface {

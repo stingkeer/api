@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/intercept"
+	"go.aew.app/api/def"
+	"go.aew.app/api/intercept"
 )
 
 var (

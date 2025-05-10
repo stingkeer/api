@@ -3,16 +3,16 @@ package core
 import (
 	_ "unsafe"
 
-	"gitee.com/fast_api/api/call"
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/http"
-	"gitee.com/fast_api/api/intercept"
-	"gitee.com/fast_api/api/kit/handler/sgzip"
-	"gitee.com/fast_api/api/match"
-	"gitee.com/fast_api/api/serialize"
+	"go.aew.app/api/call"
+	"go.aew.app/api/def"
+	"go.aew.app/api/http"
+	"go.aew.app/api/intercept"
+	"go.aew.app/api/kit/handler/sgzip"
+	"go.aew.app/api/match"
+	"go.aew.app/api/serialize"
 )
 
-//go:linkname addHttpHandle gitee.com/fast_api/api/http.addHttpHandle
+//go:linkname addHttpHandle go.aew.app/api/http.addHttpHandle
 func addHttpHandle(f intercept.HttpIntercept)
 
 func init() {

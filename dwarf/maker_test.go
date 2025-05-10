@@ -45,7 +45,7 @@ func TestFunBase(t *testing.T) {
 }
 
 func TestRegex(t *testing.T) {
-	regexp.MustCompile("$gitee.com/fast_api/.+$")
+	regexp.MustCompile("$go.aew.app/.+$")
 }
 
 func TestGoSym(t *testing.T) {

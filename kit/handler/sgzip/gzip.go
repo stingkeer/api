@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	"gitee.com/fast_api/api/call/rettypes"
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/intercept"
+	"go.aew.app/api/call/rettypes"
+	"go.aew.app/api/def"
+	"go.aew.app/api/intercept"
 )
 
 var _ intercept.HttpIntercept = (*GZip)(nil)

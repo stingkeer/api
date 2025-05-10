@@ -5,9 +5,9 @@ import (
 	"io"
 	"time"
 
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/log"
 	"github.com/gorilla/websocket"
+	"go.aew.app/api/def"
+	"go.aew.app/api/log"
 )
 
 var (

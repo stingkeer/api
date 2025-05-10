@@ -11,10 +11,10 @@ import (
 	"sort"
 	"strings"
 
-	"gitee.com/fast_api/api/call/types"
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/dwarf"
-	"gitee.com/fast_api/api/kit/core"
+	"go.aew.app/api/call/types"
+	"go.aew.app/api/def"
+	"go.aew.app/api/dwarf"
+	"go.aew.app/api/kit/core"
 )
 
 //TODO Response type no implement

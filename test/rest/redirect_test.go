@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"testing"
 
-	"gitee.com/fast_api/api"
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/test/r"
+	"go.aew.app/api"
+	"go.aew.app/api/def"
+	"go.aew.app/api/test/r"
 )
 
 func TestNewRedirect(t *testing.T) {

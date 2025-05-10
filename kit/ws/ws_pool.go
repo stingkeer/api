@@ -1,6 +1,6 @@
 package ws
 
-import "gitee.com/fast_api/api/log"
+import "go.aew.app/api/log"
 
 var (
 	cPool map[string]*WSCtx = make(map[string]*WSCtx)

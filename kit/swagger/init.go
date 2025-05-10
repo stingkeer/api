@@ -3,7 +3,7 @@ package swagger
 import (
 	"reflect"
 
-	"gitee.com/fast_api/api/call/types"
+	"go.aew.app/api/call/types"
 )
 
 var (

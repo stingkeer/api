@@ -3,11 +3,11 @@ package api
 import (
 	stdhttp "net/http"
 
-	"gitee.com/fast_api/api/call"
-	"gitee.com/fast_api/api/call/rettypes"
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/http"
-	"gitee.com/fast_api/api/kit/core"
+	"go.aew.app/api/call"
+	"go.aew.app/api/call/rettypes"
+	"go.aew.app/api/def"
+	"go.aew.app/api/http"
+	"go.aew.app/api/kit/core"
 )
 
 var (

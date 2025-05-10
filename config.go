@@ -3,7 +3,7 @@ package api
 import (
 	"crypto/tls"
 
-	"gitee.com/fast_api/api/dwarf"
+	"go.aew.app/api/dwarf"
 )
 
 type ServerConfig struct {

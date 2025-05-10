@@ -3,7 +3,7 @@ package http
 import (
 	"reflect"
 
-	"gitee.com/fast_api/api/def"
+	"go.aew.app/api/def"
 )
 
 type ErrorHandler func(err interface{}) interface{}

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"gitee.com/fast_api/api"
+	"go.aew.app/api"
 )
 
 var cert = `-----BEGIN CERTIFICATE-----

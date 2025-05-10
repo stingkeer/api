@@ -3,7 +3,7 @@ package core
 import (
 	"fmt"
 
-	"gitee.com/fast_api/api/def"
+	"go.aew.app/api/def"
 )
 
 var (

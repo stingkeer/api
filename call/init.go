@@ -1,9 +1,9 @@
 package call
 
 import (
-	"gitee.com/fast_api/api/call/rettypes"
-	"gitee.com/fast_api/api/call/types"
-	"gitee.com/fast_api/api/http"
+	"go.aew.app/api/call/rettypes"
+	"go.aew.app/api/call/types"
+	"go.aew.app/api/http"
 )
 
 func init() {

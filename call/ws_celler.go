@@ -1,8 +1,8 @@
 package call
 
 import (
-	"gitee.com/fast_api/api/def"
 	"github.com/gorilla/websocket"
+	"go.aew.app/api/def"
 )
 
 var _ def.Caller = (*WsCaller)(nil)

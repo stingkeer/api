@@ -8,10 +8,10 @@ import (
 	"reflect"
 	"strings"
 
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/intercept"
-	"gitee.com/fast_api/api/log"
-	"gitee.com/fast_api/api/utils"
+	"go.aew.app/api/def"
+	"go.aew.app/api/intercept"
+	"go.aew.app/api/log"
+	"go.aew.app/api/utils"
 )
 
 var _ def.Caller = (*callerDefault)(nil)

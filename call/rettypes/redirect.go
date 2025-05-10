@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"reflect"
 
-	"gitee.com/fast_api/api/def"
+	"go.aew.app/api/def"
 )
 
 var (

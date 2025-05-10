@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"reflect"
 
-	"gitee.com/fast_api/api/def"
-	"gitee.com/fast_api/api/kit/ws"
 	"github.com/gorilla/websocket"
+	"go.aew.app/api/def"
+	"go.aew.app/api/kit/ws"
 )
 
 var _ def.Adapter = (*WSType)(nil)
