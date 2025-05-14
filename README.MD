@@ -1,4 +1,4 @@
-
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/stingkeer/api)
 
 ### 1. Quick Start
 ```
