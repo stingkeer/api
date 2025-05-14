@@ -1,8 +1,7 @@
-package sgzip
+package compress
 
 import (
 	"bytes"
-	"compress/gzip"
 	"io"
 	"net/http"
 	"strings"
@@ -12,9 +11,14 @@ import (
 	"go.aew.app/api.v1/intercept"
 )
 
-var _ intercept.HttpIntercept = (*GZip)(nil)
+var CompressRegister = map[string]Compress{
+	"gzip":    &gZip{},
+	"deflate": &flateStd{},
+}
 
-type GZip struct{}
+var _ intercept.HttpIntercept = (*CompressStd)(nil)
+
+type CompressStd struct{}
 
 type readHead struct {
 	req *http.Request
@@ -28,20 +32,31 @@ func (r *readHead) Values(key string) []string {
 	return r.req.Header.Values(key)
 }
 
+// checkSupport
+// gzip, deflate, br, zstd
+func (g *CompressStd) checkSupport(h string) Compress {
+	for k, v := range CompressRegister {
+		if strings.Contains(h, k) {
+			return v
+		}
+	}
+	return nil
+}
+
 // Http implements intercept.HttpIntercept.
-func (g *GZip) Http(rw http.ResponseWriter, req *http.Request, ctx *intercept.HttpContext) bool {
-	if strings.Contains(req.Header.Get(def.Accept_Encoding), "gzip") {
+func (g *CompressStd) Http(rw http.ResponseWriter, req *http.Request, ctx *intercept.HttpContext) bool {
+	if cmp := g.checkSupport(req.Header.Get(def.Accept_Encoding)); cmp != nil {
 		if c, b := ctx.LoadAndDelete("CALLDATA_RetAdapter"); b {
 			g := c.(def.RetAdapter)
 			r, w := io.Pipe()
+			target := cmp.New(w)
 			go func() {
-				gz := gzip.NewWriter(w)
-				_, err := io.Copy(gz, g.Return())
+				_, err := io.Copy(target, g.Return())
 				if err != nil {
 					w.Close()
 					return
 				}
-				if err := gz.Close(); err != nil {
+				if err := target.Close(); err != nil {
 					w.Close()
 					return
 				}
@@ -63,14 +78,14 @@ func (g *GZip) Http(rw http.ResponseWriter, req *http.Request, ctx *intercept.Ht
 				}
 			}
 			resp.SetContentType(g.ContentType())
-			resp.AddHeader(def.Content_Encoding, "gzip")
+			resp.AddHeader(def.Content_Encoding, cmp.ContentEncoding())
 			ctx.Store("CALLDATA_RetAdapter", resp)
 		}
 
 		if c, b := ctx.LoadAndDelete("CALLDATA"); b {
 			g := c.(*def.Content)
 			buf := new(bytes.Buffer)
-			gw := gzip.NewWriter(buf)
+			gw := cmp.New(buf)
 			_, err := gw.Write(g.Bytes)
 			if err != nil {
 				rw.WriteHeader(http.StatusInternalServerError)
@@ -82,7 +97,7 @@ func (g *GZip) Http(rw http.ResponseWriter, req *http.Request, ctx *intercept.Ht
 			}
 			resp := rettypes.NewStream(buf)
 			resp.SetContentType(g.ContentType)
-			resp.AddHeader(def.Content_Encoding, "gzip")
+			resp.AddHeader(def.Content_Encoding, cmp.ContentEncoding())
 			ctx.Store("CALLDATA_RetAdapter", resp)
 		}
 	}
@@ -90,6 +105,6 @@ func (g *GZip) Http(rw http.ResponseWriter, req *http.Request, ctx *intercept.Ht
 }
 
 // Order implements intercept.HttpIntercept.
-func (g *GZip) Order() def.HandlerOrder {
-	return def.Handler_GZIP
+func (g *CompressStd) Order() def.HandlerOrder {
+	return def.Handler_HTTP_COMPRESS
 }

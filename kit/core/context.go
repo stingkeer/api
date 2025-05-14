@@ -7,7 +7,7 @@ import (
 	"go.aew.app/api.v1/def"
 	"go.aew.app/api.v1/http"
 	"go.aew.app/api.v1/intercept"
-	"go.aew.app/api.v1/kit/handler/sgzip"
+	"go.aew.app/api.v1/kit/handler/compress"
 	"go.aew.app/api.v1/match"
 	"go.aew.app/api.v1/serialize"
 )
@@ -33,5 +33,5 @@ func init() {
 	//
 	addHttpHandle(http.DefaultStatic)
 	//
-	addHttpHandle(&sgzip.GZip{})
+	addHttpHandle(&compress.CompressStd{})
 }

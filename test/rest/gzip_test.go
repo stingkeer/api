@@ -38,7 +38,7 @@ func TestHtmlGzip(t *testing.T) {
 		}, "/gzip")
 	}).With(func() {
 		gzipClient(t, func(s []byte) {
-			fmt.Println(s)
+			fmt.Println(string(s))
 		})
 	})
 }
