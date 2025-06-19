@@ -59,9 +59,6 @@ func HttpM(method string, ctx *def.Context) def.HttpMethod {
 			Param:      args,
 		}
 		ctx.Pool.Set(findM.MethodName, methodInfo)
-		if err != nil {
-			panic(err)
-		}
 		log.Infof("[%s] %s(%s) mapping url = %s", entry.HttpMethod, findM.MethodName, printArgs(findM.Args), entry.Url)
 		op := option{url: url, method: method}
 		op.SetMethod(methodInfo)

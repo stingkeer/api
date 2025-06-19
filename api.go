@@ -47,7 +47,17 @@ var (
 	//
 	HtmlView = rettypes.HtmlView
 
-	// Static static web
+	// Static static web usage
+	//
+	//	go:embed public
+	//	var public embed.FS
+	//
+	//	func init() {
+	// 		api.Static("/admin/*", "public", http.FS(public),
+	// 			mhttp.StaticRewrite("/admin/", ""),
+	// 			mhttp.StaticDefaultFile("index.html"),
+	// 		)
+	//	}
 	Static = http.DefaultStatic.HandleStatic
 
 	NewRedirect = rettypes.NewRedirect

@@ -64,9 +64,9 @@ func (ws *WSCtx) Receive(f func(messageType int, p []byte)) {
 }
 
 // Send Use the default serialize send
-func (ws *WSCtx) Send(o any) {
+func (ws *WSCtx) Send(o any) error {
 	context := ws.serialize.Encode(o)
-	ws.conn.WriteMessage(websocket.BinaryMessage, context.Bytes)
+	return ws.conn.WriteMessage(websocket.BinaryMessage, context.Bytes)
 }
 
 func (ws *WSCtx) WriteJSON(o any) {

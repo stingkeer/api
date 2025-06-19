@@ -64,7 +64,7 @@ func (h *Html) renderer(write io.Writer) {
 			}
 		}
 	}()
-	temp, err := template.New("aaa").Parse(h.tpl)
+	temp, err := template.New(h.tpl).Parse(h.tpl)
 	if err != nil {
 		panic(err)
 	}
