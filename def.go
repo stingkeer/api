@@ -22,9 +22,12 @@ var (
 )
 
 func loadTls(s *ServerConfig) (tconf *tls.Config, err error) {
-	if s.tlsConfig != nil {
+	if s.tlsConfig == nil {
 		s.tlsConfig = &tls.Config{}
+	} else {
+		return s.tlsConfig, nil
 	}
+
 	certs := make([]tls.Certificate, 1)
 	certs[0], err = tls.X509KeyPair(defaultConf.certPEMBlock, defaultConf.keyPEMBlock)
 	if err != nil {
