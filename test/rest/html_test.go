@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"strings"
 	"testing"
 
 	"go.aew.app/api.v1"
@@ -38,6 +39,9 @@ func TestHtml(t *testing.T) {
 		if resp.Header(def.Content_Type) != def.CONTENT_HTML {
 			t.Error("not html Content_Type")
 		}
-		t.Log(resp.BodyString())
+		r := resp.BodyString()
+		if !strings.Contains(r, "My photos") {
+			t.Error("html error")
+		}
 	})
 }

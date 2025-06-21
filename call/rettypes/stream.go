@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"go.aew.app/api.v1/def"
-	"go.aew.app/api.v1/log"
 )
 
 type Stream struct {
@@ -98,7 +97,6 @@ func (s *Stream) Strings() string {
 
 func (s *Stream) Close() error {
 	if v, b := s.io.(io.Closer); b {
-		log.Trace("close file ")
 		return v.Close()
 	}
 	return nil

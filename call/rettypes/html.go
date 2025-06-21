@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/fs"
 	"reflect"
+	"time"
 
 	"go.aew.app/api.v1/def"
 	"go.aew.app/api.v1/log"
@@ -59,20 +60,33 @@ func (h *Html) renderer(write io.Writer) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Error(err)
-			if w, b := write.(*io.PipeWriter); b {
-				w.Close()
-			}
+			h.closeIO(write)
 		}
 	}()
 	temp, err := template.New(h.tpl).Parse(h.tpl)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		return
 	}
-	err = temp.Execute(write, h.data)
-	if err != nil {
-		panic(err)
+
+	done := make(chan error, 1)
+	go func() {
+		done <- temp.Execute(write, h.data)
+	}()
+
+	select {
+	case err := <-done:
+		if err != nil {
+			log.Error(err)
+		}
+	case <-time.After(time.Minute):
+		log.Errorf("%s template execution timed out", h.tpl)
 	}
-	if w, b := write.(*io.PipeWriter); b {
+	h.closeIO(write)
+}
+
+func (h *Html) closeIO(i any) {
+	if w, b := i.(io.Closer); b {
 		w.Close()
 	}
 }
