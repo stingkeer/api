@@ -80,7 +80,7 @@ func (h *Html) renderer(write io.Writer) {
 			log.Error(err)
 		}
 	case <-time.After(time.Minute):
-		log.Errorf("%s template execution timed out", h.tpl)
+		log.Errorf("template execution timed out")
 	}
 	h.closeIO(write)
 }
