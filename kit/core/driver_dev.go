@@ -8,6 +8,6 @@ import (
 
 func HttpM(method string, ctx *def.Context) def.HttpMethod {
 	return func(f interface{}, url string) def.Option {
-		return &option{url: url, method: method}
+		return &option{url: url, method: method, mi: &def.MethodInfo{}}
 	}
 }
