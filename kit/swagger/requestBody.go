@@ -6,15 +6,29 @@ type RequestBodyObject struct {
 	Required    bool           `json:"required,omitempty"`
 }
 
-func JsonRefRequestBody(ref string, typ string) *RequestBodyObject {
-	return &RequestBodyObject{
-		Content: map[string]any{
-			"application/json": map[string]any{
-				"schema": map[string]any{
-					"type": typ,
-					"$ref": ref,
+// application/octet-stream
+func RefRequestBody(ref string, typ string) *RequestBodyObject {
+	if ref == "binary" && typ == "array" {
+		return &RequestBodyObject{
+			Content: map[string]any{
+				"application/octet-stream": map[string]any{
+					"schema": map[string]any{
+						"format": ref,
+					},
 				},
 			},
-		},
+		}
+	} else {
+		return &RequestBodyObject{
+			Content: map[string]any{
+				"application/json": map[string]any{
+					"schema": map[string]any{
+						"type": typ,
+						"$ref": ref,
+					},
+				},
+			},
+		}
 	}
+
 }

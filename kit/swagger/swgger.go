@@ -233,7 +233,7 @@ func genPaths(ctx *def.Context) map[string]map[string]OperationObject {
 			}
 
 			if name == "body" {
-				reqBodys = append(reqBodys, JsonRefRequestBody(format, typ))
+				reqBodys = append(reqBodys, RefRequestBody(format, typ))
 			} else {
 				arrs, parameter := parseQuery(typ, format, p)
 				if parameter != nil {
@@ -304,6 +304,9 @@ func parameterDataType(t reflect.Type) (typ, format string) {
 	case reflect.Bool:
 		return "boolean", ""
 	case reflect.Array, reflect.Slice:
+		if t.Elem().Kind() == reflect.Int8 {
+			return "array", "binary"
+		}
 		return "array", definitions(t.Elem())
 	}
 	return "", ""

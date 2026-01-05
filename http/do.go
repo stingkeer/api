@@ -95,6 +95,8 @@ func addHttpHandle(f intercept.HttpIntercept) {
 	httpHandles.Sort()
 }
 
+// AddHttpHandle
+// 100-1000 Reserved for the system
 func AddHttpHandle(f intercept.HttpIntercept) {
 	if f.Order() == 0 {
 		addHttpHandle(f)
