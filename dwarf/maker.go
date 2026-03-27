@@ -150,7 +150,7 @@ func (h *DwarfMaker) Init(exe *string) {
 		}
 	}
 	h.r = nil
-	log.Printf("DwarfMaker init use %s", time.Since(now))
+	log.Printf("DwarfMaker init use %s len %d", time.Since(now), len(h.debug))
 }
 
 func (h *DwarfMaker) LookFun(inf interface{}) (*MethodMeta, error) {

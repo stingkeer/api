@@ -43,6 +43,19 @@ var exclude = map[string]interface{}{
 	"crypto":   nil,
 	"embed":    nil,
 	"database": nil,
+	"slices":   nil,
+	"maps":     nil,
+	"mime":     nil,
+	// "github.com":        nil,
+	"vendor":            nil,
+	"weak":              nil,
+	"cmp":               nil,
+	"unique":            nil,
+	"container":         nil,
+	"golang.org":        nil,
+	"google.golang.org": nil,
+	"gorm.io":           nil,
+	"gvisor.dev":        nil,
 }
 
 func isRuntimePackage(pkg string) bool {

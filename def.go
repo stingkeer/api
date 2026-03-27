@@ -67,6 +67,12 @@ func WithTLSConfig(tlsConfig *tls.Config) Optional {
 	}
 }
 
+func WithDwarfMode(mode dwarf.FilterMode) Optional {
+	return func(conf *ServerConfig) {
+		conf.dwarf.SetFilterMode(mode)
+	}
+}
+
 func WithTLS(certPEMBlock, keyPEMBlock []byte) Optional {
 	return func(conf *ServerConfig) {
 		conf.certPEMBlock = certPEMBlock
