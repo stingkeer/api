@@ -266,3 +266,17 @@ func TestOnlyParam3(t *testing.T) {
 			fmt.Println(resp.BodyString())
 		})
 }
+
+func TestPath(t *testing.T) {
+	//<index>
+	r.Test(t, func() def.Option {
+		return api.POST(func(id int, name string) any {
+			return map[string]any{"id": id, "name": name}
+		}, "/path/<id>")
+	}).Request().
+		AddParam("name", "hello").
+		AddParam("id", "1").
+		Do(func(resp *r.Response) {
+			fmt.Println(resp.BodyString())
+		})
+}

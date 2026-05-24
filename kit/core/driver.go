@@ -1,5 +1,3 @@
-//go:build !runtest
-
 package core
 
 import (
@@ -36,8 +34,18 @@ func makerInit() {
 		maker.Init(&dll)
 	}
 }
+func _HttpM(method string, ctx *def.Context) def.HttpMethod {
+	return func(f interface{}, url string) def.Option {
+		return &option{url: url, method: method, mi: &def.MethodInfo{}}
+	}
+}
 
 func HttpM(method string, ctx *def.Context) def.HttpMethod {
+
+	if isTestMode() {
+		return _HttpM(method, ctx)
+	}
+
 	//init dwarf
 	once.Do(makerInit)
 	return func(f interface{}, url string) def.Option {
@@ -67,4 +75,22 @@ func HttpM(method string, ctx *def.Context) def.HttpMethod {
 		op.SetContext(ctx)
 		return &op
 	}
+}
+
+func isTestMode() bool {
+	if os.Getenv("API_TEST") == "1" {
+		return false
+	}
+	args := os.Args
+	if len(args) == 0 {
+		return false
+	}
+	if strings.HasSuffix(args[0], ".test") {
+		for _, _args := range args[1:] {
+			if strings.HasPrefix(_args, "-test.") {
+				return true
+			}
+		}
+	}
+	return false
 }

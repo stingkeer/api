@@ -1,12 +1,11 @@
 {
-    "commentTranslate.hover.enabled": false,
+    "commentTranslate.hover.enabled": true,
     "go.buildFlags": [
-        "-tags=swagger"
+        "-tags=swagger,runtest"
     ],
     "go.testTags": "swagger",
-    "go.delveConfig": {
-        
-    },
-    "go.testFlags": ["-v"],
-
+    "go.delveConfig": {},
+    "go.testFlags": [
+        "-v"
+    ],
 }
