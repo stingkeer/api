@@ -113,7 +113,7 @@ func WriteError(err any, rw http.ResponseWriter) {
 	if e != nil {
 		panic(e)
 	}
-	rw.Header().Add(def.Content_Type, def.Content_JSON)
+	rw.Header().Set(def.Content_Type, def.Content_JSON)
 	rw.WriteHeader(http.StatusInternalServerError)
 	rw.Write(bytes)
 }

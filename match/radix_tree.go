@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -21,7 +22,6 @@ func newStore() *store {
 	return &store{
 		root: &node{
 			static:    true,
-			children:  make([]*node, 256),
 			pchildren: make([]*node, 0),
 			pindex:    -1,
 			pnames:    []string{},
@@ -59,12 +59,53 @@ type node struct {
 	order    int // the order at which the data was added. used to be pick the first one when matching multiple
 	minOrder int // minimum order among all the child nodes and this node
 
-	children  []*node // child static nodes, indexed by the first byte of each child key
+	// children holds static child nodes sorted by their first key byte.
+	// Router nodes rarely have more than a handful of static children, so a
+	// sorted slice with binary search beats the previous fixed [256]*node
+	// array (2KB per node) in both memory and cache friendliness.
+	children  []*node // child static nodes, sorted by the first byte of each child key
 	pchildren []*node // child param nodes
 
 	regex  *regexp.Regexp // regular expression for a param node containing regular expression key
 	pindex int            // the parameter index, meaningful only for param node
 	pnames []string       // the parameter names collected from the root till this node
+}
+
+// child returns the static child whose key starts with b, or nil.
+// children is a sorted slice, so lookup is a binary search over first bytes —
+// router nodes have small fan-outs, so this stays cache-friendly while the
+// previous fixed [256]*node array (2KB per node) did not.
+func (n *node) child(b byte) *node {
+	kids := n.children
+	lo, hi := 0, len(kids)
+	for lo < hi {
+		mid := int(uint(lo+hi) >> 1)
+		if c := kids[mid].key[0]; c == b {
+			return kids[mid]
+		} else if c < b {
+			lo = mid + 1
+		} else {
+			hi = mid
+		}
+	}
+	return nil
+}
+
+// setChild inserts c into children, keeping them sorted by first key byte.
+// If a child with the same first byte exists it is replaced, matching the
+// old array-index semantics.
+func (n *node) setChild(c *node) {
+	b := c.key[0]
+	kids := n.children
+	i := sort.Search(len(kids), func(i int) bool { return kids[i].key[0] >= b })
+	if i < len(kids) && kids[i].key[0] == b {
+		kids[i] = c
+		return
+	}
+	kids = append(kids, nil)
+	copy(kids[i+1:], kids[i:])
+	kids[i] = c
+	n.children = kids
 }
 
 // add adds a new data item to the tree rooted at the current node.
@@ -94,7 +135,7 @@ func (n *node) add(key string, data interface{}, order int) int {
 		newKey := key[matched:]
 
 		// try adding to a static child
-		if child := n.children[newKey[0]]; child != nil {
+		if child := n.child(newKey[0]); child != nil {
 			if pn := child.add(newKey, data, order); pn >= 0 {
 				return pn
 			}
@@ -129,9 +170,8 @@ func (n *node) add(key string, data interface{}, order int) int {
 
 	n.key = key[0:matched]
 	n.data = nil
-	n.pchildren = make([]*node, 0)
-	n.children = make([]*node, 256)
-	n.children[n1.key[0]] = n1
+	n.pchildren = nil
+	n.children = []*node{n1}
 
 	return n.add(key, data, order)
 }
@@ -156,12 +196,11 @@ func (n *node) addChild(key string, data interface{}, order int) int {
 			static:    true,
 			key:       key,
 			minOrder:  order,
-			children:  make([]*node, 256),
 			pchildren: make([]*node, 0),
 			pindex:    n.pindex,
 			pnames:    n.pnames,
 		}
-		n.children[key[0]] = child
+		n.setChild(child)
 		if p1 > 0 {
 			// param token occurs after a static string
 			child.key = key[:p0]
@@ -179,7 +218,6 @@ func (n *node) addChild(key string, data interface{}, order int) int {
 		static:    false,
 		key:       key[p0 : p1+1],
 		minOrder:  order,
-		children:  make([]*node, 256),
 		pchildren: make([]*node, 0),
 		pindex:    n.pindex,
 		pnames:    n.pnames,
@@ -262,7 +300,7 @@ repeat:
 
 	if len(key) > 0 {
 		// find a static child that can match the rest of the key
-		if child := n.children[key[0]]; child != nil {
+		if child := n.child(key[0]); child != nil {
 			if len(n.pchildren) == 0 {
 				// use goto to avoid recursion when no param children
 				n = child
@@ -302,9 +340,7 @@ repeat:
 func (n *node) print(level int) string {
 	r := fmt.Sprintf("%v{key: %v, regex: %v, data: %v, order: %v, minOrder: %v, pindex: %v, pnames: %v}\n", strings.Repeat(" ", level<<2), n.key, n.regex, n.data, n.order, n.minOrder, n.pindex, n.pnames)
 	for _, child := range n.children {
-		if child != nil {
-			r += child.print(level + 1)
-		}
+		r += child.print(level + 1)
 	}
 	for _, child := range n.pchildren {
 		r += child.print(level + 1)

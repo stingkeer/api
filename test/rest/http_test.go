@@ -3,10 +3,7 @@ package rest
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"math/big"
-	"mime/multipart"
-	"os"
 	"testing"
 
 	"go.aew.app/api.v1"
@@ -106,29 +103,6 @@ func TestRequirParam(t *testing.T) {
 
 }
 
-func TestDownFile(t *testing.T) {
-	r.Test(t, func() def.Option {
-		return api.GET(func() any {
-			f, e := os.Open("d:/download/QmfWv8FfpKiCWsueKfXDLrgyqXZsEuGFJFBL7TfjNmxkAw")
-			fmt.Println(e)
-			return api.NewStream(f).SetRateLimit(500000)
-		}, "/download")
-	})
-}
-
-func MulFile(read multipart.Reader) string {
-	par, _ := read.NextPart()
-	fmt.Println(par.FileName(), par.FormName())
-	b, _ := io.ReadAll(par)
-	fmt.Println(string(b))
-	return string(b)
-}
-
-func TestUpload(t *testing.T) {
-	api.POST(MulFile, "/update")
-	api.StartService(nil)
-}
-
 func TestResp404(t *testing.T) {
 	r.Test(t, func() def.Option {
 		return api.GET(func() any {
@@ -147,9 +121,9 @@ func TestResp(t *testing.T) {
 			return api.NewResp(map[string]any{
 				"status": true,
 			})
-		}, "/resp")
+		}, "/resp2")
 	}).DoRequestNobody(func(resp *r.Response) {
-		resp.AssetBody("{\"status\":true}")
+		resp.AssertBody("{\"status\":true}")
 	})
 }
 
@@ -163,7 +137,7 @@ func TestPostBody(t *testing.T) {
 			return body
 		}, "/login")
 	}).Request().SetBody([]byte(x)).Do(func(resp *r.Response) {
-		resp.AssetBody(x)
+		resp.AssertBody(x)
 	})
 }
 
@@ -209,7 +183,7 @@ func TestBodyAndParam(t *testing.T) {
 			return body
 		}, "/bodyParam")
 	}).Request().SetBody([]byte(x)).AddParam("ok", "hello").Do(func(resp *r.Response) {
-		resp.AssetBody(x)
+		resp.AssertBody(x)
 	})
 }
 

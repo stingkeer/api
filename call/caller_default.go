@@ -133,7 +133,8 @@ func (c *callerDefault) Call(f *def.Entry, req *def.Request) interface{} {
 
 	bodyCount := 0
 
-	for pName, p := range m.Param {
+	for _, p := range m.ParamList {
+		pName := p.Name
 		pw := &def.ParamWarp{Request: *req}
 		pw.PTyp = v.Type().In(p.Order)
 		pw.PName = pName

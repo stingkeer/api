@@ -73,9 +73,11 @@ func (api *ApiInter) Http(rw http.ResponseWriter, req *http.Request, ctx *interc
 		ctx.Store("MATCH", 0)
 		return false
 	}
-	if req.Method != entry.HttpMethod {
+	if req.Method != entry.HttpMethod &&
+		!(req.Method == http.MethodHead && entry.HttpMethod == http.MethodGet) {
 		log.Warnf("not support HttpMethod %s", req.Method)
 		ctx.Store("MATCH_METHOD", req.Method)
+		ctx.Store("MATCH_METHOD_ALLOW", entry.HttpMethod)
 		return false
 	}
 	if entry.Fn != nil {
@@ -110,7 +112,7 @@ func WriteRetResponse(rw http.ResponseWriter, req *http.Request, adapter def.Ret
 	appendSysHeader(rw, req)
 	header := rw.Header()
 	//set ContentType
-	header.Add("Content-Type", adapter.ContentType())
+	header.Set("Content-Type", adapter.ContentType())
 
 	//if struct impl def.AppendHeader ,can def header
 	if v, b := adapter.(def.AppendHeader); b {
@@ -158,7 +160,7 @@ func WriteResponse(rw http.ResponseWriter, req *http.Request, content *def.Conte
 	appendSysHeader(rw, req)
 	header := rw.Header()
 	if content != nil {
-		header.Add("Content-Type", content.ContentType)
+		header.Set("Content-Type", content.ContentType)
 		rw.WriteHeader(http.StatusOK)
 		rw.Write(content.Bytes)
 	}

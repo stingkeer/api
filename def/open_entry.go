@@ -35,6 +35,11 @@ type MethodInfo struct {
 	Method     *Entry                    `json:"-"`
 	MethodName string                    `json:"method_name"`
 	Param      map[string]dwarf.ArgsMeta `json:"param"`
+	// ParamList is the same parameters as Param, in declaration order.
+	// Use this whenever deterministic iteration matters: cache keys built
+	// from a map range differ between calls with identical arguments, which
+	// silently defeats the method cache for multi-param methods.
+	ParamList  []dwarf.ArgsMeta `json:"param_list"`
 	Middleware []MiddleWare
 	KV         sync.Map
 }

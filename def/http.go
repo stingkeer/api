@@ -19,6 +19,10 @@ type Context struct {
 	Pool      *MethodsPools
 	Caller    Caller
 	Serialize Serialize
+	// Listen is the address the server binds to, filled in by StartService.
+	// Consumers like the swagger generator use it to emit a correct servers
+	// URL instead of guessing from environment variables.
+	Listen string
 }
 
 type Option interface {

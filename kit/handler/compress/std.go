@@ -45,39 +45,56 @@ func (g *CompressStd) checkSupport(h string) Compress {
 
 // Http implements intercept.HttpIntercept.
 func (g *CompressStd) Http(rw http.ResponseWriter, req *http.Request, ctx *intercept.HttpContext) bool {
+	// Range semantics apply to the representation bytes; re-encoding the
+	// ranged body (different byte offsets, different length) corrupts
+	// Content-Range/Content-Length. Serve ranged responses uncompressed.
+	if req.Header.Get("Range") != "" {
+		return false
+	}
 	if cmp := g.checkSupport(req.Header.Get(def.Accept_Encoding)); cmp != nil {
 		if c, b := ctx.LoadAndDelete("CALLDATA_RetAdapter"); b {
-			g := c.(def.RetAdapter)
+			src := c.(def.RetAdapter)
+
+			// Collect status/headers/content-type from the source adapter BEFORE
+			// starting the copy goroutine: Append/ContentType mutate shared state
+			// (seek the underlying reader, set range bounds) and racing them
+			// against the copy goroutine is a data race on Stream fields and the
+			// underlying reader.
+			code := http.StatusOK
+			if v, is := c.(def.HttpStatus); is {
+				code = v.Code()
+			}
+			mHeader := make(map[string]string)
+			if v, is := c.(def.AppendHeader); is {
+				for k, v1 := range v.Append(&readHead{req: req}) {
+					// compressed byte count differs from source length; a stale
+					// Content-Length truncates the response mid-decompression
+					if k == "Content-Length" {
+						continue
+					}
+					mHeader[k] = v1
+				}
+			}
+			ct := src.ContentType()
+
 			r, w := io.Pipe()
 			target := cmp.New(w)
 			go func() {
-				_, err := io.Copy(target, g.Return())
-				if err != nil {
-					w.Close()
+				defer w.Close()
+				if _, err := io.Copy(target, src.Return()); err != nil {
 					return
 				}
 				if err := target.Close(); err != nil {
-					w.Close()
 					return
 				}
-				w.Close()
 			}()
-			resp := rettypes.NewStream(r)
 
-			if status, is := c.(def.HttpStatus); is {
-				resp.SetCode(status.Code())
+			resp := rettypes.NewStream(r)
+			resp.SetCode(code)
+			for k, v1 := range mHeader {
+				resp.AddHeader(k, v1)
 			}
-			//if struct impl def.AppendHeader ,can def header
-			if v, b := c.(def.AppendHeader); b {
-				//Call the return handler and assign append
-				mHeader := v.Append(&readHead{
-					req: req,
-				})
-				for k, v1 := range mHeader {
-					resp.AddHeader(k, v1)
-				}
-			}
-			resp.SetContentType(g.ContentType())
+			resp.SetContentType(ct)
 			resp.AddHeader(def.Content_Encoding, cmp.ContentEncoding())
 			ctx.Store("CALLDATA_RetAdapter", resp)
 		}

@@ -34,21 +34,24 @@ func makerInit() {
 		maker.Init(&dll)
 	}
 }
-func _HttpM(method string, ctx *def.Context) def.HttpMethod {
+func _HttpM(method string, _ *def.Context) def.HttpMethod {
 	return func(f interface{}, url string) def.Option {
 		return &option{url: url, method: method, mi: &def.MethodInfo{}}
 	}
 }
 
 func HttpM(method string, ctx *def.Context) def.HttpMethod {
-
-	if isTestMode() {
-		return _HttpM(method, ctx)
-	}
-
-	//init dwarf
-	once.Do(makerInit)
+	// NOTE: test-mode must be detected lazily (inside the returned closure),
+	// because HttpM is bound to api.GET/api.POST... at package-init time.
+	// Detecting it eagerly here locks every test binary into dummy mode before
+	// testing.T.Setenv can take effect, which silently skips route registration.
 	return func(f interface{}, url string) def.Option {
+		if isTestMode() {
+			return _HttpM(method, ctx)(f, url)
+		}
+
+		//init dwarf
+		once.Do(makerInit)
 		entry := &def.Entry{
 			Url:        url,
 			HttpMethod: method,
@@ -60,13 +63,16 @@ func HttpM(method string, ctx *def.Context) def.HttpMethod {
 			panic(err)
 		}
 		var args = make(map[string]dwarf.ArgsMeta)
+		paramList := make([]dwarf.ArgsMeta, len(findM.Args))
 		for _, arg := range findM.Args {
 			args[arg.Name] = arg
+			paramList[arg.Order] = arg
 		}
 		methodInfo := &def.MethodInfo{
 			Method:     entry,
 			MethodName: findM.MethodName,
 			Param:      args,
+			ParamList:  paramList,
 		}
 		ctx.Pool.Set(findM.MethodName, methodInfo)
 		log.Infof("[%s] %s(%s) mapping url = %s", entry.HttpMethod, findM.MethodName, printArgs(findM.Args), entry.Url)

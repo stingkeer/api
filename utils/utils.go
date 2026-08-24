@@ -51,7 +51,11 @@ func DefaultCallValue(typ reflect.Type) reflect.Value {
 	case reflect.String:
 		return reflect.ValueOf("")
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return reflect.ValueOf(0).Convert(typ)
+		return reflect.ValueOf(int64(0)).Convert(typ)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return reflect.ValueOf(uint64(0)).Convert(typ)
+	case reflect.Float32, reflect.Float64:
+		return reflect.ValueOf(float64(0)).Convert(typ)
 	default:
 		log.Errorf("DefaultCallValue error kind %s", typ.Kind())
 	}

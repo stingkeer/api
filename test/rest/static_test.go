@@ -1,13 +1,6 @@
 package rest
 
-import (
-	"net/http"
-	"testing"
-
-	"go.aew.app/api.v1"
-)
-
-func TestStatic(t *testing.T) {
-	api.Static("/web/*", "web", http.Dir("."))
-	api.StartService(nil)
-}
+// Static file serving is covered by TestIntegrationStaticFiles in
+// integration_files_test.go (self-contained: temp dir + real requests +
+// assertions). This file previously held TestStatic, which only registered
+// a route and called api.StartService directly — no request, no assertion.

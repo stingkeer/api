@@ -26,3 +26,23 @@ func TestCache(t *testing.T) {
 		t.Errorf("TestCache Error")
 	}
 }
+
+// TestCacheMultiParam is a regression test: cache keys were previously built
+// by ranging over the Param map, so with 2+ params the key order randomized
+// per process and every request missed the cache.
+func TestCacheMultiParam(t *testing.T) {
+	invoked := 0
+	const hits = 5
+	r.Test(t, func() def.Option {
+		return api.GET(func(a, b def.String[cache.Key]) (any, cache.Cache) {
+			invoked++
+			return a.V + b.V, cache.NewCacheImpl(time.Minute)
+		}, "/cache-multi")
+	}).Request().AddParam("a", "foo").AddParam("b", "bar").DoTimes(hits, func(resp *r.Response) {
+		// The cached copy is stored/replayed as the serialized string value.
+		resp.AssertBody("foobar")
+	})
+	if invoked != 1 {
+		t.Errorf("multi-param cache: handler invoked %d times, want 1 (cache key not deterministic?)", invoked)
+	}
+}

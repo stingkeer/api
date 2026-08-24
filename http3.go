@@ -22,6 +22,7 @@ func StartService(ops ...Optional) error {
 
 func StartTLSService(ops ...Optional) error {
 	apply(&defaultConf, ops...)
+	def.DefaultContext.Listen = defaultConf.listen
 	log.Infof("QUIC listen addr %s", defaultConf.listen)
 
 	t, err := loadTls(&defaultConf)
@@ -39,7 +40,7 @@ func StartTLSService(ops ...Optional) error {
 	qErr := make(chan error)
 	go func() {
 		hErr <- httpTls(&defaultConf, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			quicServer.SetQuicHeaders(w.Header())
+			quicServer.SetQUICHeaders(w.Header())
 			server.ServeHTTP(w, r)
 		}))
 	}()

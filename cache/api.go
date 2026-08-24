@@ -32,7 +32,10 @@ type defaultProcessCacheImpl struct{}
 
 func (d *defaultProcessCacheImpl) EncodeKey(m *def.MethodInfo, args []reflect.Value) []byte {
 	var builder strings.Builder
-	for _, dm := range m.Param {
+	// Iterating ParamList (declaration order), not the Param map: map order
+	// is randomized per process, which made keys unstable and cache hits
+	// impossible for methods with 2+ params.
+	for _, dm := range m.ParamList {
 		if !args[dm.Order].IsValid() {
 			continue
 		}

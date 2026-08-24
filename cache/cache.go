@@ -42,10 +42,6 @@ func init() {
 
 }
 
-func validArgs(m *def.MethodInfo, args []reflect.Value) {
-
-}
-
 func validCache(vs []reflect.Value) Cache {
 	for _, v := range vs {
 		if !v.IsValid() || v.IsNil() {

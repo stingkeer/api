@@ -30,8 +30,14 @@ func (i Int16Req) Int16() int16 {
 	return i.V
 }
 
+// Deprecated: an Int32() accessor on Int8Req was a copy-paste mistake. Use
+// Int32Req.Int32() or int32(i.V).
 func (i Int8Req) Int32() int32 {
 	return int32(i.V)
+}
+
+func (i Int32Req) Int32() int32 {
+	return i.V
 }
 
 func (i Int64Req) Int64() int64 {

@@ -47,8 +47,14 @@ func (i Int16[T]) Int16() int16 {
 	return i.V
 }
 
+// Deprecated: an Int32() accessor on Int8 was a copy-paste mistake. Use
+// Int32[T].Int32() or int32(i.V).
 func (i Int8[T]) Int32() int32 {
 	return int32(i.V)
+}
+
+func (i Int32[T]) Int32() int32 {
+	return i.V
 }
 
 func (i Int64[T]) Int64() int64 {
